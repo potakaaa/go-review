@@ -2,7 +2,7 @@
 
 Dynamic QR/NFC link management for physical Google Review cards.
 
-Every card is printed once with a permanent URL — `https://go.rald.site/r/a7K3mP`.
+Every card is printed once with a permanent URL — `https://goreview.rald.site/r/a7K3mP`.
 That URL never changes. The Google Review page it points at is a database row you
 can edit from your phone while standing in the cafe. That indirection is the whole
 product: **a printed card is never wasted because a destination changed.**
@@ -60,7 +60,7 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → `anon` `public` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` |
-| `NEXT_PUBLIC_REDIRECT_BASE_URL` | `https://go.rald.site` |
+| `NEXT_PUBLIC_REDIRECT_BASE_URL` | `https://goreview.rald.site` |
 
 > **`SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security.** It is used in
 > exactly one file (`lib/supabase/admin.ts`, guarded by `import "server-only"`)
@@ -162,28 +162,28 @@ values are inlined at build time and a running deployment will not pick them up.
 > They are inlined into the browser bundle by design, and Vercel refuses to build
 > if they are stored with secret visibility.
 
-### Custom domain (`go.rald.site`)
+### Custom domain (`goreview.rald.site`)
 
 The domain is already added to the `review-routes` project. What remains is the
 DNS record, at your registrar for `rald.site` (currently Namecheap):
 
 | Type | Host | Value |
 | --- | --- | --- |
-| `A` | `go` | `76.76.21.21` |
+| `A` | `goreview` | `76.76.21.21` |
 
 Vercel verifies automatically and issues the certificate within a few minutes.
 Check progress with:
 
 ```bash
-vercel domains inspect go.rald.site --scope ralds-projects-1208
+vercel domains inspect goreview.rald.site --scope ralds-projects-1208
 ```
 
-Then confirm `https://go.rald.site/r/<slug>` redirects correctly **before
+Then confirm `https://goreview.rald.site/r/<slug>` redirects correctly **before
 printing any cards** — `NEXT_PUBLIC_REDIRECT_BASE_URL` is already set to this
 domain, so every QR code generated encodes it.
 
-Add `https://go.rald.site` to **Supabase → Authentication → URL Configuration →
-Site URL**, and add `https://go.rald.site/**` to Redirect URLs.
+Add `https://goreview.rald.site` to **Supabase → Authentication → URL Configuration →
+Site URL**, and add `https://goreview.rald.site/**` to Redirect URLs.
 
 > Once cards are printed, this domain must keep working indefinitely. Treat it as
 > permanent infrastructure: don't let the registration lapse, and don't repoint it.

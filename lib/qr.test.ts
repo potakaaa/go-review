@@ -2,28 +2,28 @@ import { describe, expect, it } from "vitest";
 
 import { QR_OPTIONS, publicUrlForSlug, qrFileName } from "@/lib/qr";
 
-const BASE = "https://go.rald.site";
+const BASE = "https://goreview.rald.site";
 
 describe("publicUrlForSlug", () => {
   it("builds the URL that gets printed on the card", () => {
     expect(publicUrlForSlug("a7K3mP", BASE)).toBe(
-      "https://go.rald.site/r/a7K3mP",
+      "https://goreview.rald.site/r/a7K3mP",
     );
   });
 
   it("tolerates a trailing slash in the configured base", () => {
     // A stray slash in an env var would otherwise print //r/ onto real cards.
-    expect(publicUrlForSlug("a7K3mP", "https://go.rald.site/")).toBe(
-      "https://go.rald.site/r/a7K3mP",
+    expect(publicUrlForSlug("a7K3mP", "https://goreview.rald.site/")).toBe(
+      "https://goreview.rald.site/r/a7K3mP",
     );
-    expect(publicUrlForSlug("a7K3mP", "https://go.rald.site///")).toBe(
-      "https://go.rald.site/r/a7K3mP",
+    expect(publicUrlForSlug("a7K3mP", "https://goreview.rald.site///")).toBe(
+      "https://goreview.rald.site/r/a7K3mP",
     );
   });
 
   it("preserves slug case, which the QR encodes verbatim", () => {
     expect(publicUrlForSlug("q91LmX", BASE)).toBe(
-      "https://go.rald.site/r/q91LmX",
+      "https://goreview.rald.site/r/q91LmX",
     );
   });
 });
