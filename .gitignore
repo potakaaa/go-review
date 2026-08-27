@@ -10,6 +10,7 @@ coverage/
 .env.*
 !.env.example
 tsconfig.tsbuildinfo
+.vercel/
 
 # Local Supabase CLI state
 supabase/.branches/
