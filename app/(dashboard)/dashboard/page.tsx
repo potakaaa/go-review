@@ -46,6 +46,13 @@ export default async function DashboardPage() {
             New route
           </ButtonLink>
           <ButtonLink
+            href="/dashboard/routes/batch/new"
+            variant="secondary"
+            className="w-full sm:w-auto"
+          >
+            Batch routes
+          </ButtonLink>
+          <ButtonLink
             href="/dashboard/convert"
             variant="secondary"
             className="w-full sm:w-auto"

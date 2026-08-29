@@ -6,9 +6,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { batchSlug, generateBatchKey } from "@/lib/batch";
 import { resolveGoogleReviewLink } from "@/lib/google-review";
 import { generateSlug } from "@/lib/slug";
 import {
+  createBatchRouteSchema,
   createRouteSchema,
   fieldErrors,
   updateRouteSchema,
@@ -158,6 +160,77 @@ export async function createRoute(
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
   redirect(`/dashboard/routes/${newId}?created=1`);
+}
+
+/**
+ * Creates one atomic print run. Every route shares the same destination and
+ * gets a readable, numbered slug such as `akfiuex-1` through `akfiuex-30`.
+ */
+export async function createBatch(
+  _prevState: RouteFormState,
+  formData: FormData,
+): Promise<RouteFormState> {
+  const values = {
+    business_name: String(formData.get("business_name") ?? ""),
+    destination_url: String(formData.get("destination_url") ?? ""),
+    maps_url: String(formData.get("maps_url") ?? ""),
+    notes: String(formData.get("notes") ?? ""),
+    quantity: String(formData.get("quantity") ?? ""),
+  };
+
+  const parsed = createBatchRouteSchema.safeParse(values);
+  if (!parsed.success) {
+    return { errors: fieldErrors(parsed.error), values };
+  }
+
+  const ownerId = await requireUserId();
+  const supabase = await createClient();
+
+  let batchKey: string | null = null;
+
+  // A batch insert is transactional at the PostgREST boundary: either every
+  // numbered card is created, or none is. A fresh random prefix handles the
+  // extremely unlikely case where a slug already exists.
+  for (let attempt = 0; attempt < SLUG_ATTEMPTS; attempt++) {
+    const candidate = generateBatchKey();
+    const rows = Array.from({ length: parsed.data.quantity }, (_, index) => ({
+      owner_id: ownerId,
+      slug: batchSlug(candidate, index + 1),
+      batch_key: candidate,
+      batch_position: index + 1,
+      business_name: parsed.data.business_name,
+      destination_url: parsed.data.destination_url,
+      maps_url: parsed.data.maps_url,
+      notes: parsed.data.notes,
+    }));
+
+    const { error } = await supabase.from("redirect_routes").insert(rows);
+
+    if (!error) {
+      batchKey = candidate;
+      break;
+    }
+
+    if (error.code !== UNIQUE_VIOLATION) {
+      return {
+        errors: {},
+        values,
+        message: `Could not save this batch: ${error.message}`,
+      };
+    }
+  }
+
+  if (!batchKey) {
+    return {
+      errors: {},
+      values,
+      message: "Could not generate a unique batch link. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/routes");
+  redirect(`/dashboard/routes/batches/${batchKey}?created=1`);
 }
 
 export async function updateRoute(

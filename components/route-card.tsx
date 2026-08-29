@@ -44,6 +44,14 @@ export function RouteCard({ route }: { route: RedirectRoute }) {
         {route.scan_count} {route.scan_count === 1 ? "scan" : "scans"} · Created{" "}
         {formatDate(route.created_at)}
       </p>
+      {route.batch_key ? (
+        <Link
+          href={"/dashboard/routes/batches/" + route.batch_key}
+          className="mt-2 inline-flex text-xs font-medium text-brand underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          Batch {route.batch_key} · card {route.batch_position}
+        </Link>
+      ) : null}
 
       <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <CopyButton value={publicUrl} className="text-sm" />

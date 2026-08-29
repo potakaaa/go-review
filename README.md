@@ -88,12 +88,16 @@ npm run dev
    When editing later, that source link is already there to convert again. You
    can also use **Convert Maps link** from the dashboard when you only need the
    direct URL. Leave the slug blank and a random one like `a7K3mP` is generated.
-2. The success screen shows the QR code. **Download PNG** for print, **SVG** for
-   a designer, or **Copy URL** to write to an NFC tag.
-3. Print the card. That link is now permanent.
-4. If the cafe changes its Google listing, **Edit** the destination. The slug,
+2. For a print run, choose **Batch routes**, enter the shared business,
+   destination and quantity, then create the batch. Routes receive numbered
+   slugs such as `akfiuex-1` and `akfiuex-2`.
+3. The batch screen can download every high-resolution QR as one ZIP. It also
+   includes `manifest.csv`, which maps each downloaded file to its permanent
+   slug. A single route still offers **Download PNG**, **SVG**, or **Copy URL**.
+4. Print the card. That link is now permanent.
+5. If the cafe changes its Google listing, **Edit** the destination. The slug,
    the URL and the printed QR are untouched.
-5. If a cafe cancels, **Deactivate**. Scanning shows a branded "card deactivated"
+6. If a cafe cancels, **Deactivate**. Scanning shows a branded "card deactivated"
    page rather than a broken link. Reactivate any time.
 
 ### Slugs

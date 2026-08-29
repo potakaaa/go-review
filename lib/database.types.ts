@@ -10,6 +10,8 @@ export type RedirectRoute = {
   owner_id: string;
   slug: string;
   slug_lower: string;
+  batch_key: string | null;
+  batch_position: number | null;
   business_name: string;
   destination_url: string;
   maps_url: string | null;
@@ -25,6 +27,8 @@ type RedirectRouteInsert = {
   id?: string;
   owner_id: string;
   slug: string;
+  batch_key?: string | null;
+  batch_position?: number | null;
   business_name: string;
   destination_url: string;
   maps_url?: string | null;

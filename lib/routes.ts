@@ -71,6 +71,18 @@ export async function getRoute(id: string): Promise<RedirectRoute | null> {
   return data;
 }
 
+export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("redirect_routes")
+    .select("*")
+    .eq("batch_key", batchKey)
+    .order("batch_position", { ascending: true });
+
+  if (error) throw new Error(`Could not load batch routes: ${error.message}`);
+  return data ?? [];
+}
+
 export type RouteStats = {
   total: number;
   active: number;

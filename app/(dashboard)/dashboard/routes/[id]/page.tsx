@@ -68,6 +68,14 @@ export default async function RouteDetailPage({
         >
           Edit route
         </Link>
+        {route.batch_key ? (
+          <Link
+            href={"/dashboard/routes/batches/" + route.batch_key}
+            className={buttonClass("secondary", "text-sm sm:col-span-2")}
+          >
+            View batch and download ZIP
+          </Link>
+        ) : null}
       </div>
 
       <Card className="divide-y divide-line">

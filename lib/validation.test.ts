@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBatchRouteSchema,
   createRouteSchema,
   destinationUrlSchema,
   looksLikeGoogleReviewUrl,
@@ -128,6 +129,32 @@ describe("createRouteSchema", () => {
   it("requires a business name", () => {
     expect(
       createRouteSchema.safeParse({ ...valid, business_name: "  " }).success,
+    ).toBe(false);
+  });
+});
+
+describe("createBatchRouteSchema", () => {
+  const valid = {
+    business_name: "Bella's Cafe",
+    destination_url: "https://g.page/r/CabcDEF/review",
+    maps_url: "",
+    notes: "",
+    quantity: "30",
+  };
+
+  it("coerces the requested quantity to an integer", () => {
+    expect(createBatchRouteSchema.parse(valid).quantity).toBe(30);
+  });
+
+  it("rejects quantities outside the supported print-run size", () => {
+    expect(
+      createBatchRouteSchema.safeParse({ ...valid, quantity: "1" }).success,
+    ).toBe(false);
+    expect(
+      createBatchRouteSchema.safeParse({ ...valid, quantity: "101" }).success,
+    ).toBe(false);
+    expect(
+      createBatchRouteSchema.safeParse({ ...valid, quantity: "3.5" }).success,
     ).toBe(false);
   });
 });

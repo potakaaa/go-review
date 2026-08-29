@@ -27,12 +27,25 @@ export default async function RoutesPage({
             Every route is a permanent destination for a printed card or NFC tag.
           </p>
         </div>
-        <ButtonLink href="/dashboard/routes/new" className="hidden sm:inline-flex">
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
-            <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
-          </svg>
-          New route
-        </ButtonLink>
+        <div className="grid gap-2 sm:flex">
+          <ButtonLink href="/dashboard/routes/batch/new" variant="secondary">
+            Batch routes
+          </ButtonLink>
+          <ButtonLink
+            href="/dashboard/routes/new"
+            className="hidden sm:inline-flex"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="size-4"
+              fill="currentColor"
+            >
+              <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
+            </svg>
+            New route
+          </ButtonLink>
+        </div>
       </header>
 
       <Card className="p-3 sm:p-5">

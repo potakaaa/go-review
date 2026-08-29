@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { BATCH_MAX_SIZE, BATCH_MIN_SIZE } from "@/lib/batch";
 import {
   SLUG_MAX_LENGTH,
   SLUG_MIN_LENGTH,
@@ -130,6 +131,18 @@ export const createRouteSchema = z.object({
   slug: customSlugSchema,
 });
 
+export const createBatchRouteSchema = z.object({
+  business_name: businessNameSchema,
+  destination_url: destinationUrlSchema,
+  maps_url: mapsUrlSchema,
+  notes: notesSchema,
+  quantity: z.coerce
+    .number()
+    .int("Enter a whole number of routes.")
+    .min(BATCH_MIN_SIZE, `Create at least ${BATCH_MIN_SIZE} routes.`)
+    .max(BATCH_MAX_SIZE, `Create at most ${BATCH_MAX_SIZE} routes at a time.`),
+});
+
 export const updateRouteSchema = z.object({
   business_name: businessNameSchema,
   destination_url: destinationUrlSchema,
@@ -139,6 +152,7 @@ export const updateRouteSchema = z.object({
 });
 
 export type CreateRouteInput = z.infer<typeof createRouteSchema>;
+export type CreateBatchRouteInput = z.infer<typeof createBatchRouteSchema>;
 export type UpdateRouteInput = z.infer<typeof updateRouteSchema>;
 
 export { SLUG_MIN_LENGTH, SLUG_MAX_LENGTH };
