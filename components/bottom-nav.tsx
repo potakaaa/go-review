@@ -26,12 +26,6 @@ const ITEMS = [
     exact: true,
     icon: "M4 19h3V9H4v10zm6 0h3V5h-3v14zm6 0h3v-7h-3v7z",
   },
-  {
-    href: "/dashboard/routes/new",
-    label: "New",
-    exact: false,
-    icon: "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z",
-  },
 ] as const;
 
 const DESKTOP_ITEMS = [
