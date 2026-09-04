@@ -6,7 +6,7 @@ import type { RedirectRoute } from "@/lib/database.types";
 export type RouteFilters = {
   q?: string;
   status?: "all" | "active" | "inactive";
-  sort?: "newest" | "oldest";
+  sort?: "newest" | "oldest" | "most-used";
 };
 
 /** Narrows loose `searchParams` values into the filter shape the query wants. */
@@ -24,7 +24,8 @@ export function parseFilters(params: {
   return {
     q: (first(params.q) ?? "").trim(),
     status: status === "active" || status === "inactive" ? status : "all",
-    sort: sort === "oldest" ? "oldest" : "newest",
+    sort:
+      sort === "oldest" || sort === "most-used" ? sort : "newest",
   };
 }
 
@@ -40,8 +41,18 @@ export async function listRoutes(
 
   let query = supabase
     .from("redirect_routes")
-    .select("*")
-    .order("created_at", { ascending: filters.sort === "oldest" });
+    .select("*");
+
+  if (filters.sort === "most-used") {
+    query = query
+      .order("scan_count", { ascending: false })
+      .order("last_scanned_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false });
+  } else {
+    query = query.order("created_at", {
+      ascending: filters.sort === "oldest",
+    });
+  }
 
   if (filters.status !== "all") {
     query = query.eq("active", filters.status === "active");
@@ -56,7 +67,22 @@ export async function listRoutes(
 
   const { data, error } = await query;
   if (error) throw new Error(`Could not load routes: ${error.message}`);
-  return data ?? [];
+
+  const rows = data ?? [];
+  if (!filters.q) return rows;
+
+  // Exact route-number searches should win over a partial business-name hit,
+  // regardless of the selected sort order.
+  const exactIndex = rows.findIndex(
+    (route) => route.slug_lower === filters.q.toLowerCase(),
+  );
+  if (exactIndex <= 0) return rows;
+
+  return [
+    rows[exactIndex],
+    ...rows.slice(0, exactIndex),
+    ...rows.slice(exactIndex + 1),
+  ];
 }
 
 export async function getRoute(id: string): Promise<RedirectRoute | null> {
@@ -87,6 +113,7 @@ export type RouteStats = {
   total: number;
   active: number;
   inactive: number;
+  scanned: number;
   totalScans: number;
 };
 
@@ -104,13 +131,30 @@ export async function getRouteStats(): Promise<RouteStats> {
 
   const rows = data ?? [];
   const active = rows.filter((row) => row.active).length;
+  const scanned = rows.filter((row) => row.scan_count > 0).length;
 
   return {
     total: rows.length,
     active,
     inactive: rows.length - active,
+    scanned,
     totalScans: rows.reduce((sum, row) => sum + row.scan_count, 0),
   };
+}
+
+export async function getMostUsedRoutes(limit = 10): Promise<RedirectRoute[]> {
+  const supabase = await createClient();
+  const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 50);
+  const { data, error } = await supabase
+    .from("redirect_routes")
+    .select("*")
+    .order("scan_count", { ascending: false })
+    .order("last_scanned_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(safeLimit);
+
+  if (error) throw new Error(`Could not load usage analytics: ${error.message}`);
+  return data ?? [];
 }
 
 export async function getRecentRoutes(limit = 3): Promise<RedirectRoute[]> {

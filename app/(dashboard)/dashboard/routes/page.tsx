@@ -69,32 +69,12 @@ export default async function RoutesPage({
           />
         )
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3 lg:grid-cols-2">
           {routes.map((route) => (
             <RouteCard key={route.id} route={route} />
           ))}
         </div>
       )}
-
-      {/* Sits above the bottom nav so creating a route is always one tap away,
-          however far down you have scrolled. */}
-      <div className="pointer-events-none fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 px-0 sm:inset-x-6 md:hidden">
-        <div className="pointer-events-auto mx-auto max-w-md">
-          <ButtonLink
-            href="/dashboard/routes/new"
-            className="mobile-create-cta w-full shadow-2xl shadow-black/40"
-          >
-            <span className="mobile-create-cta-content">
-              <span aria-hidden="true" className="flex size-5 items-center justify-center">
-                <svg viewBox="0 0 24 24" className="size-5" fill="currentColor">
-                  <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
-                </svg>
-              </span>
-              <span>New route</span>
-            </span>
-          </ButtonLink>
-        </div>
-      </div>
     </div>
   );
 }

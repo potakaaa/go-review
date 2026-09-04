@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 
 import { QrPanel } from "@/components/qr-panel";
 import { ToggleActiveButton } from "@/components/toggle-active-button";
-import { Alert, Card, StatusBadge, buttonClass } from "@/components/ui";
+import { ToggleLockButton } from "@/components/toggle-lock-button";
+import { Alert, Card, LockBadge, StatusBadge, buttonClass } from "@/components/ui";
 import { formatDate, formatRelativeDate } from "@/lib/format";
 import { publicUrlForSlug } from "@/lib/qr";
 import { getRoute } from "@/lib/routes";
@@ -42,7 +43,10 @@ export default async function RouteDetailPage({
           </h1>
           <p className="mt-2 font-mono text-xs text-muted">/r/{route.slug}</p>
         </div>
-        <StatusBadge active={route.active} />
+        <div className="flex shrink-0 items-center gap-2">
+          <StatusBadge active={route.active} />
+          {route.locked ? <LockBadge /> : null}
+        </div>
       </div>
 
       <Card className="p-5 sm:p-8">
@@ -119,11 +123,18 @@ export default async function RouteDetailPage({
         </div>
       </Card>
 
-      <ToggleActiveButton
-        id={route.id}
-        active={route.active}
-        businessName={route.business_name}
-      />
+      <div className="grid gap-2 sm:grid-cols-2">
+        <ToggleActiveButton
+          id={route.id}
+          active={route.active}
+          businessName={route.business_name}
+        />
+        <ToggleLockButton
+          id={route.id}
+          locked={route.locked}
+          businessName={route.business_name}
+        />
+      </div>
     </div>
   );
 }

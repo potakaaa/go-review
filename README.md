@@ -8,6 +8,7 @@ can edit from your phone while standing in the cafe. That indirection is the who
 product: **a printed card is never wasted because a destination changed.**
 
 - Mobile-first admin dashboard (built for 390–412px wide phones)
+- Installable on iPhone from Safari with Add to Home Screen
 - Supabase Auth, no public registration
 - Row Level Security on every query
 - 302 redirects, so destinations stay changeable forever
@@ -81,13 +82,13 @@ npm run dev
 
 ## Everyday use
 
-1. **Create Route** — enter the business name, then paste a Google Maps
-   share link into **Convert a Google Maps link**. Tap **Convert link** to
-   generate the direct Google review URL; it is placed into the destination
-   field automatically, while the original Maps link is saved with the route.
-   When editing later, that source link is already there to convert again. You
-   can also use **Convert Maps link** from the dashboard when you only need the
-   direct URL. Leave the slug blank and a random one like `a7K3mP` is generated.
+1. **Create or edit a route** — paste a Google Maps share link into **Convert a
+   Google Maps link** and tap **Convert link**. The direct Google review URL is
+   placed into the destination field automatically, while the original Maps
+   link is saved with the route. Tap **Copy link**, enter the restaurant name,
+   and save. When editing later, the saved Maps link is already there to
+   convert again. Leave the slug blank when creating a route and a random one
+   like `a7K3mP` is generated.
 2. For a print run, choose **Batch routes**, enter the shared business,
    destination and quantity, then create the batch. Routes receive numbered
    slugs such as `akfiuex-1` and `akfiuex-2`.
@@ -99,6 +100,17 @@ npm run dev
    the URL and the printed QR are untouched.
 6. If a cafe cancels, **Deactivate**. Scanning shows a branded "card deactivated"
    page rather than a broken link. Reactivate any time.
+7. For a route that already belongs to a business, choose **Lock editing**. The
+   public link and QR code keep working, but saving any edit requires typing the
+   current business name. **Unlock editing** from the route screen when you need
+   to make ordinary edits again.
+
+### iPhone installation
+
+Open the production site in Safari, tap **Share**, choose **Add to Home
+Screen**, then open Review Routes from the new home-screen icon. The dashboard
+is installable as a standalone app; it does not cache public `/r/*` redirects,
+so a printed card always uses its current destination.
 
 ### Slugs
 
@@ -115,6 +127,10 @@ The redirect responds first and increments the counter afterwards via `after()`,
 so a scan never waits on analytics. **No IP addresses, user agents, or any other
 personal data are recorded** — just a count and a timestamp. A dropped count is
 an acceptable loss; a slow redirect is not.
+
+The dashboard **Analytics** tab ranks routes by all-time scan count. Counts are
+visits to a route, not unique people; daily trends and unique-visitor reporting
+are not currently collected.
 
 ---
 
@@ -146,6 +162,11 @@ Run against a dev server signed in as your admin user.
 | 8 | Load `/r/doesnotexist` | Branded 404, not a stack trace |
 | 9 | Open `/dashboard` in a private window | Redirected to `/login`; create a second Supabase user and confirm it sees none of your routes |
 | 10 | DevTools device mode at 390×844, 393×852 and 412×915 | No horizontal scrolling on any page; all buttons comfortably tappable |
+| 11 | Open the production site in iPhone Safari | Add to Home Screen prompt appears; standalone launch hides it |
+| 12 | Scan a route, then open `/dashboard/analytics` | The route appears in most-used links with the updated count |
+| 13 | Lock a route, submit an edit with the wrong name | The save is rejected and the confirmation field shows an error |
+| 14 | Lock a route, submit an edit with the current business name | The changes save and the route remains locked |
+| 15 | Unlock a route, then edit it without a confirmation | The changes save normally |
 
 ---
 
@@ -200,7 +221,7 @@ Site URL**, and add `https://goreview.rald.site/**` to Redirect URLs.
 app/
   r/[slug]/route.ts               public redirect — the only page customers hit
   login/                          email + password, no sign-up
-  (dashboard)/dashboard/          stats, route list, create, detail, edit
+  (dashboard)/dashboard/          stats, route list, analytics, create, detail, edit
 lib/
   google-review.ts                 server-side Maps redirect/ftid converter
   supabase/{client,server,admin,proxy}.ts

@@ -11,6 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Review Routes",
     short_name: "Review Routes",
+    id: "/dashboard",
     description:
       "Manage the permanent QR and NFC links printed on Google Review cards.",
     start_url: "/dashboard",

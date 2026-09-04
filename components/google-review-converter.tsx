@@ -40,6 +40,7 @@ export function GoogleReviewConverter({
   onConverted,
   initialUrl = "",
   sourceError,
+  autoFocus = false,
 }: {
   /** When true, render controls for a surrounding Create Route form. */
   embedded?: boolean;
@@ -48,6 +49,8 @@ export function GoogleReviewConverter({
   initialUrl?: string;
   /** Validation feedback from the surrounding route form, if any. */
   sourceError?: string;
+  /** Focus the Maps field when this is the primary task on an edit screen. */
+  autoFocus?: boolean;
 }) {
   const [state, formAction] = useActionState<
     GoogleReviewConversionState,
@@ -95,6 +98,8 @@ export function GoogleReviewConverter({
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
+            autoFocus={autoFocus}
+            enterKeyHint="go"
             value={mapsUrl}
             onChange={(event) => setMapsUrl(event.target.value)}
             placeholder="https://maps.app.goo.gl/…"

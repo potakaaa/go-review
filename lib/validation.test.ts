@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createBatchRouteSchema,
   createRouteSchema,
+  destinationNeedsAcknowledgement,
   destinationUrlSchema,
   looksLikeGoogleReviewUrl,
   mapsUrlSchema,
@@ -74,6 +75,24 @@ describe("looksLikeGoogleReviewUrl", () => {
     const url = "https://example.com/leave-us-a-review";
     expect(looksLikeGoogleReviewUrl(url)).toBe(false);
     expect(destinationUrlSchema.safeParse(url).success).toBe(true);
+  });
+});
+
+describe("destinationNeedsAcknowledgement", () => {
+  it("flags secure destinations outside the Google Review URL shapes", () => {
+    expect(destinationNeedsAcknowledgement("https://example.com/review")).toBe(
+      true,
+    );
+  });
+
+  it("does not flag Google review links or incomplete input", () => {
+    expect(
+      destinationNeedsAcknowledgement("https://g.page/r/CabcDEF/review"),
+    ).toBe(false);
+    expect(destinationNeedsAcknowledgement("   ")).toBe(false);
+    expect(destinationNeedsAcknowledgement("http://example.com/review")).toBe(
+      false,
+    );
   });
 });
 

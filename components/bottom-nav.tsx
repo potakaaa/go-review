@@ -17,8 +17,14 @@ const ITEMS = [
   {
     href: "/dashboard/routes",
     label: "Routes",
-    exact: true,
+    exact: false,
     icon: "M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm10-2h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2zm4 0v2h-2v-2h2z",
+  },
+  {
+    href: "/dashboard/analytics",
+    label: "Analytics",
+    exact: true,
+    icon: "M4 19h3V9H4v10zm6 0h3V5h-3v14zm6 0h3v-7h-3v7z",
   },
   {
     href: "/dashboard/routes/new",
@@ -31,6 +37,7 @@ const ITEMS = [
 const DESKTOP_ITEMS = [
   { href: "/dashboard", label: "Dashboard", exact: true },
   { href: "/dashboard/routes", label: "Routes", exact: false },
+  { href: "/dashboard/analytics", label: "Analytics", exact: true },
   { href: "/dashboard/convert", label: "Convert", exact: true },
 ] as const;
 

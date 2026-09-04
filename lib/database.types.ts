@@ -17,6 +17,7 @@ export type RedirectRoute = {
   maps_url: string | null;
   notes: string | null;
   active: boolean;
+  locked: boolean;
   scan_count: number;
   last_scanned_at: string | null;
   created_at: string;
@@ -34,6 +35,7 @@ type RedirectRouteInsert = {
   maps_url?: string | null;
   notes?: string | null;
   active?: boolean;
+  locked?: boolean;
 };
 
 type RedirectRouteUpdate = Partial<

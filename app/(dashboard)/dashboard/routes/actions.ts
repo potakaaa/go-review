@@ -245,6 +245,7 @@ export async function updateRoute(
     destination_url: String(formData.get("destination_url") ?? ""),
     maps_url: String(formData.get("maps_url") ?? ""),
     notes: String(formData.get("notes") ?? ""),
+    confirm_business_name: String(formData.get("confirm_business_name") ?? ""),
   };
 
   const parsed = updateRouteSchema.safeParse({
@@ -258,6 +259,41 @@ export async function updateRoute(
 
   await requireUserId();
   const supabase = await createClient();
+
+  // The lock check happens on the server against the stored business name.
+  // The submitted business name is intentionally not used for confirmation:
+  // otherwise a user could rename a locked route and confirm against the new
+  // value in the same request.
+  const { data: currentRoute, error: currentRouteError } = await supabase
+    .from("redirect_routes")
+    .select("business_name, locked")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (currentRouteError) {
+    return {
+      errors: {},
+      values,
+      message: `Could not verify this route: ${currentRouteError.message}`,
+    };
+  }
+
+  if (!currentRoute) {
+    return { errors: {}, values, message: "Could not find this route." };
+  }
+
+  const submittedConfirmation = values.confirm_business_name.trim().toLowerCase();
+  const storedBusinessName = currentRoute.business_name.trim().toLowerCase();
+
+  if (currentRoute.locked && submittedConfirmation !== storedBusinessName) {
+    return {
+      errors: {
+        confirm_business_name:
+          "Type the current business name to edit this locked route.",
+      },
+      values,
+    };
+  }
 
   // `slug` is deliberately absent from this update. A card in a customer's
   // hands is printed once; changing where it points must never change the URL
@@ -310,4 +346,33 @@ export async function toggleRouteActive(formData: FormData): Promise<void> {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
   revalidatePath(`/dashboard/routes/${id}`);
+}
+
+/**
+ * Locks or unlocks editing for one route. This intentionally does not affect
+ * the public redirect or the active/inactive switch: a business can protect
+ * its destination details while still pausing the printed card if needed.
+ */
+export async function toggleRouteLocked(formData: FormData): Promise<void> {
+  // Authenticate before even accepting the no-op path: exported Server
+  // Actions can be invoked directly without rendering this page first.
+  await requireUserId();
+
+  const id = String(formData.get("id") ?? "");
+  const nextLocked = formData.get("next_locked") === "true";
+  if (!id) return;
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("redirect_routes")
+    .update({ locked: nextLocked })
+    .eq("id", id);
+
+  if (error) throw new Error(`Could not update this route: ${error.message}`);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/routes");
+  revalidatePath(`/dashboard/routes/${id}`);
+  revalidatePath(`/dashboard/routes/${id}/edit`);
 }

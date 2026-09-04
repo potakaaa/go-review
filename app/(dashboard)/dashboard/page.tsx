@@ -69,14 +69,27 @@ export default async function DashboardPage() {
       </div>
 
       {stats.total > 0 ? (
-        <Card className="flex items-center justify-between gap-4 px-5 py-4 text-sm text-muted">
-          <span className="eyebrow">Activity</span>
-          <span className="text-right">
-          <span className="font-semibold text-ink tabular-nums">
-            {stats.totalScans}
-          </span>{" "}
-          {stats.totalScans === 1 ? "scan" : "scans"} across all cards
-          </span>
+        <Card className="transition-colors hover:border-line-strong">
+          <Link
+            href="/dashboard/analytics"
+            className="group flex min-h-11 items-center justify-between gap-4 px-5 py-4 text-sm text-muted focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+          >
+            <span className="eyebrow">Activity</span>
+            <span className="flex items-center gap-3 text-right">
+              <span>
+                <span className="font-semibold text-ink tabular-nums">
+                  {stats.totalScans}
+                </span>{" "}
+                {stats.totalScans === 1 ? "scan" : "scans"} across all cards
+              </span>
+              <span
+                aria-hidden="true"
+                className="text-base text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-ink"
+              >
+                ↗
+              </span>
+            </span>
+          </Link>
         </Card>
       ) : null}
 

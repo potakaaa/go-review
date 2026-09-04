@@ -8,8 +8,9 @@ import {
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
+import { RouteDestinationField } from "@/components/route-destination-field";
 import { Alert, FormError, buttonClass } from "@/components/ui";
-import { looksLikeGoogleReviewUrl } from "@/lib/validation";
+import { destinationNeedsAcknowledgement } from "@/lib/validation";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -55,15 +56,17 @@ export function CreateRouteForm() {
   // Advisory only. A destination that doesn't match a known Google Review shape
   // is still saveable -- Google changes these URLs, and a card that can't be
   // created is worse than one pointing somewhere unexpected.
-  const trimmed = destination.trim();
-  const showWarning =
-    trimmed.length > 0 &&
-    trimmed.startsWith("https://") &&
-    !looksLikeGoogleReviewUrl(trimmed);
+  const showWarning = destinationNeedsAcknowledgement(destination);
 
   return (
     <form action={formAction} className="space-y-6">
       {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
+
+      <GoogleReviewConverter
+        embedded
+        onConverted={handleConvertedReviewUrl}
+        sourceError={state.errors?.maps_url}
+      />
 
       <div>
         <label htmlFor="business_name" className="eyebrow mb-2 block">
@@ -84,59 +87,18 @@ export function CreateRouteForm() {
         <FormError>{state.errors?.business_name}</FormError>
       </div>
 
-      <GoogleReviewConverter
-        embedded
-        onConverted={handleConvertedReviewUrl}
-        sourceError={state.errors?.maps_url}
+      <RouteDestinationField
+        value={destination}
+        onChange={(value) => {
+          setDestination(value);
+          setAcknowledgedWarning(false);
+        }}
+        error={state.errors?.destination_url}
+        acknowledgedWarning={acknowledgedWarning}
+        onAcknowledgedWarningChange={setAcknowledgedWarning}
+        description="Filled automatically after conversion. Edit this only when you need to use another destination."
+        warningDescription="It will still work — the card will send people wherever this points. Tick below if that's what you want."
       />
-
-      <div>
-        <label htmlFor="destination_url" className="eyebrow mb-2 block">
-          Google Review URL
-        </label>
-        <input
-          id="destination_url"
-          name="destination_url"
-          type="url"
-          required
-          inputMode="url"
-          autoComplete="off"
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          enterKeyHint="next"
-          value={destination}
-          onChange={(event) => {
-            setDestination(event.target.value);
-            setAcknowledgedWarning(false);
-          }}
-          placeholder="https://g.page/r/…/review"
-          className={FIELD}
-        />
-        <FormError>{state.errors?.destination_url}</FormError>
-
-        {showWarning ? (
-          <div className="mt-2">
-            <Alert tone="warn" title="This doesn't look like a Google Review link">
-              <p>
-                It will still work — the card will send people wherever this
-                points. Tick below if that&apos;s what you want.
-              </p>
-              <label className="mt-2 flex items-start gap-2 font-medium">
-                <input
-                  type="checkbox"
-                  checked={acknowledgedWarning}
-                  onChange={(event) =>
-                    setAcknowledgedWarning(event.target.checked)
-                  }
-                  className="mt-0.5 size-4"
-                />
-                Save this destination anyway
-              </label>
-            </Alert>
-          </div>
-        ) : null}
-      </div>
 
       <div>
         <label htmlFor="notes" className="eyebrow mb-2 block">
@@ -195,14 +157,16 @@ export function CreateRouteForm() {
         ) : null}
       </div>
 
-      <SubmitButton
-        disabled={showWarning && !acknowledgedWarning}
-        label={
-          showWarning && !acknowledgedWarning
-            ? "Confirm the destination above"
-            : "Create route"
-        }
-      />
+      <div className="mobile-submit-bar">
+        <SubmitButton
+          disabled={showWarning && !acknowledgedWarning}
+          label={
+            showWarning && !acknowledgedWarning
+              ? "Confirm the destination above"
+              : "Create route"
+          }
+        />
+      </div>
     </form>
   );
 }

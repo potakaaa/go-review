@@ -20,7 +20,7 @@ export default function ConvertMapsLinkPage() {
       </div>
 
       <Card className="p-5 sm:p-7">
-        <GoogleReviewConverter />
+          <GoogleReviewConverter autoFocus />
       </Card>
     </div>
   );

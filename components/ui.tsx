@@ -74,6 +74,36 @@ export function StatusBadge({ active }: { active: boolean }) {
   );
 }
 
+export function LockBadge({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      title="Editing locked"
+      aria-label="Editing locked"
+      className={`inline-flex items-center justify-center gap-1.5 rounded-full border border-warn/30 bg-warn-soft text-warn ${
+        compact
+          ? "size-6 p-0"
+          : "px-2.5 py-1 text-[11px] font-medium tracking-wide uppercase"
+      }`}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className={compact ? "size-3.5" : "size-3"}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M7 10V8a5 5 0 0 1 10 0v2" />
+        <rect x="5" y="10" width="14" height="10" rx="1.5" />
+        <path d="M12 14v2" />
+      </svg>
+      {compact ? null : "Locked"}
+    </span>
+  );
+}
+
 export function FormError({ children }: { children?: ReactNode }) {
   if (!children) return null;
   return (

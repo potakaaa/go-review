@@ -108,13 +108,38 @@ export function RouteFilters({ total }: { total: number }) {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search business or slug"
+          placeholder="Search route number or business"
           aria-label="Search routes by business name or slug"
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
-          className="w-full rounded-md border border-line-strong bg-elevated py-3 pr-4 pl-11 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-ink"
+          className="w-full rounded-md border border-line-strong bg-elevated py-3 pr-12 pl-11 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-ink"
         />
+        {query ? (
+          <button
+            type="button"
+            aria-label="Clear route search"
+            onClick={() => {
+              setQuery("");
+              const next = new URLSearchParams(searchParams);
+              next.delete("q");
+              push(next);
+            }}
+            className="tap-target absolute top-1/2 right-1 flex -translate-y-1/2 items-center justify-center rounded-md text-subtle transition-colors hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ink"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeWidth="2"
+            >
+              <path d="m7 7 10 10M17 7 7 17" />
+            </svg>
+          </button>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
@@ -141,6 +166,7 @@ export function RouteFilters({ total }: { total: number }) {
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
+            <option value="most-used">Most used</option>
           </select>
           <SelectChevron />
         </div>

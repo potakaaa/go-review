@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { EditRouteForm } from "@/app/(dashboard)/dashboard/routes/[id]/edit/edit-route-form";
 import { CopyButton } from "@/components/copy-button";
 import { QrPanel } from "@/components/qr-panel";
-import { Card } from "@/components/ui";
+import { Card, LockBadge } from "@/components/ui";
+import { ToggleLockButton } from "@/components/toggle-lock-button";
 import { publicUrlForSlug } from "@/lib/qr";
 import { getRoute } from "@/lib/routes";
 
@@ -21,14 +22,25 @@ export default async function EditRoutePage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <div>
-        <p className="eyebrow">04 — route settings</p>
-        <h1 className="display-heading mt-3 text-4xl text-ink sm:text-5xl">
-          Edit route
-        </h1>
-        <p className="mt-3 truncate text-sm text-muted">
-          {route.business_name}
-        </p>
+      <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="eyebrow">04 — route settings</p>
+          <h1 className="display-heading mt-3 text-4xl text-ink sm:text-5xl">
+            Edit route
+          </h1>
+          <div className="mt-3 flex items-center gap-2">
+            <p className="truncate text-sm text-muted">
+              {route.business_name}
+            </p>
+            {route.locked ? <LockBadge /> : null}
+          </div>
+        </div>
+        <ToggleLockButton
+          id={route.id}
+          locked={route.locked}
+          businessName={route.business_name}
+          className="w-full sm:w-44"
+        />
       </div>
 
       <Card className="p-5 sm:p-7">

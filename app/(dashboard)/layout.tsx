@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { BottomNav, DesktopNav } from "@/components/bottom-nav";
+import { InstallPrompt } from "@/components/install-prompt";
 import { logout } from "@/app/login/actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -52,6 +53,7 @@ export default async function DashboardLayout({
 
       {/* Bottom padding clears the fixed nav plus the home indicator. */}
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-8 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-10 md:pb-12">
+        <InstallPrompt />
         {children}
       </main>
 

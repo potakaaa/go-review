@@ -8,8 +8,9 @@ import {
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
+import { RouteDestinationField } from "@/components/route-destination-field";
 import { Alert, FormError, buttonClass } from "@/components/ui";
-import { looksLikeGoogleReviewUrl } from "@/lib/validation";
+import { destinationNeedsAcknowledgement } from "@/lib/validation";
 import type { RedirectRoute } from "@/lib/database.types";
 
 const FIELD =
@@ -38,17 +39,14 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
     state.values?.destination_url ?? route.destination_url,
   );
   const [acknowledgedWarning, setAcknowledgedWarning] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
 
   const handleConvertedReviewUrl = useCallback((reviewUrl: string) => {
     setDestination(reviewUrl);
     setAcknowledgedWarning(false);
   }, []);
 
-  const trimmed = destination.trim();
-  const showWarning =
-    trimmed.length > 0 &&
-    trimmed.startsWith("https://") &&
-    !looksLikeGoogleReviewUrl(trimmed);
+  const showWarning = destinationNeedsAcknowledgement(destination);
 
   return (
     <form action={formAction} className="space-y-6">
@@ -69,6 +67,14 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
         </p>
       </div>
 
+      <GoogleReviewConverter
+        embedded
+        autoFocus
+        initialUrl={route.maps_url ?? ""}
+        onConverted={handleConvertedReviewUrl}
+        sourceError={state.errors?.maps_url}
+      />
+
       <div>
         <label htmlFor="business_name" className="eyebrow mb-2 block">
           Business name
@@ -86,58 +92,17 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
         <FormError>{state.errors?.business_name}</FormError>
       </div>
 
-      <GoogleReviewConverter
-        embedded
-        initialUrl={route.maps_url ?? ""}
-        onConverted={handleConvertedReviewUrl}
-        sourceError={state.errors?.maps_url}
+      <RouteDestinationField
+        value={destination}
+        onChange={(value) => {
+          setDestination(value);
+          setAcknowledgedWarning(false);
+        }}
+        error={state.errors?.destination_url}
+        acknowledgedWarning={acknowledgedWarning}
+        onAcknowledgedWarningChange={setAcknowledgedWarning}
+        description="Filled automatically after conversion. Edit this only when you need to use another destination."
       />
-
-      <div>
-        <label htmlFor="destination_url" className="eyebrow mb-2 block">
-          Google Review URL
-        </label>
-        <input
-          id="destination_url"
-          name="destination_url"
-          type="url"
-          required
-          inputMode="url"
-          autoComplete="off"
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          value={destination}
-          onChange={(event) => {
-            setDestination(event.target.value);
-            setAcknowledgedWarning(false);
-          }}
-          className={FIELD}
-        />
-        <FormError>{state.errors?.destination_url}</FormError>
-
-        {showWarning ? (
-          <div className="mt-2">
-            <Alert tone="warn" title="This doesn't look like a Google Review link">
-              <p>
-                It will still work — the card will send people wherever this
-                points.
-              </p>
-              <label className="mt-2 flex items-start gap-2 font-medium">
-                <input
-                  type="checkbox"
-                  checked={acknowledgedWarning}
-                  onChange={(event) =>
-                    setAcknowledgedWarning(event.target.checked)
-                  }
-                  className="mt-0.5 size-4"
-                />
-                Save this destination anyway
-              </label>
-            </Alert>
-          </div>
-        ) : null}
-      </div>
 
       <div>
         <label htmlFor="notes" className="eyebrow mb-2 block">
@@ -169,7 +134,40 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
         />
       </label>
 
-      <SubmitButton disabled={showWarning && !acknowledgedWarning} />
+      {route.locked ? (
+        <div className="rounded-md border border-warn/35 bg-warn-soft p-4">
+          <p className="eyebrow text-warn">Editing locked</p>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Type <span className="font-medium text-ink">{route.business_name}</span>{" "}
+            to confirm this edit. The route will stay locked after saving.
+          </p>
+          <label
+            htmlFor="confirm_business_name"
+            className="eyebrow mt-4 mb-2 block"
+          >
+            Current business name
+          </label>
+          <input
+            id="confirm_business_name"
+            name="confirm_business_name"
+            type="text"
+            required
+            inputMode="text"
+            autoComplete="off"
+            autoCapitalize="words"
+            autoCorrect="off"
+            spellCheck={false}
+            value={confirmation}
+            onChange={(event) => setConfirmation(event.target.value)}
+            className={FIELD}
+          />
+          <FormError>{state.errors?.confirm_business_name}</FormError>
+        </div>
+      ) : null}
+
+      <div className="mobile-submit-bar">
+        <SubmitButton disabled={showWarning && !acknowledgedWarning} />
+      </div>
     </form>
   );
 }

@@ -40,6 +40,16 @@ export function looksLikeGoogleReviewUrl(input: string): boolean {
   return GOOGLE_REVIEW_PATTERNS.some((matches) => matches(url));
 }
 
+/** Advisory UI check used before saving a non-Google destination. */
+export function destinationNeedsAcknowledgement(input: string): boolean {
+  const trimmed = input.trim();
+  return (
+    trimmed.length > 0 &&
+    trimmed.startsWith("https://") &&
+    !looksLikeGoogleReviewUrl(trimmed)
+  );
+}
+
 /**
  * HTTPS is required, not merely preferred: an http:// destination would show a
  * "not secure" interstitial to a customer holding their phone at a table.
