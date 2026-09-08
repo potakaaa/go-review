@@ -85,6 +85,15 @@ export type Database = {
         Args: Record<never, never>;
         Returns: boolean;
       };
+      batch_update_routes: {
+        Args: {
+          p_route_ids: string[];
+          p_business_names: string[];
+          p_destination_url: string;
+          p_maps_url: string | null;
+        };
+        Returns: number;
+      };
       resolve_redirect: {
         Args: { p_slug: string };
         Returns: Array<{

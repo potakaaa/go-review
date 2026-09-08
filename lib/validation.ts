@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { BATCH_MAX_SIZE, BATCH_MIN_SIZE } from "@/lib/batch";
+import { BATCH_EDIT_MAX_SIZE } from "@/lib/batch-edit";
 import {
   SLUG_MAX_LENGTH,
   SLUG_MIN_LENGTH,
@@ -179,6 +180,27 @@ export const createBatchRouteSchema = z.object({
     .max(BATCH_MAX_SIZE, `Create at most ${BATCH_MAX_SIZE} routes at a time.`),
 });
 
+export const batchEditRouteSchema = z.object({
+  route_ids: z
+    .array(z.uuid("Select valid routes."))
+    .min(1, "Select at least one route.")
+    .max(
+      BATCH_EDIT_MAX_SIZE,
+      `Select ${BATCH_EDIT_MAX_SIZE} routes or fewer at a time.`,
+    )
+    .superRefine((ids, ctx) => {
+      if (new Set(ids).size !== ids.length) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Each route can only be selected once.",
+        });
+      }
+  }),
+  name_seed: businessNameSchema,
+  destination_url: destinationUrlSchema,
+  maps_url: mapsUrlSchema,
+});
+
 export const updateRouteSchema = z.object({
   business_name: businessNameSchema,
   destination_url: destinationUrlSchema,
@@ -189,6 +211,7 @@ export const updateRouteSchema = z.object({
 
 export type CreateRouteInput = z.infer<typeof createRouteSchema>;
 export type CreateBatchRouteInput = z.infer<typeof createBatchRouteSchema>;
+export type BatchEditRouteInput = z.infer<typeof batchEditRouteSchema>;
 export type UpdateRouteInput = z.infer<typeof updateRouteSchema>;
 
 export { SLUG_MIN_LENGTH, SLUG_MAX_LENGTH };

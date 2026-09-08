@@ -3,7 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { isAdminHost } from "@/lib/site";
+import { isAdminHost, isLocalDevelopmentHost } from "@/lib/site";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,6 +39,10 @@ export async function checkStaffAccess(
   );
   if (staffError) return { state: "unavailable", userId: user.id };
   if (!isStaff) return { state: "unapproved", userId: user.id };
+
+  if (isLocalDevelopmentHost((await headers()).get("host"))) {
+    return { state: "ready", userId: user.id };
+  }
 
   const { data: assurance, error: assuranceError } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();

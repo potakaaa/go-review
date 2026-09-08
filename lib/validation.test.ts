@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createBatchRouteSchema,
+  batchEditRouteSchema,
   createRouteSchema,
   destinationNeedsAcknowledgement,
   destinationUrlSchema,
@@ -202,6 +203,33 @@ describe("createBatchRouteSchema", () => {
     ).toBe(false);
     expect(
       createBatchRouteSchema.safeParse({ ...valid, quantity: "3.5" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("batchEditRouteSchema", () => {
+  const valid = {
+    route_ids: [
+      "20000000-0000-4000-8000-000000000001",
+      "20000000-0000-4000-8000-000000000002",
+    ],
+    name_seed: "restaurant-1",
+    destination_url: "https://g.page/r/CabcDEF/review",
+  };
+
+  it("accepts selected routes and a numbered name seed", () => {
+    expect(batchEditRouteSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("requires a selection and rejects duplicate route ids", () => {
+    expect(
+      batchEditRouteSchema.safeParse({ ...valid, route_ids: [] }).success,
+    ).toBe(false);
+    expect(
+      batchEditRouteSchema.safeParse({
+        ...valid,
+        route_ids: [valid.route_ids[0], valid.route_ids[0]],
+      }).success,
     ).toBe(false);
   });
 });

@@ -6,11 +6,18 @@ export function adminOrigin(): string {
   return (process.env.ADMIN_ORIGIN || "https://admin.goreview.rald.site").replace(/\/$/, "");
 }
 
+export function isLocalDevelopmentHost(
+  host: string | null,
+  development = process.env.NODE_ENV === "development",
+): boolean {
+  return development && /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host?.toLowerCase() ?? "");
+}
+
 /** Host, not forwarded-host: an arbitrary forwarded header must not grant access. */
 export function isAdminHost(host: string | null, origin = adminOrigin(), development = process.env.NODE_ENV === "development"): boolean {
   if (!host) return false;
+  if (isLocalDevelopmentHost(host, development)) return true;
   const normalized = host.toLowerCase();
-  if (development && /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalized)) return true;
   return normalized === new URL(origin).host.toLowerCase();
 }
 

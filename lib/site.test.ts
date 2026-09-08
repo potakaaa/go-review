@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAdminHost, isPublicPath } from "@/lib/site";
+import { isAdminHost, isLocalDevelopmentHost, isPublicPath } from "@/lib/site";
 
 describe("site host boundaries", () => {
   const origin = "https://admin.goreview.rald.site";
@@ -12,6 +12,10 @@ describe("site host boundaries", () => {
   });
 
   it("allows local hosts only during development", () => {
+    expect(isLocalDevelopmentHost("localhost:3000", true)).toBe(true);
+    expect(isLocalDevelopmentHost("127.0.0.1", true)).toBe(true);
+    expect(isLocalDevelopmentHost("localhost.attacker.test", true)).toBe(false);
+    expect(isLocalDevelopmentHost("localhost:3000", false)).toBe(false);
     expect(isAdminHost("localhost:3000", origin, true)).toBe(true);
     expect(isAdminHost("localhost:3000", origin, false)).toBe(false);
   });

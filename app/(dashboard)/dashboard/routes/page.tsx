@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { RouteCard } from "@/components/route-card";
 import { RouteFilters } from "@/components/route-filters";
-import { ButtonLink, Card, EmptyState } from "@/components/ui";
+import { Alert, ButtonLink, Card, EmptyState } from "@/components/ui";
 import { listRoutes, parseFilters } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Routes" };
@@ -10,13 +10,25 @@ export const metadata: Metadata = { title: "Routes" };
 export default async function RoutesPage({
   searchParams,
 }: PageProps<"/dashboard/routes">) {
-  const filters = parseFilters(await searchParams);
+  const params = await searchParams;
+  const filters = parseFilters(params);
   const routes = await listRoutes(filters);
+  const updatedValue = Array.isArray(params.updated)
+    ? params.updated[0]
+    : params.updated;
+  const updatedCount = Number(updatedValue);
 
   const isFiltered = filters.q !== "" || filters.status !== "all";
 
   return (
     <div className="space-y-8 pb-16">
+      {Number.isInteger(updatedCount) && updatedCount > 0 ? (
+        <Alert tone="ok" title="Routes updated">
+          {updatedCount} {updatedCount === 1 ? "route was" : "routes were"}{" "}
+          updated successfully.
+        </Alert>
+      ) : null}
+
       <header className="flex flex-col gap-5 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">02 — permanent links</p>
@@ -28,6 +40,9 @@ export default async function RoutesPage({
           </p>
         </div>
         <div className="grid gap-2 sm:flex">
+          <ButtonLink href="/dashboard/routes/batch/edit" variant="secondary">
+            Batch edit
+          </ButtonLink>
           <ButtonLink href="/dashboard/routes/batch/new" variant="secondary">
             Batch routes
           </ButtonLink>

@@ -52,7 +52,8 @@ There is deliberately **no sign-up page**. Create your user by hand:
 Copy the new user's UUID, then add it to `private.staff_members` using the
 onboarding SQL in [`SECURITY.md`](./SECURITY.md). All approved staff share the
 same route inventory. An Auth account that is not in the allowlist cannot enter
-the workspace. First sign-in also requires TOTP authenticator enrollment.
+the workspace. Production sign-in also requires TOTP authenticator enrollment;
+approved localhost sessions skip that challenge during development.
 
 ### 4. Environment
 
@@ -234,7 +235,8 @@ The public host serves the Goreview landing page and `/r/*` card redirects.
 Dashboard and authentication routes return 404 on the public host. The admin
 host redirects `/` to `/dashboard` and retains the staff allowlist plus MFA.
 Vercel preview hosts can render the public landing page but cannot serve admin
-routes. Localhost is allowed during development.
+routes. Localhost is allowed during development, and skips the MFA challenge
+for approved local staff accounts only.
 
 Apply `20260908031556_shop_stories.sql` before deploying the page. It creates
 the private photo bucket, public published-only reads, MFA-protected editing,
@@ -279,7 +281,7 @@ gives you Add-to-Home-Screen.
 
 ### Security notes
 
-- RLS requires an active staff allowlist entry and an `aal2` MFA session.
+- Production RLS requires an active staff allowlist entry and an `aal2` MFA session.
 - There is **no `DELETE` policy** — deactivation is soft, so a card in someone's
   hand always resolves to something.
 - Table/column grants protect ownership, slugs, timestamps and counters from

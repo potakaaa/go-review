@@ -1,6 +1,7 @@
 import "server-only";
 
 import { requireStaffMfa } from "@/lib/auth";
+import { sortRoutesByBusinessName } from "@/lib/batch-edit";
 import type { RedirectRoute } from "@/lib/database.types";
 
 export type RouteFilters = {
@@ -30,8 +31,8 @@ export function parseFilters(params: {
 }
 
 /**
- * Every query independently requires approved staff access and MFA. RLS repeats
- * the same boundary in the database; all active staff share the workspace.
+ * Every query independently requires approved staff access and MFA in production.
+ * RLS repeats the same boundary in the database; all active staff share the workspace.
  */
 export async function listRoutes(
   filters: Required<RouteFilters>,
@@ -115,6 +116,21 @@ export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]>
     throw new Error("Could not load batch routes.");
   }
   return data ?? [];
+}
+
+/** All routes for the deliberate bulk-edit screen, in human alphabetic order. */
+export async function getRoutesForBatchEdit(): Promise<RedirectRoute[]> {
+  const { supabase } = await requireStaffMfa();
+  const { data, error } = await supabase
+    .from("redirect_routes")
+    .select("*");
+
+  if (error) {
+    console.error("[routes] batch_edit_list_failed", { code: error.code });
+    throw new Error("Could not load routes for batch editing.");
+  }
+
+  return sortRoutesByBusinessName(data ?? []);
 }
 
 export type RouteStats = {
