@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import { ForgotPasswordForm } from "@/app/forgot-password/forgot-password-form";
 import { Card } from "@/components/ui";
 
-export const metadata: Metadata = { title: "Reset password" };
+export const metadata: Metadata = {
+  title: "Reset password",
+  robots: { index: false, follow: false },
+};
 
 export default async function ForgotPasswordPage({
   searchParams,

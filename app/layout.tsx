@@ -5,19 +5,20 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://goreview.rald.site"),
   title: {
-    default: "Goreview",
+    default: "Goreview | Google Review Cards for Philippine Businesses",
     template: "%s · Goreview",
   },
   description:
-    "Manage the permanent QR and NFC links printed on Google Review cards.",
+    "Get more genuine Google reviews with customized NFC and QR Google review cards for businesses in the Philippines. One-time payment, lifetime support.",
   applicationName: "Goreview",
+  creator: "Goreview by Helbi Solutions",
+  category: "Business services",
   appleWebApp: {
     capable: true,
     title: "Goreview",
     statusBarStyle: "default",
   },
-  // Internal tool: keep every page out of search results.
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {

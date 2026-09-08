@@ -1,18 +1,26 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FACEBOOK_URL, ORDER_EMAIL, PUBLIC_ORIGIN } from "@/lib/site";
 import { ProductPhoto, LandingMotion } from "@/components/landing-motion";
 import { CustomOfferings } from "@/components/custom-offerings";
+import { JsonLd } from "@/components/json-ld";
 import { ShopStoryCard } from "@/components/shop-story";
 import { getPublishedStories } from "@/lib/stories";
+import {
+  faqJsonLd,
+  organizationJsonLd,
+  productJsonLd,
+  publicUrl,
+} from "@/lib/seo";
 import { reviewDifference } from "@/lib/story-validation";
 
 export const metadata: Metadata = {
-  title: { absolute: "Goreview — One tap. A lasting impression." },
-  description: "Make leaving a Google review effortless. Customized NFC and QR review cards from ₱699. One-time payment, lifetime support. Ships anywhere in the Philippines.",
+  title: { absolute: "Google Review Cards for Philippine Businesses | Goreview" },
+  description: "Get more genuine Google reviews with customized NFC and QR Google review cards from ₱699. One-time payment, lifetime support, and shipping across the Philippines.",
   robots: { index: true, follow: true },
   alternates: { canonical: PUBLIC_ORIGIN },
-  openGraph: { title: "Goreview — One tap. A lasting impression.", description: "Your counter. Their experience. One easy review. From ₱699, with lifetime support.", url: PUBLIC_ORIGIN, siteName: "Goreview", type: "website", locale: "en_PH", images: [{ url: `${PUBLIC_ORIGIN}/opengraph-image` }] },
-  twitter: { card: "summary_large_image" },
+  openGraph: { title: "Google Review Cards for Philippine Businesses | Goreview", description: "Get more genuine Google reviews with a simple NFC and QR review card. From ₱699, with lifetime support.", url: PUBLIC_ORIGIN, siteName: "Goreview", type: "website", locale: "en_PH", images: [{ url: `${PUBLIC_ORIGIN}/opengraph-image`, width: 1200, height: 630, alt: "Goreview NFC and QR Google review cards" }] },
+  twitter: { card: "summary_large_image", title: "Google Review Cards for Philippine Businesses | Goreview", description: "Get more genuine Google reviews with a simple NFC and QR review card.", images: [`${PUBLIC_ORIGIN}/opengraph-image`] },
 };
 
 export const revalidate = 60;
@@ -27,8 +35,9 @@ const faqs = [
   ["Does Goreview guarantee more reviews?", "Goreview makes it easier for customers to reach your Google review page. Leaving a review is always their choice. Any shop results shown here are observed changes over the stated dates, not a guarantee of future results."],
 ];
 
-function OrderLink({ className = "", children = "Order via Facebook" }: { className?: string; children?: React.ReactNode }) {
-  return <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-12 items-center justify-between gap-5 rounded-lg border border-ink bg-ink px-5 py-3 text-[14px] font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink ${className}`}>{children}<span aria-hidden="true">↗</span></a>;
+function OrderLink({ className = "", children = "Order via Facebook", compact = false }: { className?: string; children?: React.ReactNode; compact?: boolean }) {
+  const size = compact ? "min-h-10 px-3 py-2 text-[12px] sm:min-h-11 sm:px-4 sm:py-2.5 sm:text-[14px]" : "min-h-12 px-5 py-3 text-[14px]";
+  return <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center justify-between rounded-lg border border-ink bg-ink font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink ${size} ${className}`}>{children}<span aria-hidden="true">↗</span></a>;
 }
 
 const container = "mx-auto w-[calc(100%-2.5rem)] max-w-[1180px] md:w-[calc(100%-3.5rem)] xl:w-[calc(100%-6rem)]";
@@ -46,10 +55,16 @@ function SectionHeading({ kickerText, title, accent, description }: { kickerText
 export default async function Home() {
   const stories = await getPublishedStories();
   const hasResults = stories.some(story => reviewDifference(story) !== null);
+  const structuredData = [
+    organizationJsonLd,
+    productJsonLd(publicUrl("/google-review-card")),
+    faqJsonLd(faqs.map(([question, answer]) => ({ question, answer }))),
+  ];
   return <div>
+    <JsonLd data={structuredData} />
     <LandingMotion />
     <a href="#main" className="fixed -top-20 left-5 z-[100] bg-ink px-5 py-3 text-canvas focus:top-3">Skip to content</a>
-    <header className="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur-xl"><div className={`${container} flex h-[68px] items-center justify-between gap-4 md:h-[84px]`}><a href="#" className="text-2xl font-semibold tracking-[-1.6px] md:text-[27px]" aria-label="Goreview home">go<span className="font-normal">review</span><span className="text-muted">.</span></a><nav aria-label="Main navigation" className="flex items-center gap-[18px] md:gap-8"><a className="hidden py-3.5 text-[13px] text-muted hover:text-ink md:block" href="#how-it-works">How it works</a><a className="hidden py-3.5 text-[13px] text-muted hover:text-ink lg:block" href="#custom">Custom setups</a><a className="py-3.5 text-[13px] text-muted hover:text-ink" href="#pricing">Pricing</a><OrderLink className="min-h-[42px] gap-2.5 px-3 py-2.5 text-[12px] md:px-4 md:text-[14px]">Get your card</OrderLink></nav></div></header>
+    <header className="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur-xl"><div className={`${container} flex h-[68px] items-center justify-between gap-4 md:h-[84px]`}><a href="#" className="text-2xl font-semibold tracking-[-1.6px] md:text-[27px]" aria-label="Goreview home">go<span className="font-normal">review</span><span className="text-muted">.</span></a><nav aria-label="Main navigation" className="flex items-center gap-[18px] md:gap-8"><a className="hidden py-3.5 text-[13px] text-muted hover:text-ink md:block" href="#how-it-works">How it works</a><Link className="hidden py-3.5 text-[13px] text-muted hover:text-ink lg:block" href="/google-review-card">Google review cards</Link><Link className="hidden py-3.5 text-[13px] text-muted hover:text-ink xl:block" href="/guides">Guides</Link><a className="py-3.5 text-[13px] text-muted hover:text-ink" href="#pricing">Pricing</a><OrderLink compact className="gap-2"><span className="sm:hidden">Get card</span><span className="hidden sm:inline">Get your card</span></OrderLink></nav></div></header>
     <main id="main">
       <section className={`${container} grid min-h-[650px] grid-cols-1 items-center gap-6 py-12 md:min-h-[720px] md:grid-cols-[1.1fr_1fr] md:gap-8 md:py-[74px]`} aria-labelledby="hero-heading">
         <div><p className={kicker}><span className="mr-2 inline-block size-1.5 rounded-full bg-ink align-px shadow-[0_0_0_4px_rgb(245_245_245/6%)]" /> A small card. A lasting impression.</p><h1 id="hero-heading" className="mt-5 text-[clamp(2.8rem,10.8vw,4.375rem)] font-[450] leading-[1.09] tracking-[-.067em] md:mt-6 md:text-[clamp(3rem,5.3vw,4.75rem)] md:leading-[1.08]">Good experiences<br />deserve to be<br /><span className="display-heading mt-1 inline-block text-[1.12em] text-muted">shared.</span></h1><p className="mt-6 max-w-[440px] text-[16px] leading-[1.75] text-muted md:mt-7 md:text-[18px]">Make leaving a Google review effortless.<br className="hidden md:block" /> A tap or a scan connects your customers to your review page—right from your counter.</p><div className="mt-6 flex flex-wrap items-center gap-5 md:mt-8 md:gap-6"><OrderLink className="min-h-[52px] px-6 text-[14px]" /><a className={textLink} href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a></div><p className="mt-6 flex flex-wrap items-center gap-x-1 text-[13px] text-muted md:text-[14px]"><span aria-hidden="true" className="mr-1 text-xl leading-none text-ink">∞</span> One-time payment. <strong className="font-medium text-ink">Lifetime support.</strong></p></div>
@@ -78,6 +93,6 @@ export default async function Home() {
       <section data-reveal className={`${reveal} border-y border-line bg-[radial-gradient(ellipse_at_bottom,#1c1c1c,#101010_65%)] py-[70px] text-center md:py-[105px]`}><div className={container}><p className={kicker}>Your next review starts at your counter</p><h2 className="mt-6 text-[clamp(2.25rem,4.8vw,4.0625rem)] font-normal leading-[1.14] tracking-[-.05em]">Give good experiences<br /><span className="display-heading text-muted">somewhere to go.</span></h2><div className="mt-6 flex flex-col items-center justify-center gap-2.5 md:mt-8 md:flex-row md:gap-6"><OrderLink>Get your Goreview card</OrderLink><a href={ORDER_EMAIL} className={textLink}>Email to order ↗</a></div><p className="mt-6 text-[13px] text-muted">One-time payment. Lifetime support.</p></div></section>
     </main>
     <footer className={`${container} flex flex-col gap-6 pb-[115px] pt-9 md:flex-row md:justify-between md:gap-10 md:py-11`}><div><a href="#" className="text-2xl font-semibold tracking-[-1.6px]">go<span className="font-normal">review</span>.</a><p className="mt-3 text-[12px] leading-[1.8] text-muted">By Helbi Solutions · Made for everyday businesses.</p></div><div className="text-left md:text-right"><a className="mr-6 text-[13px] md:mr-0 md:ml-6" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">Facebook ↗</a><a className="text-[13px] md:ml-6" href={ORDER_EMAIL}>Email ↗</a><p className="mt-3 text-[12px] leading-[1.8] text-muted">Goreview is an independent product, not affiliated with Google.</p></div></footer>
-    <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-3 border-t border-line-strong bg-surface/95 px-5 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"><span className="text-[13px] text-muted">From <strong className="text-lg font-medium text-ink">₱699</strong><small className="mt-0.5 block text-[10px]">One-time · Lifetime support</small></span><OrderLink className="min-h-[43px] text-[13px]">Get your card</OrderLink></div>
+    <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-3 border-t border-line-strong bg-surface/95 px-5 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"><span className="text-[13px] text-muted">From <strong className="text-lg font-medium text-ink">₱699</strong><small className="mt-0.5 block text-[10px]">One-time · Lifetime support</small></span><OrderLink compact className="gap-2"><span>Get card</span></OrderLink></div>
   </div>;
 }

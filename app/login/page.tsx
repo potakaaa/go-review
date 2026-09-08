@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import { LoginForm } from "@/app/login/login-form";
 import { Card } from "@/components/ui";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = {
+  title: "Sign in",
+  robots: { index: false, follow: false },
+};
 
 export default async function LoginPage({
   searchParams,

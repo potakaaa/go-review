@@ -7,7 +7,10 @@ import { checkStaffAccess } from "@/lib/auth";
 import { safeNextPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Security verification" };
+export const metadata: Metadata = {
+  title: "Security verification",
+  robots: { index: false, follow: false },
+};
 
 export default async function MfaPage({
   searchParams,

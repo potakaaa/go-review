@@ -15,7 +15,19 @@ export function isAdminHost(host: string | null, origin = adminOrigin(), develop
 }
 
 export function isPublicPath(path: string): boolean {
-  return path === "/" || path === "/robots.txt" || path === "/sitemap.xml" ||
-    path === "/icon" || path === "/apple-icon" || path === "/opengraph-image" ||
-    path.startsWith("/media/stories/") || path.startsWith("/images/") || path.startsWith("/fonts/");
+  return path === "/" ||
+    path === "/robots.txt" ||
+    path === "/sitemap.xml" ||
+    path === "/icon" ||
+    path === "/apple-icon" ||
+    path === "/opengraph-image" ||
+    path === "/google-review-card" ||
+    path === "/nfc-google-review-card" ||
+    path === "/google-review-qr-code" ||
+    path === "/google-review-card-philippines" ||
+    path === "/guides" ||
+    path.startsWith("/guides/") ||
+    path.startsWith("/media/stories/") ||
+    path.startsWith("/images/") ||
+    path.startsWith("/fonts/");
 }
