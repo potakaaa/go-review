@@ -3,10 +3,15 @@
 import "server-only";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { requireStaffMfa } from "@/lib/auth";
+import {
+  hasPermission,
+  isSuperadmin,
+  requireAuth,
+  requirePermission,
+} from "@/lib/permissions";
 import { batchSlug, generateBatchKey } from "@/lib/batch";
 import {
   incrementedRouteNames,
@@ -42,11 +47,6 @@ const UNIQUE_VIOLATION = "23505";
 /** How many fresh slugs to try before giving up. */
 const SLUG_ATTEMPTS = 5;
 
-async function requireUserId(): Promise<string> {
-  const { userId } = await requireStaffMfa();
-  return userId;
-}
-
 /**
  * Resolves a Google Maps share link without creating or changing a route.
  * Authentication is checked here because Server Actions are public POST
@@ -56,7 +56,8 @@ export async function convertGoogleMapsLink(
   _prevState: GoogleReviewConversionState,
   formData: FormData,
 ): Promise<GoogleReviewConversionState> {
-  await requireUserId();
+  const access = await requireAuth();
+  if (!hasPermission(access, "convert", "view")) notFound();
 
   const rawValue = formData.get("maps_url");
   const sourceUrl = typeof rawValue === "string" ? rawValue.trim() : "";
@@ -88,6 +89,9 @@ export async function createRoute(
   _prevState: RouteFormState,
   formData: FormData,
 ): Promise<RouteFormState> {
+  const access = await requireAuth();
+  if (!hasPermission(access, "routes", "manage")) notFound();
+
   const values = {
     business_name: String(formData.get("business_name") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
@@ -101,8 +105,10 @@ export async function createRoute(
     return { errors: fieldErrors(parsed.error), values };
   }
 
-  const ownerId = await requireUserId();
+  const { userId: ownerId, profile } = access;
   const supabase = await createClient();
+  const publicationStatus: "draft" | "published" =
+    profile.role === "superadmin" ? "published" : "draft";
   const customSlug = parsed.data.slug;
 
   let newId: string | null = null;
@@ -122,6 +128,8 @@ export async function createRoute(
         destination_url: parsed.data.destination_url,
         maps_url: parsed.data.maps_url,
         notes: parsed.data.notes,
+        publication_status: publicationStatus,
+        active: profile.role === "superadmin",
       })
       .select("id")
       .single();
@@ -171,6 +179,9 @@ export async function createBatch(
   _prevState: RouteFormState,
   formData: FormData,
 ): Promise<RouteFormState> {
+  const access = await requireAuth();
+  if (!hasPermission(access, "routes", "manage")) notFound();
+
   const values = {
     business_name: String(formData.get("business_name") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
@@ -184,8 +195,10 @@ export async function createBatch(
     return { errors: fieldErrors(parsed.error), values };
   }
 
-  const ownerId = await requireUserId();
+  const { userId: ownerId, profile } = access;
   const supabase = await createClient();
+  const publicationStatus: "draft" | "published" =
+    profile.role === "superadmin" ? "published" : "draft";
 
   let batchKey: string | null = null;
 
@@ -203,6 +216,8 @@ export async function createBatch(
       destination_url: parsed.data.destination_url,
       maps_url: parsed.data.maps_url,
       notes: parsed.data.notes,
+      publication_status: publicationStatus,
+      active: profile.role === "superadmin",
     }));
 
     const { error } = await supabase.from("redirect_routes").insert(rows);
@@ -244,6 +259,7 @@ export async function batchUpdateRoutes(
   _prevState: RouteFormState,
   formData: FormData,
 ): Promise<RouteFormState> {
+  const access = await requirePermission("routes", "manage");
   const values = {
     name_seed: String(formData.get("name_seed") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
@@ -261,8 +277,7 @@ export async function batchUpdateRoutes(
     return { errors: fieldErrors(parsed.error), values };
   }
 
-  await requireUserId();
-  const supabase = await createClient();
+  const { supabase } = access;
 
   // The client sends only ids and the requested changes. Read the current
   // names again here so the assignment order and lock decision are server
@@ -381,6 +396,9 @@ export async function updateRoute(
   _prevState: RouteFormState,
   formData: FormData,
 ): Promise<RouteFormState> {
+  const access = await requireAuth();
+  if (!hasPermission(access, "routes", "manage")) notFound();
+
   const id = String(formData.get("id") ?? "");
   if (!id) return { errors: {}, message: "Missing route id." };
 
@@ -401,7 +419,6 @@ export async function updateRoute(
     return { errors: fieldErrors(parsed.error), values };
   }
 
-  await requireUserId();
   const supabase = await createClient();
 
   // The lock check happens on the server against the stored business name.
@@ -477,11 +494,13 @@ export async function updateRoute(
  * branded "deactivated" page.
  */
 export async function toggleRouteActive(formData: FormData): Promise<void> {
+  const access = await requireAuth();
+  if (!hasPermission(access, "routes", "manage")) notFound();
+
   const id = String(formData.get("id") ?? "");
   const nextActive = formData.get("next_active") === "true";
   if (!id) return;
 
-  await requireUserId();
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -505,9 +524,8 @@ export async function toggleRouteActive(formData: FormData): Promise<void> {
  * its destination details while still pausing the printed card if needed.
  */
 export async function toggleRouteLocked(formData: FormData): Promise<void> {
-  // Authenticate before even accepting the no-op path: exported Server
-  // Actions can be invoked directly without rendering this page first.
-  await requireUserId();
+  const access = await requireAuth();
+  if (!hasPermission(access, "routes", "manage")) notFound();
 
   const id = String(formData.get("id") ?? "");
   const nextLocked = formData.get("next_locked") === "true";
@@ -529,4 +547,28 @@ export async function toggleRouteLocked(formData: FormData): Promise<void> {
   revalidatePath("/dashboard/routes");
   revalidatePath(`/dashboard/routes/${id}`);
   revalidatePath(`/dashboard/routes/${id}/edit`);
+}
+
+/** Only a superadmin can make a regular admin's draft public. */
+export async function publishRoute(formData: FormData): Promise<void> {
+  const access = await requireAuth();
+  if (!isSuperadmin(access)) notFound();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const { supabase } = access;
+  const { error } = await supabase
+    .from("redirect_routes")
+    .update({ publication_status: "published", active: true })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[routes] publish_failed", { code: error.code });
+    throw new Error("Could not publish this route.");
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/routes");
+  revalidatePath(`/dashboard/routes/${id}`);
 }

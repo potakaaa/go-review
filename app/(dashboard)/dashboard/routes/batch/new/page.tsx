@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 
 import { CreateBatchRouteForm } from "@/app/(dashboard)/dashboard/routes/batch/new/create-batch-route-form";
 import { Card } from "@/components/ui";
+import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Batch routes" };
 
-export default function NewBatchRoutePage() {
+export default async function NewBatchRoutePage() {
+  await requirePermission("routes", "manage");
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div>

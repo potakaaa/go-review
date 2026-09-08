@@ -3,7 +3,6 @@ import { createServerClient } from "@supabase/ssr";
 
 import { supabaseAnonKey, supabaseUrl } from "@/lib/env";
 import type { Database } from "@/lib/database.types";
-import { isLocalDevelopmentHost } from "@/lib/site";
 
 const LOGIN_PATH = "/login";
 const MFA_PATH = "/mfa";
@@ -51,7 +50,6 @@ function redirectWithCookies(
 export async function updateSession(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
   const isDevelopment = process.env.NODE_ENV === "development";
-  const localMfaBypass = isLocalDevelopmentHost(request.headers.get("host"));
   const supabaseOrigin = new URL(supabaseUrl()).origin;
   const csp = [
     "default-src 'self'",
@@ -132,18 +130,32 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(loginUrl, response, csp);
   }
 
-  let hasMfa = localMfaBypass;
-  if (!localMfaBypass) {
-    const { data: assurance, error: assuranceError } =
-      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (assuranceError) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = LOGIN_PATH;
-      loginUrl.search = "?error=access_unavailable";
-      return redirectWithCookies(loginUrl, response, csp);
-    }
-    hasMfa = assurance.currentLevel === "aal2";
+  const {
+    data: mustChangePassword,
+    error: passwordStateError,
+  } = await supabase.rpc("is_password_change_required");
+  if (passwordStateError) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = LOGIN_PATH;
+    loginUrl.search = "?error=access_unavailable";
+    return redirectWithCookies(loginUrl, response, csp);
   }
+  if (mustChangePassword && !isPath(pathname, RESET_PASSWORD_PATH)) {
+    const resetUrl = request.nextUrl.clone();
+    resetUrl.pathname = RESET_PASSWORD_PATH;
+    resetUrl.search = "?required=1";
+    return redirectWithCookies(resetUrl, response, csp);
+  }
+
+  const { data: assurance, error: assuranceError } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assuranceError) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = LOGIN_PATH;
+    loginUrl.search = "?error=access_unavailable";
+    return redirectWithCookies(loginUrl, response, csp);
+  }
+  const hasMfa = assurance.currentLevel === "aal2";
 
   if (
     !hasMfa &&

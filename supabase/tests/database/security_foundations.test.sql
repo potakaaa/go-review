@@ -10,8 +10,8 @@ values
   ('10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'staff-test@example.invalid', now(), now()),
   ('10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'outsider-test@example.invalid', now(), now());
 
-insert into private.staff_members (user_id)
-values ('10000000-0000-0000-0000-000000000001');
+insert into private.staff_members (user_id, role)
+values ('10000000-0000-0000-0000-000000000001', 'superadmin');
 
 select has_table('private', 'staff_members', 'staff allowlist exists');
 select has_table('private', 'route_audit_events', 'private audit log exists');
@@ -43,6 +43,12 @@ select ok(
   'staff cannot delete permanent routes'
 );
 
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"10000000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',
+  true
+);
 select lives_ok(
   $$
     insert into public.redirect_routes (
@@ -71,6 +77,7 @@ select throws_ok(
   'destination_url must be an approved Google review URL',
   'lookalike Google destinations are rejected in Postgres'
 );
+reset role;
 
 -- Reproduce a route created before Google-only enforcement. Trigger execution
 -- is disabled only for this fixture insert; application updates use it normally.

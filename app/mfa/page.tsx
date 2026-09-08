@@ -27,6 +27,9 @@ export default async function MfaPage({
   if (access.state === "unavailable") {
     redirect("/login?error=access_unavailable");
   }
+  if (access.state === "needs_password_change") {
+    redirect("/reset-password?required=1");
+  }
   if (access.state === "ready") redirect(safeNextPath(params.next));
 
   return (

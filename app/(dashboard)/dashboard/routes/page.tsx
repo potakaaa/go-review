@@ -4,12 +4,16 @@ import { RouteCard } from "@/components/route-card";
 import { RouteFilters } from "@/components/route-filters";
 import { Alert, ButtonLink, Card, EmptyState } from "@/components/ui";
 import { listRoutes, parseFilters } from "@/lib/routes";
+import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Routes" };
 
 export default async function RoutesPage({
   searchParams,
 }: PageProps<"/dashboard/routes">) {
+  const access = await requirePermission("routes", "view");
+  const canManageRoutes =
+    access.profile.role === "superadmin" || access.permissions.routes.canManage;
   const params = await searchParams;
   const filters = parseFilters(params);
   const routes = await listRoutes(filters);
@@ -40,26 +44,30 @@ export default async function RoutesPage({
           </p>
         </div>
         <div className="grid gap-2 sm:flex">
-          <ButtonLink href="/dashboard/routes/batch/edit" variant="secondary">
-            Batch edit
-          </ButtonLink>
-          <ButtonLink href="/dashboard/routes/batch/new" variant="secondary">
-            Batch routes
-          </ButtonLink>
-          <ButtonLink
-            href="/dashboard/routes/new"
-            className="hidden sm:inline-flex"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="size-4"
-              fill="currentColor"
-            >
-              <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
-            </svg>
-            New route
-          </ButtonLink>
+          {canManageRoutes ? (
+            <>
+              <ButtonLink href="/dashboard/routes/batch/edit" variant="secondary">
+                Batch edit
+              </ButtonLink>
+              <ButtonLink href="/dashboard/routes/batch/new" variant="secondary">
+                Batch routes
+              </ButtonLink>
+              <ButtonLink
+                href="/dashboard/routes/new"
+                className="hidden sm:inline-flex"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="size-4"
+                  fill="currentColor"
+                >
+                  <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
+                </svg>
+                New route
+              </ButtonLink>
+            </>
+          ) : null}
         </div>
       </header>
 
@@ -78,15 +86,15 @@ export default async function RoutesPage({
           <EmptyState
             title="No routes yet"
             description="Create your first route to generate a QR code for a card."
-            action={
+            action={canManageRoutes ? (
               <ButtonLink href="/dashboard/routes/new">Create Route</ButtonLink>
-            }
+            ) : undefined}
           />
         )
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3 lg:grid-cols-2">
           {routes.map((route) => (
-            <RouteCard key={route.id} route={route} />
+            <RouteCard key={route.id} route={route} canManage={canManageRoutes} />
           ))}
         </div>
       )}

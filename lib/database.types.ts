@@ -1,3 +1,20 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export type StaffRole = "admin" | "superadmin";
+export type StaffSection =
+  | "routes"
+  | "analytics"
+  | "convert"
+  | "stories"
+  | "staff";
+export type RouteAccessLevel = "view" | "manage";
+
 /**
  * Hand-maintained to match supabase/migrations/*.sql.
  *
@@ -18,6 +35,7 @@ export type RedirectRoute = {
   notes: string | null;
   active: boolean;
   locked: boolean;
+  publication_status: "draft" | "published";
   scan_count: number;
   last_scanned_at: string | null;
   created_at: string;
@@ -36,6 +54,7 @@ type RedirectRouteInsert = {
   notes?: string | null;
   active?: boolean;
   locked?: boolean;
+  publication_status?: "draft" | "published";
 };
 
 type RedirectRouteUpdate = Partial<
@@ -83,6 +102,80 @@ export type Database = {
     Functions: {
       is_active_staff: {
         Args: Record<never, never>;
+        Returns: boolean;
+      };
+      is_password_change_required: {
+        Args: Record<never, never>;
+        Returns: boolean;
+      };
+      get_my_staff_profile: {
+        Args: Record<never, never>;
+        Returns: Array<{
+          user_id: string;
+          role: StaffRole;
+          must_change_password: boolean;
+        }>;
+      };
+      get_my_staff_permissions: {
+        Args: Record<never, never>;
+        Returns: Array<{
+          section: StaffSection;
+          can_view: boolean;
+          can_manage: boolean;
+        }>;
+      };
+      complete_password_change: {
+        Args: { p_user_id: string };
+        Returns: boolean;
+      };
+      admin_list_staff: {
+        Args: Record<never, never>;
+        Returns: Array<{
+          user_id: string;
+          email: string | null;
+          role: StaffRole;
+          active: boolean;
+          must_change_password: boolean;
+          created_at: string;
+          created_by: string | null;
+        }>;
+      };
+      admin_list_staff_permissions: {
+        Args: { p_user_id: string };
+        Returns: Array<{
+          section: StaffSection;
+          can_view: boolean;
+          can_manage: boolean;
+        }>;
+      };
+      admin_list_route_access: {
+        Args: { p_user_id: string };
+        Returns: Array<{
+          route_id: string;
+          access_level: RouteAccessLevel;
+        }>;
+      };
+      admin_register_staff: {
+        Args: {
+          p_user_id: string;
+          p_role: StaffRole;
+          p_permissions?: Json;
+          p_route_access?: Json;
+        };
+        Returns: boolean;
+      };
+      admin_update_staff: {
+        Args: {
+          p_user_id: string;
+          p_role: StaffRole;
+          p_active: boolean;
+          p_permissions?: Json;
+          p_route_access?: Json;
+        };
+        Returns: boolean;
+      };
+      admin_mark_password_change_required: {
+        Args: { p_user_id: string };
         Returns: boolean;
       };
       batch_update_routes: {

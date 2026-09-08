@@ -15,9 +15,8 @@ const loginSchema = z.object({
 });
 
 /**
- * There is deliberately no sign-up action anywhere in this codebase. The single
- * admin account is created by hand in the Supabase dashboard, so no public
- * registration surface exists to be abused.
+ * There is deliberately no public sign-up action. Accounts are created by a
+ * superadmin or directly in the Supabase dashboard.
  */
 export async function login(
   _prevState: LoginState,
@@ -60,6 +59,10 @@ export async function login(
   }
 
   const destination = safeNextPath(formData.get("next"));
+
+  if (access.state === "needs_password_change") {
+    redirect("/reset-password?required=1");
+  }
 
   if (access.state === "needs_mfa") {
     redirect(`/mfa?next=${encodeURIComponent(destination)}`);

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { Card } from "@/components/ui";
+import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Convert Maps link" };
 
-export default function ConvertMapsLinkPage() {
+export default async function ConvertMapsLinkPage() {
+  await requirePermission("convert", "view");
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div>

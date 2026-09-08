@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ButtonLink, Card, EmptyState } from "@/components/ui";
 import { formatRelativeDate } from "@/lib/format";
 import { getMostUsedRoutes, getRouteStats } from "@/lib/routes";
+import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Analytics" };
 
@@ -19,6 +20,9 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 export default async function AnalyticsPage() {
+  const access = await requirePermission("analytics", "view");
+  const canViewRoutes =
+    access.profile.role === "superadmin" || access.permissions.routes.canView;
   const [stats, routes] = await Promise.all([
     getRouteStats(),
     getMostUsedRoutes(10),
@@ -37,14 +41,16 @@ export default async function AnalyticsPage() {
             See which permanent links are getting used most.
           </p>
         </div>
-        <div className="grid gap-2 sm:flex">
-          <ButtonLink href="/dashboard/routes?sort=most-used" variant="secondary">
-            Most used in routes
-          </ButtonLink>
-          <ButtonLink href="/dashboard/routes" variant="secondary">
-            All routes
-          </ButtonLink>
-        </div>
+        {canViewRoutes ? (
+          <div className="grid gap-2 sm:flex">
+            <ButtonLink href="/dashboard/routes?sort=most-used" variant="secondary">
+              Most used in routes
+            </ButtonLink>
+            <ButtonLink href="/dashboard/routes" variant="secondary">
+              All routes
+            </ButtonLink>
+          </div>
+        ) : null}
       </header>
 
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
@@ -71,7 +77,9 @@ export default async function AnalyticsPage() {
           <EmptyState
             title="No scans yet"
             description="When someone scans a printed card, its route will appear here."
-            action={<ButtonLink href="/dashboard/routes">View routes</ButtonLink>}
+            action={
+              canViewRoutes ? <ButtonLink href="/dashboard/routes">View routes</ButtonLink> : undefined
+            }
           />
         ) : (
           <Card className="overflow-hidden divide-y divide-line">
@@ -88,12 +96,18 @@ export default async function AnalyticsPage() {
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <Link
-                      href={`/dashboard/routes/${route.id}/edit`}
-                      className="block truncate text-sm font-semibold tracking-tight text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                    >
-                      {route.business_name}
-                    </Link>
+                    {canViewRoutes ? (
+                      <Link
+                        href={`/dashboard/routes/${route.id}`}
+                        className="block truncate text-sm font-semibold tracking-tight text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      >
+                        {route.business_name}
+                      </Link>
+                    ) : (
+                      <p className="truncate text-sm font-semibold tracking-tight text-ink">
+                        {route.business_name}
+                      </p>
+                    )}
                     <p className="mt-1 truncate font-mono text-[11px] text-muted">
                       /r/{route.slug}
                     </p>

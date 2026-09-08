@@ -296,8 +296,7 @@ message_service_sid = ""
 # DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
 auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 
-# TOTP remains available for optional local testing. The app intentionally skips
-# the MFA challenge only on localhost during development; production still requires it.
+# TOTP MFA is enabled for local parity with the mandatory production flow.
 [auth.mfa]
 # Control how many MFA factors can be enrolled at once per user.
 max_enrolled_factors = 10

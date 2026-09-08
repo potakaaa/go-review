@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default async function DashboardLayout({
   children,
 }: LayoutProps<"/">) {
-  await requireStaffMfa();
+  const access = await requireStaffMfa();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -38,8 +38,25 @@ export default async function DashboardLayout({
             </span>
           </div>
 
-          <DesktopNav />
-          <Link href="/dashboard/stories" className="text-xs text-muted tap-target inline-flex items-center md:hidden">Shop stories</Link>
+          <DesktopNav
+            role={access.profile.role}
+            permissions={access.permissions}
+          />
+          <div className="flex items-center gap-3 md:hidden">
+            {(
+              access.profile.role === "superadmin" ||
+              access.permissions.stories.canView
+            ) ? (
+              <Link href="/dashboard/stories" className="text-xs text-muted tap-target inline-flex items-center">
+                Shop stories
+              </Link>
+            ) : null}
+            {access.profile.role === "superadmin" ? (
+              <Link href="/dashboard/staff" className="text-xs text-muted tap-target inline-flex items-center">
+                Staff
+              </Link>
+            ) : null}
+          </div>
 
           <form action={logout}>
             <button
@@ -58,7 +75,7 @@ export default async function DashboardLayout({
         {children}
       </main>
 
-      <BottomNav />
+      <BottomNav role={access.profile.role} permissions={access.permissions} />
     </div>
   );
 }

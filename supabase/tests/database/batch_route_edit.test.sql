@@ -9,8 +9,8 @@ insert into auth.users (id, aud, role, email, created_at, updated_at)
 values
   ('20000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'batch-edit-test@example.invalid', now(), now());
 
-insert into private.staff_members (user_id)
-values ('20000000-0000-0000-0000-000000000001');
+insert into private.staff_members (user_id, role)
+values ('20000000-0000-0000-0000-000000000001', 'superadmin');
 
 select has_function(
   'public',
