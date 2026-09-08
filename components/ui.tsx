@@ -74,6 +74,15 @@ export function StatusBadge({ active }: { active: boolean }) {
   );
 }
 
+export function PublicationBadge({ status }: { status: "draft" | "published" }) {
+  if (status === "published") return null;
+  return (
+    <span className="inline-flex items-center rounded-full border border-warn/30 bg-warn-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-warn">
+      Draft approval needed
+    </span>
+  );
+}
+
 export function LockBadge({ compact = false }: { compact?: boolean }) {
   return (
     <span

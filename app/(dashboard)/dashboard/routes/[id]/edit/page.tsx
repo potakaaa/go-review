@@ -8,12 +8,14 @@ import { Card, LockBadge } from "@/components/ui";
 import { ToggleLockButton } from "@/components/toggle-lock-button";
 import { publicUrlForSlug } from "@/lib/qr";
 import { getRoute } from "@/lib/routes";
+import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Edit route" };
 
 export default async function EditRoutePage({
   params,
 }: PageProps<"/dashboard/routes/[id]/edit">) {
+  await requirePermission("routes", "manage");
   const { id } = await params;
   const route = await getRoute(id);
   if (!route) notFound();

@@ -5,10 +5,19 @@ import { notFound } from "next/navigation";
 import { QrPanel } from "@/components/qr-panel";
 import { ToggleActiveButton } from "@/components/toggle-active-button";
 import { ToggleLockButton } from "@/components/toggle-lock-button";
-import { Alert, Card, LockBadge, StatusBadge, buttonClass } from "@/components/ui";
+import {
+  Alert,
+  Card,
+  LockBadge,
+  PublicationBadge,
+  StatusBadge,
+  buttonClass,
+} from "@/components/ui";
 import { formatDate, formatRelativeDate } from "@/lib/format";
 import { publicUrlForSlug } from "@/lib/qr";
 import { getRoute } from "@/lib/routes";
+import { requirePermission, isSuperadmin } from "@/lib/permissions";
+import { publishRoute } from "@/app/(dashboard)/dashboard/routes/actions";
 
 export const metadata: Metadata = { title: "Route" };
 
@@ -16,6 +25,10 @@ export default async function RouteDetailPage({
   params,
   searchParams,
 }: PageProps<"/dashboard/routes/[id]">) {
+  const access = await requirePermission("routes", "view");
+  const canManageRoutes =
+    isSuperadmin(access) || access.permissions.routes.canManage;
+  const canPublish = isSuperadmin(access);
   const { id } = await params;
   const { created, saved } = await searchParams;
 
@@ -45,6 +58,7 @@ export default async function RouteDetailPage({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <StatusBadge active={route.active} />
+          <PublicationBadge status={route.publication_status} />
           {route.locked ? <LockBadge /> : null}
         </div>
       </div>
@@ -66,12 +80,14 @@ export default async function RouteDetailPage({
         >
           Open destination
         </a>
-        <Link
-          href={`/dashboard/routes/${route.id}/edit`}
-          className={buttonClass("secondary", "text-sm")}
-        >
-          Edit route
-        </Link>
+        {canManageRoutes ? (
+          <Link
+            href={`/dashboard/routes/${route.id}/edit`}
+            className={buttonClass("secondary", "text-sm")}
+          >
+            Edit route
+          </Link>
+        ) : null}
         {route.batch_key ? (
           <Link
             href={"/dashboard/routes/batches/" + route.batch_key}
@@ -123,18 +139,40 @@ export default async function RouteDetailPage({
         </div>
       </Card>
 
-      <div className="grid gap-2 sm:grid-cols-2">
-        <ToggleActiveButton
-          id={route.id}
-          active={route.active}
-          businessName={route.business_name}
-        />
-        <ToggleLockButton
-          id={route.id}
-          locked={route.locked}
-          businessName={route.business_name}
-        />
-      </div>
+      {canManageRoutes ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <ToggleActiveButton
+            id={route.id}
+            active={route.active}
+            businessName={route.business_name}
+          />
+          <ToggleLockButton
+            id={route.id}
+            locked={route.locked}
+            businessName={route.business_name}
+          />
+        </div>
+      ) : null}
+
+      {canPublish && route.publication_status === "draft" ? (
+        <form
+          action={publishRoute}
+          className="rounded-xl border border-warn/30 bg-warn-soft p-5"
+        >
+          <input type="hidden" name="id" value={route.id} />
+          <p className="eyebrow text-warn">Superadmin approval</p>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            This draft is not public yet. Publish it after checking the
+            destination and business details.
+          </p>
+          <button
+            type="submit"
+            className={buttonClass("primary", "mt-4 w-full sm:w-auto")}
+          >
+            Publish route
+          </button>
+        </form>
+      ) : null}
     </div>
   );
 }

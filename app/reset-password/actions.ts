@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { passwordSchema } from "@/lib/validation";
 
 export type UpdatePasswordState = {
@@ -58,6 +59,35 @@ export async function updatePassword(
   if (error) {
     console.error("[auth] password_update_failed", { code: error.code });
     return { message: "Password could not be updated. Request a new link." };
+  }
+
+  const { data: mustChangePassword, error: passwordStateError } =
+    await supabase.rpc("is_password_change_required");
+  if (passwordStateError) {
+    console.error("[auth] staff_password_state_check_failed", {
+      code: passwordStateError.code,
+    });
+    return { message: "Password was not fully verified. Please try again." };
+  }
+
+  if (mustChangePassword) {
+    try {
+      const { error: staffStateError } = await createAdminClient().rpc(
+        "complete_password_change",
+        { p_user_id: user.id },
+      );
+      if (staffStateError) {
+        console.error("[auth] staff_password_state_failed", {
+          code: staffStateError.code,
+        });
+        return { message: "Password was not fully verified. Please try again." };
+      }
+    } catch {
+      console.error("[auth] staff_password_state_failed", {
+        code: "service_role_unavailable",
+      });
+      return { message: "Password was not fully verified. Please try again." };
+    }
   }
 
   await supabase.auth.signOut({ scope: "global" });

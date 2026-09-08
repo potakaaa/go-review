@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 
 import { CreateRouteForm } from "@/app/(dashboard)/dashboard/routes/new/create-route-form";
 import { Card } from "@/components/ui";
+import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "New route" };
 
-export default function NewRoutePage() {
+export default async function NewRoutePage() {
+  await requirePermission("routes", "manage");
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div>

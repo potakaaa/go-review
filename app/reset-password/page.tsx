@@ -10,7 +10,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function ResetPasswordPage() {
+export default async function ResetPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ required?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const required = params.required === "1" || params.required?.[0] === "1";
   const supabase = await createClient();
   const {
     data: { user },
@@ -32,13 +38,16 @@ export default async function ResetPasswordPage() {
           >
             NEW
           </div>
-          <p className="eyebrow">Goreview / account recovery</p>
+          <p className="eyebrow">
+            Goreview / {required ? "first sign-in" : "account recovery"}
+          </p>
           <h1 className="display-heading mt-3 text-3xl text-ink sm:text-4xl">
             Choose a new password
           </h1>
           <p className="mt-3 max-w-xs text-sm leading-6 text-muted">
-            Your recovery link has been verified. Set a strong password, then
-            sign in and finish authenticator setup.
+            {required
+              ? "Your temporary password must be replaced before you can open the workspace."
+              : "Your recovery link has been verified. Set a strong password, then sign in and finish authenticator setup."}
           </p>
         </div>
 

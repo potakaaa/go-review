@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireStaffMfa } from "@/lib/auth";
+import { requirePermission } from "@/lib/permissions";
 import { storySchema, STORY_BUCKET } from "@/lib/story-validation";
 import { normalizeStoryImage } from "@/lib/story-images";
 import { z } from "zod";
@@ -10,7 +10,7 @@ import { z } from "zod";
 export type StoryFormState = { error?: string };
 
 export async function saveStory(_state: StoryFormState, form: FormData): Promise<StoryFormState> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requirePermission("stories", "manage");
   const rawId = form.get("id");
   const id = rawId ? z.uuid().safeParse(rawId) : null;
   if (id && !id.success) return { error: "Invalid story." };

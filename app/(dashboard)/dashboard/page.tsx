@@ -4,6 +4,7 @@ import Link from "next/link";
 import { RouteCard } from "@/components/route-card";
 import { ButtonLink, Card, EmptyState } from "@/components/ui";
 import { getRecentRoutes, getRouteStats } from "@/lib/routes";
+import { requireDashboardAccess, isSuperadmin } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -19,6 +20,15 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 export default async function DashboardPage() {
+  const access = await requireDashboardAccess();
+  const canManageRoutes =
+    isSuperadmin(access) || access.permissions.routes.canManage;
+  const canViewRoutes =
+    isSuperadmin(access) || access.permissions.routes.canView;
+  const canViewAnalytics =
+    isSuperadmin(access) || access.permissions.analytics.canView;
+  const canConvert =
+    isSuperadmin(access) || access.permissions.convert.canView;
   // One request, two queries in flight together rather than in sequence.
   const [stats, recent] = await Promise.all([
     getRouteStats(),
@@ -38,28 +48,36 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid w-full gap-2 sm:flex sm:w-auto">
-          <ButtonLink href="/dashboard/routes/new" className="w-full sm:w-auto">
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
-              <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
-            </svg>
-            New route
-          </ButtonLink>
-          <ButtonLink
-            href="/dashboard/routes/batch/new"
-            variant="secondary"
-            className="w-full sm:w-auto"
-          >
-            Batch routes
-          </ButtonLink>
-          <ButtonLink
-            href="/dashboard/convert"
-            variant="secondary"
-            className="w-full sm:w-auto"
-          >
-            Convert link
-          </ButtonLink>
-        </div>
+        {canManageRoutes || canConvert ? (
+          <div className="grid w-full gap-2 sm:flex sm:w-auto">
+            {canManageRoutes ? (
+              <>
+                <ButtonLink href="/dashboard/routes/new" className="w-full sm:w-auto">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
+                    <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
+                  </svg>
+                  New route
+                </ButtonLink>
+                <ButtonLink
+                  href="/dashboard/routes/batch/new"
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                >
+                  Batch routes
+                </ButtonLink>
+              </>
+            ) : null}
+            {canConvert ? (
+              <ButtonLink
+                href="/dashboard/convert"
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                Convert link
+              </ButtonLink>
+            ) : null}
+          </div>
+        ) : null}
       </header>
 
       <div className="grid overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
@@ -68,7 +86,7 @@ export default async function DashboardPage() {
         <Stat label="Inactive" value={stats.inactive} />
       </div>
 
-      {stats.total > 0 ? (
+      {stats.total > 0 && canViewAnalytics ? (
         <Card className="transition-colors hover:border-line-strong">
           <Link
             href="/dashboard/analytics"
@@ -101,7 +119,7 @@ export default async function DashboardPage() {
               Recently created
             </h2>
           </div>
-          {stats.total > 0 ? (
+          {stats.total > 0 && canViewRoutes ? (
             <Link
               href="/dashboard/routes"
               className="text-xs font-medium text-muted transition-colors hover:text-ink"
@@ -116,13 +134,20 @@ export default async function DashboardPage() {
             title="No routes yet"
             description="Create your first route to generate a QR code for a card."
             action={
-              <ButtonLink href="/dashboard/routes/new">Create Route</ButtonLink>
+              canManageRoutes ? (
+                <ButtonLink href="/dashboard/routes/new">Create Route</ButtonLink>
+              ) : undefined
             }
           />
         ) : (
           <div className="space-y-3">
             {recent.map((route) => (
-              <RouteCard key={route.id} route={route} />
+              <RouteCard
+                key={route.id}
+                route={route}
+                canManage={canManageRoutes}
+                canView={canViewRoutes}
+              />
             ))}
           </div>
         )}

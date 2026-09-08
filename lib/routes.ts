@@ -1,6 +1,9 @@
 import "server-only";
 
-import { requireStaffMfa } from "@/lib/auth";
+import {
+  requirePermission,
+  requireRouteReportingAccess,
+} from "@/lib/permissions";
 import type { RedirectRoute } from "@/lib/database.types";
 
 export type RouteFilters = {
@@ -31,12 +34,12 @@ export function parseFilters(params: {
 
 /**
  * Every query independently requires approved staff access and MFA. RLS repeats
- * the same boundary in the database; all active staff share the workspace.
+ * the same boundary in the database and narrows rows to route assignments.
  */
 export async function listRoutes(
   filters: Required<RouteFilters>,
 ): Promise<RedirectRoute[]> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requirePermission("routes", "view");
 
   let query = supabase
     .from("redirect_routes")
@@ -88,7 +91,7 @@ export async function listRoutes(
 }
 
 export async function getRoute(id: string): Promise<RedirectRoute | null> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requirePermission("routes", "view");
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("*")
@@ -103,7 +106,7 @@ export async function getRoute(id: string): Promise<RedirectRoute | null> {
 }
 
 export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requirePermission("routes", "view");
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("*")
@@ -130,7 +133,7 @@ export type RouteStats = {
  * millions) counting in memory beats three separate head queries.
  */
 export async function getRouteStats(): Promise<RouteStats> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requireRouteReportingAccess();
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("active, scan_count");
@@ -154,7 +157,7 @@ export async function getRouteStats(): Promise<RouteStats> {
 }
 
 export async function getMostUsedRoutes(limit = 10): Promise<RedirectRoute[]> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requirePermission("analytics", "view");
   const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 50);
   const { data, error } = await supabase
     .from("redirect_routes")
@@ -172,7 +175,7 @@ export async function getMostUsedRoutes(limit = 10): Promise<RedirectRoute[]> {
 }
 
 export async function getRecentRoutes(limit = 3): Promise<RedirectRoute[]> {
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requireRouteReportingAccess();
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("*")

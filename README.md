@@ -42,17 +42,23 @@ For the existing production project, follow the staged order in
 [`SECURITY.md`](./SECURITY.md) instead of applying both security migrations at
 once.
 
-### 3. Create and approve a staff account
+### 3. Create staff accounts
 
-There is deliberately **no sign-up page**. Create your user by hand:
+There is deliberately **no public sign-up page**. The first superadmin is
+approved during the database rollout. After signing in, open **Staff** to create
+each additional account:
 
-**Supabase dashboard → Authentication → Users → Add user**, with
-*Auto Confirm User* enabled.
+1. Enter the staff member's email and a temporary password.
+2. Choose `admin` or `superadmin`.
+3. Choose the sections they can view or manage, then assign individual routes
+   with `view` or `manage` access.
+4. Share the temporary password through a secure channel. The application
+   creates and confirms the Auth account; it does not email the password.
 
-Copy the new user's UUID, then add it to `private.staff_members` using the
-onboarding SQL in [`SECURITY.md`](./SECURITY.md). All approved staff share the
-same route inventory. An Auth account that is not in the allowlist cannot enter
-the workspace. First sign-in also requires TOTP authenticator enrollment.
+New admins must change the temporary password before continuing and must enroll
+and verify a TOTP authenticator before opening the dashboard. A superadmin can
+disable an account or reset its password from the same screen. See
+[`SECURITY.md`](./SECURITY.md) for the rollout and recovery procedure.
 
 ### 4. Environment
 
@@ -65,10 +71,13 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → `anon` `public` |
 | `NEXT_PUBLIC_REDIRECT_BASE_URL` | `https://goreview.rald.site` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` secret; server-only |
 
-The application deliberately does not use a Supabase service-role key. Public
-redirects use the anon key plus an exact-slug database function, so the hosting
-runtime cannot bypass RLS or enumerate client data.
+The service-role key is used only by server-side superadmin actions to create
+confirmed Auth accounts and reset temporary passwords. Never prefix it with
+`NEXT_PUBLIC_`, expose it to a client component, commit it, or print it in logs.
+Public redirects still use the anon key plus an exact-slug database function, so
+the browser cannot bypass RLS or enumerate client data.
 
 > **Keep `NEXT_PUBLIC_REDIRECT_BASE_URL` set to the production origin even in
 > local development.** It is what gets encoded into downloadable QR codes — point
@@ -112,6 +121,20 @@ If a staff member forgets their password, use **Forgot your password?** on the
 sign-in screen. Recovery responses never disclose whether an email is registered;
 the emailed link establishes a short recovery session, then all sessions are
 signed out after the new password is saved.
+
+### Staff access
+
+The superadmin has full access and is the only role that can open **Staff**,
+change another staff member's role or permissions, reset a temporary password,
+or publish a route. Regular admins receive explicit permissions for these
+sections: **Routes**, **Analytics**, **Convert**, and **Shop stories**. The
+optional **Staff** permission is reserved for the superadmin role.
+
+Route access is assigned separately as `none`, `view`, or `manage`. A route
+manager also needs the **Routes → manage** section permission. A regular admin
+can create and edit assigned routes, but new routes remain draft and inactive
+until the superadmin publishes them. This keeps route changes reviewable while
+allowing day-to-day work to stay delegated.
 
 ### iPhone installation
 
@@ -253,10 +276,10 @@ change.
 app/
   r/[slug]/route.ts               public redirect — the only page customers hit
   login/                          email + password, no sign-up
-  (dashboard)/dashboard/          stats, route list, analytics, create, detail, edit
+  (dashboard)/dashboard/          stats, routes, analytics, staff, create, detail, edit
 lib/
   google-review.ts                 server-side Maps redirect/ftid converter
-  supabase/{client,server,public,proxy}.ts
+  supabase/{client,server,public,proxy,admin}.ts
   slug.ts  validation.ts  qr.ts  routes.ts  branded-response.ts
 proxy.ts                          session refresh + auth gating
 supabase/migrations/              schema, RLS, scan-count function

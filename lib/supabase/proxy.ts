@@ -130,6 +130,23 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(loginUrl, response, csp);
   }
 
+  const {
+    data: mustChangePassword,
+    error: passwordStateError,
+  } = await supabase.rpc("is_password_change_required");
+  if (passwordStateError) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = LOGIN_PATH;
+    loginUrl.search = "?error=access_unavailable";
+    return redirectWithCookies(loginUrl, response, csp);
+  }
+  if (mustChangePassword && !isPath(pathname, RESET_PASSWORD_PATH)) {
+    const resetUrl = request.nextUrl.clone();
+    resetUrl.pathname = RESET_PASSWORD_PATH;
+    resetUrl.search = "?required=1";
+    return redirectWithCookies(resetUrl, response, csp);
+  }
+
   const { data: assurance, error: assuranceError } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assuranceError) {

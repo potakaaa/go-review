@@ -1,6 +1,6 @@
 import QRCode from "qrcode";
 
-import { requireStaffMfa } from "@/lib/auth";
+import { requirePermission } from "@/lib/permissions";
 import { BATCH_KEY_PATTERN, batchZipFileName } from "@/lib/batch";
 import { publicUrlForSlug, QR_OPTIONS, QR_PNG_SIZE, qrFileName } from "@/lib/qr";
 import { createZip, type ZipEntry } from "@/lib/zip";
@@ -55,7 +55,7 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const { supabase } = await requireStaffMfa();
+  const { supabase } = await requirePermission("routes", "view");
 
   const { data: routes, error } = await supabase
     .from("redirect_routes")
