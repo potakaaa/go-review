@@ -4,6 +4,7 @@ import {
   requirePermission,
   requireRouteReportingAccess,
 } from "@/lib/permissions";
+import { sortRoutesByBusinessName } from "@/lib/batch-edit";
 import type { RedirectRoute } from "@/lib/database.types";
 
 export type RouteFilters = {
@@ -118,6 +119,21 @@ export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]>
     throw new Error("Could not load batch routes.");
   }
   return data ?? [];
+}
+
+/** All routes for the deliberate bulk-edit screen, in human alphabetic order. */
+export async function getRoutesForBatchEdit(): Promise<RedirectRoute[]> {
+  const { supabase } = await requirePermission("routes", "manage");
+  const { data, error } = await supabase
+    .from("redirect_routes")
+    .select("*");
+
+  if (error) {
+    console.error("[routes] batch_edit_list_failed", { code: error.code });
+    throw new Error("Could not load routes for batch editing.");
+  }
+
+  return sortRoutesByBusinessName(data ?? []);
 }
 
 export type RouteStats = {

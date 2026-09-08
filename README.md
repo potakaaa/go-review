@@ -104,15 +104,18 @@ npm run dev
 2. For a print run, choose **Batch routes**, enter the shared business,
    destination and quantity, then create the batch. Routes receive numbered
    slugs such as `akfiuex-1` and `akfiuex-2`.
-3. The batch screen can download every high-resolution QR as one ZIP. It also
+3. To update several existing unlocked routes at once, choose **Batch edit**.
+   Select the routes, enter a numbered name pattern such as `restaurant-1`,
+   choose the shared destination, and save. Printed slugs remain unchanged.
+4. The batch screen can download every high-resolution QR as one ZIP. It also
    includes `manifest.csv`, which maps each downloaded file to its permanent
    slug. A single route still offers **Download PNG**, **SVG**, or **Copy URL**.
-4. Print the card. That link is now permanent.
-5. If the cafe changes its Google listing, **Edit** the destination. The slug,
+5. Print the card. That link is now permanent.
+6. If the cafe changes its Google listing, **Edit** the destination. The slug,
    the URL and the printed QR are untouched.
-6. If a cafe cancels, **Deactivate**. Scanning shows a branded "card deactivated"
+7. If a cafe cancels, **Deactivate**. Scanning shows a branded "card deactivated"
    page rather than a broken link. Reactivate any time.
-7. For a route that already belongs to a business, choose **Lock editing**. The
+8. For a route that already belongs to a business, choose **Lock editing**. The
    public link and QR code keep working, but saving any edit requires typing the
    current business name. **Unlock editing** from the route screen when you need
    to make ordinary edits again.
@@ -257,7 +260,8 @@ The public host serves the Goreview landing page and `/r/*` card redirects.
 Dashboard and authentication routes return 404 on the public host. The admin
 host redirects `/` to `/dashboard` and retains the staff allowlist plus MFA.
 Vercel preview hosts can render the public landing page but cannot serve admin
-routes. Localhost is allowed during development.
+routes. Localhost is allowed during development; approved staff still need the
+same MFA challenge so local behavior matches production authorization.
 
 Apply `20260908031556_shop_stories.sql` before deploying the page. It creates
 the private photo bucket, public published-only reads, MFA-protected editing,

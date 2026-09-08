@@ -6,11 +6,22 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { hasPermission, isSuperadmin, requireAuth } from "@/lib/permissions";
+import {
+  hasPermission,
+  isSuperadmin,
+  requireAuth,
+  requirePermission,
+} from "@/lib/permissions";
 import { batchSlug, generateBatchKey } from "@/lib/batch";
+import {
+  incrementedRouteNames,
+  sortRoutesByBusinessName,
+} from "@/lib/batch-edit";
 import { resolveGoogleReviewLink } from "@/lib/google-review";
 import { generateSlug } from "@/lib/slug";
 import {
+  batchEditRouteSchema,
+  businessNameSchema,
   createBatchRouteSchema,
   createRouteSchema,
   fieldErrors,
@@ -237,6 +248,148 @@ export async function createBatch(
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
   redirect(`/dashboard/routes/batches/${batchKey}?created=1`);
+}
+
+/**
+ * Updates selected routes as one atomic database operation. Names are assigned
+ * in the same alphabetical order shown on the batch-edit screen, while each
+ * physical route slug remains unchanged.
+ */
+export async function batchUpdateRoutes(
+  _prevState: RouteFormState,
+  formData: FormData,
+): Promise<RouteFormState> {
+  const access = await requirePermission("routes", "manage");
+  const values = {
+    name_seed: String(formData.get("name_seed") ?? ""),
+    destination_url: String(formData.get("destination_url") ?? ""),
+    maps_url: String(formData.get("maps_url") ?? ""),
+  };
+  const routeIds = formData
+    .getAll("route_ids")
+    .filter((value): value is string => typeof value === "string");
+
+  const parsed = batchEditRouteSchema.safeParse({
+    ...values,
+    route_ids: routeIds,
+  });
+  if (!parsed.success) {
+    return { errors: fieldErrors(parsed.error), values };
+  }
+
+  const { supabase } = access;
+
+  // The client sends only ids and the requested changes. Read the current
+  // names again here so the assignment order and lock decision are server
+  // authoritative even if the page has been left open for a while.
+  const { data: selectedRows, error: selectedRowsError } = await supabase
+    .from("redirect_routes")
+    .select("id, business_name, locked")
+    .in("id", parsed.data.route_ids);
+
+  if (selectedRowsError) {
+    console.error("[routes] batch_edit_check_failed", {
+      code: selectedRowsError.code,
+    });
+    return {
+      errors: {},
+      values,
+      message: "Could not verify the selected routes. Please try again.",
+    };
+  }
+
+  const selectedRoutes = sortRoutesByBusinessName(selectedRows ?? []);
+  if (selectedRoutes.length !== parsed.data.route_ids.length) {
+    return {
+      errors: {
+        route_ids:
+          "One or more selected routes are no longer available. Refresh and try again.",
+      },
+      values,
+    };
+  }
+
+  if (selectedRoutes.some((route) => route.locked)) {
+    return {
+      errors: {
+        route_ids:
+          "Unlock the selected locked routes before batch editing them.",
+      },
+      values,
+    };
+  }
+
+  const businessNames = incrementedRouteNames(
+    parsed.data.name_seed,
+    selectedRoutes.length,
+  );
+  if (
+    businessNames.some(
+      (businessName) => !businessNameSchema.safeParse(businessName).success,
+    )
+  ) {
+    return {
+      errors: {
+        name_seed: "The generated names must each be 120 characters or fewer.",
+      },
+      values,
+    };
+  }
+
+  const { data: updatedCount, error: updateError } = await supabase.rpc(
+    "batch_update_routes",
+    {
+      p_route_ids: selectedRoutes.map((route) => route.id),
+      p_business_names: businessNames,
+      p_destination_url: parsed.data.destination_url,
+      p_maps_url: parsed.data.maps_url,
+    },
+  );
+
+  if (updateError) {
+    if (updateError.code === "23514") {
+      return {
+        errors: {
+          destination_url:
+            "Use an approved Google Maps or Google Review URL.",
+        },
+        values,
+      };
+    }
+
+    if (updateError.code === "55000") {
+      return {
+        errors: {
+          route_ids:
+            "A selected route is now locked. Refresh and try again.",
+        },
+        values,
+      };
+    }
+
+    console.error("[routes] batch_edit_failed", { code: updateError.code });
+    return {
+      errors: {},
+      values,
+      message: "Could not update these routes. Please refresh and try again.",
+    };
+  }
+
+  if (updatedCount !== selectedRoutes.length) {
+    console.error("[routes] batch_edit_count_mismatch", {
+      expected: selectedRoutes.length,
+      received: updatedCount,
+    });
+    return {
+      errors: {},
+      values,
+      message: "The selected routes were not all updated. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/routes");
+  redirect(`/dashboard/routes?updated=${updatedCount}`);
 }
 
 export async function updateRoute(

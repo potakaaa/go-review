@@ -155,8 +155,8 @@ export async function updateSession(request: NextRequest) {
     loginUrl.search = "?error=access_unavailable";
     return redirectWithCookies(loginUrl, response, csp);
   }
-
   const hasMfa = assurance.currentLevel === "aal2";
+
   if (
     !hasMfa &&
     !isPath(pathname, MFA_PATH) &&
