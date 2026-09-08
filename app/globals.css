@@ -309,6 +309,12 @@ button {
    illustrations plus the restrained product/reveal motion. */
 .product-float { animation: product-float 7s ease-in-out infinite; }
 .reveal.is-visible { animation: section-arrive 750ms ease both; }
+.mobile-order-bar { transition: opacity 180ms ease, transform 180ms ease; }
+.mobile-order-bar.is-comparison-visible {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(100%);
+}
 
 .step-art {
   position: relative;

@@ -4,12 +4,24 @@ import { useEffect, useRef } from "react";
 
 export function LandingMotion() {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); } });
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const revealObserver = reduceMotion ? null : new IntersectionObserver(entries => {
+      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); revealObserver?.unobserve(entry.target); } });
     }, { threshold: 0.12 });
-    document.querySelectorAll("[data-reveal]").forEach(el => observer.observe(el));
-    return () => observer.disconnect();
+    if (revealObserver) document.querySelectorAll("[data-reveal]").forEach(el => revealObserver.observe(el));
+
+    const comparison = document.querySelector("#compare");
+    const mobileOrderBar = document.querySelector("[data-mobile-order-bar]");
+    const comparisonObserver = comparison && mobileOrderBar ? new IntersectionObserver(entries => {
+      const visible = entries.some(entry => entry.isIntersecting);
+      mobileOrderBar.classList.toggle("is-comparison-visible", visible);
+    }, { threshold: 0.02 }) : null;
+    if (comparisonObserver && comparison) comparisonObserver.observe(comparison);
+
+    return () => {
+      revealObserver?.disconnect();
+      comparisonObserver?.disconnect();
+    };
   }, []);
   return null;
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FACEBOOK_URL, ORDER_EMAIL, PUBLIC_ORIGIN } from "@/lib/site";
 import { ProductPhoto, LandingMotion } from "@/components/landing-motion";
 import { CustomOfferings } from "@/components/custom-offerings";
+import { ComparisonSection } from "@/components/comparison-section";
 import { JsonLd } from "@/components/json-ld";
 import { ShopStoryCard } from "@/components/shop-story";
 import { getPublishedStories } from "@/lib/stories";
@@ -86,6 +87,8 @@ export default async function Home() {
         <article className="border-t border-line py-6 md:border-l md:border-t-0 md:px-[18px] md:py-7 xl:px-7"><span className="font-mono text-[11px] tracking-[.07em] text-subtle">03 / SHARE</span><div className="step-art" aria-hidden="true"><span className="mini-review"><span>Your experience</span><span>☆ ☆ ☆ ☆ ☆</span><span className="review-line" /><span className="review-line short" /></span></div><h3 className="text-base font-medium tracking-[-.02em] md:text-[16px]">Their experience, in their words.</h3><p className="mt-3 max-w-[360px] text-[14px] leading-[1.8] text-muted md:text-[15px]">Your Google review page opens, ready for their honest feedback. Simple from start to finish.</p></article>
       </div></section>
 
+      <ComparisonSection />
+
       <CustomOfferings />
 
       {stories.length > 0 && <section id="shops" data-reveal className={`${section} ${reveal} border-y border-line bg-[#101010]`}><div className={container}><SectionHeading kickerText="Out in the real world" title={<>On the counter.<br /></>} accent="Part of the everyday." description={<>Real shops. Real conversations.<br />A simpler invitation to leave a review.</>} /><div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-4 xl:gap-5">{stories.map(story => <ShopStoryCard story={story} key={story.id} />)}</div>{hasResults && <p className="mt-6 max-w-[700px] text-[12px] leading-[1.8] text-muted">Review changes reflect the observation dates shown. Individual results vary; these figures do not establish that every review came through Goreview.</p>}</div></section>}
@@ -101,6 +104,6 @@ export default async function Home() {
       <section data-reveal className={`${reveal} border-y border-line bg-[radial-gradient(ellipse_at_bottom,#1c1c1c,#101010_65%)] py-[70px] text-center md:py-[105px]`}><div className={container}><p className={kicker}>Your next review starts at your counter</p><h2 className="mt-6 text-[clamp(2.25rem,4.8vw,4.0625rem)] font-normal leading-[1.14] tracking-[-.05em]">Give good experiences<br /><span className="display-heading text-muted">somewhere to go.</span></h2><div className="mt-6 flex flex-col items-center justify-center gap-2.5 md:mt-8 md:flex-row md:gap-6"><OrderLink>Get your Goreview card</OrderLink><a href={ORDER_EMAIL} className={textLink}>Email to order ↗</a></div><p className="mt-6 text-[13px] text-muted">One-time payment. Lifetime support.</p></div></section>
     </main>
     <footer className={`${container} flex flex-col gap-6 pb-[115px] pt-9 md:flex-row md:justify-between md:gap-10 md:py-11`}><div><a href="#" className="text-2xl font-semibold tracking-[-1.6px]">go<span className="font-normal">review</span>.</a><p className="mt-3 text-[12px] leading-[1.8] text-muted">By Helbi Solutions · Made for everyday businesses.</p></div><div className="text-left md:text-right"><a className="mr-6 text-[13px] md:mr-0 md:ml-6" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">Facebook ↗</a><a className="text-[13px] md:ml-6" href={ORDER_EMAIL}>Email ↗</a><p className="mt-3 text-[12px] leading-[1.8] text-muted">Goreview is an independent product, not affiliated with Google.</p></div></footer>
-    <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-3 border-t border-line-strong bg-surface/95 px-5 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"><span className="text-[13px] text-muted">From <strong className="text-lg font-medium text-ink">₱699</strong><small className="mt-0.5 block text-[10px]">One-time · Lifetime support</small></span><OrderLink compact className="gap-2"><span>Get card</span></OrderLink></div>
+    <div data-mobile-order-bar className="mobile-order-bar fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-3 border-t border-line-strong bg-surface/95 px-5 py-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"><span className="text-[13px] text-muted">From <strong className="text-lg font-medium text-ink">₱699</strong><small className="mt-0.5 block text-[10px]">One-time · Lifetime support</small></span><OrderLink compact className="gap-2"><span>Get card</span></OrderLink></div>
   </div>;
 }
