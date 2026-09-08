@@ -11,6 +11,7 @@ export type Guide = {
   title: string;
   description: string;
   excerpt: string;
+  answer: string;
   updatedAt: string;
   readTime: string;
   sections: readonly GuideSection[];
@@ -25,6 +26,8 @@ export const guides = [
       "A practical, policy-aware guide to asking real customers for more genuine Google reviews without incentives or awkward follow-ups.",
     excerpt:
       "Make the request timely, make the link easy to reach, and let customers decide what to say.",
+    answer:
+      "To get more genuine Google reviews, ask real customers at a natural moment, send them directly to your review page, and never require a positive rating or offer an incentive.",
     updatedAt: "2026-09-08",
     readTime: "6 min read",
     sections: [
@@ -94,6 +97,8 @@ export const guides = [
       "Learn how a direct Google review link and QR code can remove search steps for customers and make an honest review request easier to act on.",
     excerpt:
       "Start with the correct Business Profile review destination, test it, and place the QR code where customers naturally pause.",
+    answer:
+      "Create a Google review QR code by copying your Business Profile review link, turning that link into a high-contrast QR code, testing it on multiple phones, and placing it where customers naturally finish their interaction.",
     updatedAt: "2026-09-08",
     readTime: "5 min read",
     sections: [
@@ -154,6 +159,8 @@ export const guides = [
       "Compare NFC tap cards and QR code cards for Google reviews, including phone compatibility, customer friction, placement, and the value of using both.",
     excerpt:
       "NFC is quick for compatible phones; QR is familiar and broadly accessible. A card with both gives customers a choice.",
+    answer:
+      "NFC is usually the fastest option on compatible phones, while QR is familiar and broadly accessible; using both on one Google review card gives customers a choice.",
     updatedAt: "2026-09-08",
     readTime: "5 min read",
     sections: [

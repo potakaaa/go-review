@@ -20,6 +20,7 @@ describe("site host boundaries", () => {
     expect(isPublicPath("/")).toBe(true);
     expect(isPublicPath("/images/shop-1.webp")).toBe(true);
     expect(isPublicPath("/media/stories/one")).toBe(true);
+    expect(isPublicPath("/llms.txt")).toBe(true);
     expect(isPublicPath("/google-review-card")).toBe(true);
     expect(isPublicPath("/guides/how-to-get-more-google-reviews")).toBe(true);
     expect(isPublicPath("/login")).toBe(false);

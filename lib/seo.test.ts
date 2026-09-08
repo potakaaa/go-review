@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { guides } from "@/lib/guides";
 import { seoLandingPages } from "@/lib/seo-pages";
-import { faqJsonLd, metadataForPage, productJsonLd, publicUrl } from "@/lib/seo";
+import {
+  faqJsonLd,
+  metadataForPage,
+  productJsonLd,
+  publicUrl,
+  webPageJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 
 describe("public SEO content", () => {
   it("creates indexable canonical metadata for public pages", () => {
@@ -12,7 +19,14 @@ describe("public SEO content", () => {
       path: "/google-review-card",
     });
 
-    expect(metadata.robots).toEqual({ index: true, follow: true });
+    expect(metadata.robots).toMatchObject({ index: true, follow: true });
+    expect(metadata.robots).toMatchObject({
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+      },
+    });
     expect(metadata.alternates?.canonical).toBe(
       "https://goreview.rald.site/google-review-card",
     );
@@ -35,9 +49,15 @@ describe("public SEO content", () => {
 
     expect(product.offers.priceCurrency).toBe("PHP");
     expect(product.offers.price).toBe("699");
-    expect(product.image).toBe(
+    expect(product.image).toContain(
       "https://goreview.rald.site/images/goreview-card-clean-v2.webp",
     );
+    expect(websiteJsonLd["@type"]).toBe("WebSite");
+    expect(webPageJsonLd({
+      path: "/google-review-card",
+      name: "Google review cards",
+      description: "A description",
+    }).isPartOf["@id"]).toBe("https://goreview.rald.site#website");
     expect(JSON.stringify(product)).not.toMatch(/aggregateRating|ratingValue/);
     expect(faq.mainEntity[0].acceptedAnswer.text).toBe("Answer");
   });

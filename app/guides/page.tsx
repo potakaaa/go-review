@@ -4,7 +4,15 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { PublicCta, PublicFooter, PublicHeader } from "@/components/public-site";
 import { guides } from "@/lib/guides";
-import { breadcrumbJsonLd, metadataForPage, organizationJsonLd, publicUrl } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  metadataForPage,
+  organizationJsonLd,
+  publicUrl,
+  WEBSITE_ID,
+  webPageJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 
 export const metadata: Metadata = metadataForPage({
   title: "Google Review Guides for Businesses | Goreview",
@@ -19,12 +27,21 @@ const container = "mx-auto w-[calc(100%-2.5rem)] max-w-[1180px] md:w-[calc(100%-
 export default function GuidesPage() {
   const structuredData = [
     organizationJsonLd,
+    websiteJsonLd,
+    webPageJsonLd({
+      path: "/guides",
+      name: "Google Review Guides for Businesses",
+      description: metadata.description ?? "Practical guides for Google reviews and business visibility.",
+    }),
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
+      "@id": `${publicUrl("/guides")}#collection`,
       name: "Google Review Guides for Businesses",
       description: metadata.description,
       url: publicUrl("/guides"),
+      isPartOf: { "@id": WEBSITE_ID },
+      inLanguage: "en-PH",
       mainEntity: {
         "@type": "ItemList",
         itemListElement: guides.map((guide, index) => ({

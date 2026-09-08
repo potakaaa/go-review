@@ -6,11 +6,14 @@ import { JsonLd } from "@/components/json-ld";
 import { PublicCta, PublicFooter, PublicHeader } from "@/components/public-site";
 import { getGuide, guides } from "@/lib/guides";
 import {
+  articleJsonLd,
   breadcrumbJsonLd,
   faqJsonLd,
   metadataForPage,
   organizationJsonLd,
   publicUrl,
+  webPageJsonLd,
+  websiteJsonLd,
 } from "@/lib/seo";
 
 type GuidePageProps = {
@@ -37,6 +40,15 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
 
 const container = "mx-auto w-[calc(100%-2.5rem)] max-w-[1180px] md:w-[calc(100%-3.5rem)] xl:w-[calc(100%-6rem)]";
 
+function formatGuideDate(date: string) {
+  return new Intl.DateTimeFormat("en-PH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T00:00:00Z`));
+}
+
 export default async function GuidePage({ params }: GuidePageProps) {
   const guide = getGuide((await params).slug);
   if (!guide) notFound();
@@ -44,18 +56,20 @@ export default async function GuidePage({ params }: GuidePageProps) {
   const url = publicUrl(`/guides/${guide.slug}`);
   const structuredData = [
     organizationJsonLd,
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      headline: guide.title,
+    websiteJsonLd,
+    webPageJsonLd({
+      path: `/guides/${guide.slug}`,
+      name: guide.title,
       description: guide.description,
+    }),
+    articleJsonLd({
+      title: guide.title,
+      description: guide.description,
+      url,
       datePublished: guide.updatedAt,
       dateModified: guide.updatedAt,
-      url,
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      author: { "@type": "Organization", name: "Goreview", url: publicUrl() },
-      publisher: { "@type": "Organization", name: "Goreview", url: publicUrl() },
-    },
+      articleSection: "Google review education",
+    }),
     ...(guide.faqs ? [faqJsonLd(guide.faqs)] : []),
     breadcrumbJsonLd([
       { name: "Goreview", path: "/" },
@@ -93,7 +107,11 @@ export default async function GuidePage({ params }: GuidePageProps) {
             {guide.title}
           </h1>
           <p className="mt-7 max-w-3xl text-[17px] leading-[1.8] text-muted md:text-[19px]">{guide.excerpt}</p>
-          <p className="mt-5 text-[12px] text-subtle">Updated September 8, 2026</p>
+          <aside className="mt-8 max-w-3xl border-l border-ink pl-4" aria-label="Quick answer">
+            <p className="eyebrow">Quick answer</p>
+            <p className="mt-2 text-[15px] leading-[1.8] text-muted md:text-[16px]">{guide.answer}</p>
+          </aside>
+          <p className="mt-5 text-[12px] text-subtle">By Goreview · Updated {formatGuideDate(guide.updatedAt)}</p>
 
           <div className="mt-12 border-t border-line pt-10 md:mt-16 md:pt-14">
             {guide.sections.map((section) => (

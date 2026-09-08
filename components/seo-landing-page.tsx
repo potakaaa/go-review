@@ -11,6 +11,8 @@ import {
   organizationJsonLd,
   productJsonLd,
   publicUrl,
+  webPageJsonLd,
+  websiteJsonLd,
 } from "@/lib/seo";
 
 const container = "mx-auto w-[calc(100%-2.5rem)] max-w-[1180px] md:w-[calc(100%-3.5rem)] xl:w-[calc(100%-6rem)]";
@@ -19,11 +21,17 @@ const heading = "text-[clamp(2rem,8vw,2.875rem)] font-normal leading-[1.14] trac
 export function SeoLandingPage({ page }: { page: SeoLandingPageData }) {
   const structuredData = [
     organizationJsonLd,
+    websiteJsonLd,
+    webPageJsonLd({
+      path: page.path,
+      name: page.title,
+      description: page.description,
+    }),
     productJsonLd(publicUrl(page.path)),
     faqJsonLd(page.faqs),
     breadcrumbJsonLd([
       { name: "Goreview", path: "/" },
-      { name: page.heroTitle, path: page.path },
+      { name: page.breadcrumb, path: page.path },
     ]),
   ];
 
@@ -38,6 +46,15 @@ export function SeoLandingPage({ page }: { page: SeoLandingPageData }) {
       </a>
       <PublicHeader />
       <main id="main">
+        <div className={`${container} pt-10 md:pt-14`}>
+          <nav aria-label="Breadcrumb" className="text-[12px] text-muted">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li><Link href="/" className="hover:text-ink hover:underline">Goreview</Link></li>
+              <li aria-hidden="true">/</li>
+              <li className="text-ink" aria-current="page">{page.breadcrumb}</li>
+            </ol>
+          </nav>
+        </div>
         <section className={`${container} grid min-h-[650px] grid-cols-1 items-center gap-10 py-14 md:min-h-[690px] md:grid-cols-[1.05fr_.95fr] md:gap-12 md:py-20`}>
           <div>
             <p className="eyebrow">{page.eyebrow}</p>
@@ -48,6 +65,10 @@ export function SeoLandingPage({ page }: { page: SeoLandingPageData }) {
             <p className="mt-6 max-w-[560px] text-[16px] leading-[1.8] text-muted md:mt-7 md:text-[18px]">
               {page.heroCopy}
             </p>
+            <aside className="mt-6 max-w-[560px] border-l border-ink pl-4" aria-label="Quick answer">
+              <p className="eyebrow">Quick answer</p>
+              <p className="mt-2 text-[14px] leading-[1.75] text-muted md:text-[15px]">{page.answer}</p>
+            </aside>
             <div className="mt-7 flex flex-wrap items-center gap-5 md:mt-8 md:gap-6">
               <a
                 href={FACEBOOK_URL}

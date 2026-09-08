@@ -4,6 +4,9 @@ export type SeoLandingPage = {
   path: string;
   title: string;
   description: string;
+  updatedAt: string;
+  breadcrumb: string;
+  answer: string;
   eyebrow: string;
   heroTitle: string;
   heroAccent: string;
@@ -20,6 +23,10 @@ export const seoLandingPages = [
     title: "Google Review Cards for Philippine Businesses | Goreview",
     description:
       "Get more genuine Google reviews with a custom NFC and QR Google review card for your business in the Philippines. One-time payment from ₱699.",
+    updatedAt: "2026-09-08",
+    breadcrumb: "Google review cards",
+    answer:
+      "A Google review card is a physical card with NFC and QR options that sends customers directly to your business's Google review page, so they do not have to search for your listing.",
     eyebrow: "A direct path to your review page",
     heroTitle: "Make your next Google review",
     heroAccent: "easier.",
@@ -86,6 +93,10 @@ export const seoLandingPages = [
     title: "NFC Google Review Card | Tap to Review | Goreview",
     description:
       "Help customers reach your Google review page with a tap. Custom NFC Google review cards for Philippine businesses, with QR backup and no monthly fee.",
+    updatedAt: "2026-09-08",
+    breadcrumb: "NFC Google review cards",
+    answer:
+      "An NFC Google review card lets a customer tap a compatible phone to open your business's review page, with a QR code included as a familiar backup.",
     eyebrow: "Tap to review",
     heroTitle: "One tap from a good experience",
     heroAccent: "to your review page.",
@@ -152,6 +163,10 @@ export const seoLandingPages = [
     title: "Google Review QR Code Card | QR Code for Business Reviews",
     description:
       "Give customers a simple way to find your Google review page with a custom QR code card. Goreview ships QR and NFC review cards across the Philippines.",
+    updatedAt: "2026-09-08",
+    breadcrumb: "Google review QR codes",
+    answer:
+      "A Google review QR code card opens a business's review page when a customer scans it with a phone camera, reducing the need to search for the listing manually.",
     eyebrow: "Scan at the right moment",
     heroTitle: "Turn a camera scan into",
     heroAccent: "a simpler review ask.",
@@ -218,6 +233,10 @@ export const seoLandingPages = [
     title: "Google Review Card Philippines | NFC and QR Cards | Goreview",
     description:
       "Order a customized Google review card in the Philippines. Goreview combines NFC tap, QR scan, business setup, and lifetime support from ₱699.",
+    updatedAt: "2026-09-08",
+    breadcrumb: "Google review cards in the Philippines",
+    answer:
+      "Goreview's Philippine Google review cards combine a customized NFC tap point and QR code so local businesses can give customers a direct, voluntary path to their review page.",
     eyebrow: "Made for Philippine businesses",
     heroTitle: "A better way to ask for",
     heroAccent: "Google reviews in the Philippines.",

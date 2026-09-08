@@ -1,0 +1,32 @@
+# Goreview
+
+> Goreview makes customized NFC and QR Google review cards for businesses in the Philippines.
+
+Goreview helps a business give customers a direct, voluntary path to its Google review page. Customers can tap an NFC-enabled phone or scan a QR code; they do not need to search for the business listing first.
+
+## Important facts
+
+- Product: customized NFC and QR Google review cards.
+- Price: from PHP 699 with a one-time payment.
+- Support: lifetime support is included.
+- Coverage: cards are made for businesses in the Philippines and can ship across the Philippines.
+- Review policy: Goreview does not filter feedback, require a positive rating, offer incentives for reviews, or guarantee review volume, ratings, or search rankings.
+- Brand relationship: Goreview is an independent product by Helbi Solutions and is not affiliated with Google.
+
+## Canonical pages
+
+- [Google review cards](https://goreview.rald.site/google-review-card): what a Google review card is and how NFC and QR work together.
+- [NFC Google review cards](https://goreview.rald.site/nfc-google-review-card): how tap-to-review cards work and when QR is useful as a fallback.
+- [Google review QR code cards](https://goreview.rald.site/google-review-qr-code): how a QR code sends customers to a business review page.
+- [Google review cards in the Philippines](https://goreview.rald.site/google-review-card-philippines): local ordering, setup, shipping, and support information.
+
+## Guides
+
+- [How to get more Google reviews](https://goreview.rald.site/guides/how-to-get-more-google-reviews)
+- [How to create a Google review link and QR code](https://goreview.rald.site/guides/google-review-link-qr-code)
+- [NFC vs QR code for Google reviews](https://goreview.rald.site/guides/nfc-vs-qr-google-reviews)
+
+## Primary site
+
+- [Goreview](https://goreview.rald.site/)
+- [Sitemap](https://goreview.rald.site/sitemap.xml)

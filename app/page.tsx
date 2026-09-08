@@ -11,6 +11,8 @@ import {
   organizationJsonLd,
   productJsonLd,
   publicUrl,
+  webPageJsonLd,
+  websiteJsonLd,
 } from "@/lib/seo";
 import { reviewDifference } from "@/lib/story-validation";
 
@@ -57,6 +59,12 @@ export default async function Home() {
   const hasResults = stories.some(story => reviewDifference(story) !== null);
   const structuredData = [
     organizationJsonLd,
+    websiteJsonLd,
+    webPageJsonLd({
+      path: "/",
+      name: "Google Review Cards for Philippine Businesses | Goreview",
+      description: "Get more genuine Google reviews with customized NFC and QR Google review cards for businesses in the Philippines.",
+    }),
     productJsonLd(publicUrl("/google-review-card")),
     faqJsonLd(faqs.map(([question, answer]) => ({ question, answer }))),
   ];
