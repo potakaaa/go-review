@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -22,14 +23,25 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm({ next }: { next?: string }) {
-  const [state, formAction] = useActionState<LoginState, FormData>(login, {});
+export function LoginForm({
+  next,
+  initialError,
+  initialMessage,
+}: {
+  next?: string;
+  initialError?: string;
+  initialMessage?: string;
+}) {
+  const [state, formAction] = useActionState<LoginState, FormData>(login, {
+    error: initialError,
+  });
 
   return (
     <form action={formAction} className="space-y-5">
       {next ? <input type="hidden" name="next" value={next} /> : null}
 
       {state.error ? <Alert tone="danger">{state.error}</Alert> : null}
+      {initialMessage ? <Alert tone="ok">{initialMessage}</Alert> : null}
 
       <div>
         <label htmlFor="email" className="eyebrow mb-2 block">
@@ -66,6 +78,15 @@ export function LoginForm({ next }: { next?: string }) {
       </div>
 
       <SubmitButton />
+
+      <p className="text-center text-sm text-muted">
+        <Link
+          href="/forgot-password"
+          className="underline decoration-line-strong underline-offset-4 hover:text-ink"
+        >
+          Forgot your password?
+        </Link>
+      </p>
     </form>
   );
 }

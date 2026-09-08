@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { checkStaffAccess } from "@/lib/auth";
+import { safeNextPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginState = { error?: string };
@@ -31,9 +33,14 @@ export async function login(
   }
 
   const supabase = await createClient();
+  const captchaToken = formData.get("cf-turnstile-response");
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
+    options:
+      typeof captchaToken === "string" && captchaToken
+        ? { captchaToken }
+        : undefined,
   });
 
   if (error) {
@@ -42,19 +49,27 @@ export async function login(
     return { error: "Incorrect email or password." };
   }
 
-  const next = formData.get("next");
-  // Only ever redirect within this app -- an absolute URL here would turn the
-  // login form into an open redirect.
-  const destination =
-    typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
-      ? next
-      : "/dashboard";
+  const access = await checkStaffAccess(supabase);
+  if (access.state === "unapproved") {
+    await supabase.auth.signOut({ scope: "global" });
+    return { error: "This account is not authorized for this workspace." };
+  }
+  if (access.state === "anonymous" || access.state === "unavailable") {
+    await supabase.auth.signOut({ scope: "local" });
+    return { error: "Sign-in could not be verified. Please try again." };
+  }
+
+  const destination = safeNextPath(formData.get("next"));
+
+  if (access.state === "needs_mfa") {
+    redirect(`/mfa?next=${encodeURIComponent(destination)}`);
+  }
 
   redirect(destination);
 }
 
 export async function logout() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: "global" });
   redirect("/login");
 }

@@ -1,0 +1,7 @@
+# Brand-export deliverables are kept in the workspace, but are not application
+# assets and should not become publicly addressable in a production deployment.
+public/helbi-solutions-facebook-cover.png
+public/helbi-solutions-facebook-profile.png
+
+# Local verification assets do not belong in the serverless bundle.
+supabase/tests/

@@ -43,19 +43,14 @@ export function CreateRouteForm() {
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? "",
   );
-  const [acknowledgedWarning, setAcknowledgedWarning] = useState(false);
   const [showSlugField, setShowSlugField] = useState(
     Boolean(state.values?.slug),
   );
 
   const handleConvertedReviewUrl = useCallback((reviewUrl: string) => {
     setDestination(reviewUrl);
-    setAcknowledgedWarning(false);
   }, []);
 
-  // Advisory only. A destination that doesn't match a known Google Review shape
-  // is still saveable -- Google changes these URLs, and a card that can't be
-  // created is worse than one pointing somewhere unexpected.
   const showWarning = destinationNeedsAcknowledgement(destination);
 
   return (
@@ -89,15 +84,9 @@ export function CreateRouteForm() {
 
       <RouteDestinationField
         value={destination}
-        onChange={(value) => {
-          setDestination(value);
-          setAcknowledgedWarning(false);
-        }}
+        onChange={setDestination}
         error={state.errors?.destination_url}
-        acknowledgedWarning={acknowledgedWarning}
-        onAcknowledgedWarningChange={setAcknowledgedWarning}
         description="Filled automatically after conversion. Edit this only when you need to use another destination."
-        warningDescription="It will still work — the card will send people wherever this points. Tick below if that's what you want."
       />
 
       <div>
@@ -159,10 +148,10 @@ export function CreateRouteForm() {
 
       <div className="mobile-submit-bar">
         <SubmitButton
-          disabled={showWarning && !acknowledgedWarning}
+          disabled={showWarning}
           label={
-            showWarning && !acknowledgedWarning
-              ? "Confirm the destination above"
+            showWarning
+              ? "Use a Google Review link"
               : "Create route"
           }
         />

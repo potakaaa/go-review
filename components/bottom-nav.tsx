@@ -29,6 +29,7 @@ const ITEMS = [
 ] as const;
 
 const DESKTOP_ITEMS = [
+  { href: "/dashboard/stories", label: "Shop stories", exact: false },
   { href: "/dashboard", label: "Dashboard", exact: true },
   { href: "/dashboard/routes", label: "Routes", exact: false },
   { href: "/dashboard/analytics", label: "Analytics", exact: true },

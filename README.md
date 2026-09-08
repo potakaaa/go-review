@@ -36,19 +36,23 @@ supabase db push
 …or by pasting each migration file, in timestamp order, into **SQL Editor** in
 the Supabase dashboard.
 
-This creates the `redirect_routes` table, its RLS policies, the
-`increment_scan_count` function, and the nullable `maps_url` source-link field.
+This creates the route table, private staff allowlist and audit trail, narrow
+public redirect RPC, Google-only destination trigger, and MFA-aware RLS policies.
+For the existing production project, follow the staged order in
+[`SECURITY.md`](./SECURITY.md) instead of applying both security migrations at
+once.
 
-### 3. Create your admin account
+### 3. Create and approve a staff account
 
 There is deliberately **no sign-up page**. Create your user by hand:
 
 **Supabase dashboard → Authentication → Users → Add user**, with
 *Auto Confirm User* enabled.
 
-Anyone with an account can manage their own routes, and RLS makes them unable to
-see anyone else's. To lock the app to exactly one person, simply don't create a
-second user.
+Copy the new user's UUID, then add it to `private.staff_members` using the
+onboarding SQL in [`SECURITY.md`](./SECURITY.md). All approved staff share the
+same route inventory. An Auth account that is not in the allowlist cannot enter
+the workspace. First sign-in also requires TOTP authenticator enrollment.
 
 ### 4. Environment
 
@@ -60,12 +64,11 @@ cp .env.example .env.local
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → `anon` `public` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` |
 | `NEXT_PUBLIC_REDIRECT_BASE_URL` | `https://goreview.rald.site` |
 
-> **`SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security.** It is used in
-> exactly one file (`lib/supabase/admin.ts`, guarded by `import "server-only"`)
-> and must never be given a `NEXT_PUBLIC_` prefix.
+The application deliberately does not use a Supabase service-role key. Public
+redirects use the anon key plus an exact-slug database function, so the hosting
+runtime cannot bypass RLS or enumerate client data.
 
 > **Keep `NEXT_PUBLIC_REDIRECT_BASE_URL` set to the production origin even in
 > local development.** It is what gets encoded into downloadable QR codes — point
@@ -105,6 +108,11 @@ npm run dev
    current business name. **Unlock editing** from the route screen when you need
    to make ordinary edits again.
 
+If a staff member forgets their password, use **Forgot your password?** on the
+sign-in screen. Recovery responses never disclose whether an email is registered;
+the emailed link establishes a short recovery session, then all sessions are
+signed out after the new password is saved.
+
 ### iPhone installation
 
 Open the production site in Safari, tap **Share**, choose **Add to Home
@@ -123,10 +131,9 @@ Lookups are case-insensitive, so a hand-typed `/r/ABC123` still resolves.
 
 ### Scan counting
 
-The redirect responds first and increments the counter afterwards via `after()`,
-so a scan never waits on analytics. **No IP addresses, user agents, or any other
-personal data are recorded** — just a count and a timestamp. A dropped count is
-an acceptable loss; a slow redirect is not.
+The redirect resolver performs an indexed exact-slug lookup and atomically
+increments the aggregate counter. **No IP addresses, user agents, or any other
+personal data are recorded** — just a count and a timestamp.
 
 The dashboard **Analytics** tab ranks routes by all-time scan count. Counts are
 visits to a route, not unique people; daily trends and unique-visitor reporting
@@ -152,7 +159,7 @@ Run against a dev server signed in as your admin user.
 
 | # | Check | Expected |
 | --- | --- | --- |
-| 1 | Sign in at `/login` with a wrong password, then the right one | Error message, then the dashboard |
+| 1 | Sign in at `/login` with a wrong password, then the right one | Generic error, then TOTP verification and the dashboard |
 | 2 | Create a route with the slug field left blank | Success screen with a 6-character slug |
 | 3 | Create several routes | Every slug differs; none are `1`, `2`, `3` |
 | 4 | Scan the on-screen QR with a phone camera | Opens `<base>/r/<slug>`, which lands on the review page |
@@ -160,7 +167,7 @@ Run against a dev server signed in as your admin user.
 | 6 | Edit the destination, then reload `/r/<slug>` | **Same URL**, new destination — the core guarantee |
 | 7 | Deactivate the route, then load `/r/<slug>` | Branded "deactivated" page, `410`, no redirect |
 | 8 | Load `/r/doesnotexist` | Branded 404, not a stack trace |
-| 9 | Open `/dashboard` in a private window | Redirected to `/login`; create a second Supabase user and confirm it sees none of your routes |
+| 9 | Open `/dashboard` in a private window | Redirected to `/login`; an unapproved Supabase user is denied |
 | 10 | DevTools device mode at 390×844, 393×852 and 412×915 | No horizontal scrolling on any page; all buttons comfortably tappable |
 | 11 | Open the production site in iPhone Safari | Add to Home Screen prompt appears; standalone launch hides it |
 | 12 | Scan a route, then open `/dashboard/analytics` | The route appears in most-used links with the updated count |
@@ -173,7 +180,7 @@ Run against a dev server signed in as your admin user.
 ## Deploying to Vercel
 
 Already deployed: project `review-routes` on the `ralds-projects-1208` team,
-live at **https://review-routes.vercel.app**. All four environment variables are
+live at **https://review-routes.vercel.app**. All three environment variables are
 set for Production, Preview and Development.
 
 The current deployment was a direct file upload, not connected to git. To get
@@ -207,8 +214,33 @@ Then confirm `https://goreview.rald.site/r/<slug>` redirects correctly **before
 printing any cards** — `NEXT_PUBLIC_REDIRECT_BASE_URL` is already set to this
 domain, so every QR code generated encodes it.
 
-Add `https://goreview.rald.site` to **Supabase → Authentication → URL Configuration →
-Site URL**, and add `https://goreview.rald.site/**` to Redirect URLs.
+Use `https://admin.goreview.rald.site` as **Supabase → Authentication → URL
+Configuration → Site URL**, and add
+`https://admin.goreview.rald.site/auth/callback` to Redirect URLs. Password
+recovery belongs to the admin host; printed card links remain on
+`https://goreview.rald.site`.
+
+### Public and admin domains
+
+Add `admin.goreview.rald.site` to the same Vercel project as
+`goreview.rald.site`; a second deployment is not needed. Set this production
+environment variable and redeploy:
+
+```bash
+ADMIN_ORIGIN=https://admin.goreview.rald.site
+```
+
+The public host serves the Goreview landing page and `/r/*` card redirects.
+Dashboard and authentication routes return 404 on the public host. The admin
+host redirects `/` to `/dashboard` and retains the staff allowlist plus MFA.
+Vercel preview hosts can render the public landing page but cannot serve admin
+routes. Localhost is allowed during development.
+
+Apply `20260908031556_shop_stories.sql` before deploying the page. It creates
+the private photo bucket, public published-only reads, MFA-protected editing,
+and the three approved starter shop stories. The landing page remains usable
+without story data and refreshes published content at most 60 seconds after a
+change.
 
 > Once cards are printed, this domain must keep working indefinitely. Treat it as
 > permanent infrastructure: don't let the registration lapse, and don't repoint it.
@@ -224,22 +256,22 @@ app/
   (dashboard)/dashboard/          stats, route list, analytics, create, detail, edit
 lib/
   google-review.ts                 server-side Maps redirect/ftid converter
-  supabase/{client,server,admin,proxy}.ts
+  supabase/{client,server,public,proxy}.ts
   slug.ts  validation.ts  qr.ts  routes.ts  branded-response.ts
 proxy.ts                          session refresh + auth gating
 supabase/migrations/              schema, RLS, scan-count function
 ```
 
-**Three Supabase clients, deliberately separated:**
+**Three anon-key Supabase clients, deliberately separated:**
 
 | Client | Key | Used by |
 | --- | --- | --- |
 | `client.ts` | anon | Client Components |
 | `server.ts` | anon + cookies | Server Components, Server Actions |
-| `admin.ts` | service role | `/r/[slug]` only |
+| `public.ts` | anon, stateless | `/r/[slug]` only |
 
-The redirect uses the service role rather than a public `SELECT` policy — a public
-policy would let anyone enumerate every client's slug and destination.
+The redirect can execute one exact-slug `security definer` RPC, but has no public
+`SELECT` grant or policy. A visitor therefore cannot enumerate client routes.
 
 **No service worker.** Its scope would cover `/r/*`, and a cached redirect is
 exactly the failure this product exists to prevent. The web app manifest still
@@ -247,12 +279,14 @@ gives you Add-to-Home-Screen.
 
 ### Security notes
 
-- RLS is enabled with policies for select/insert/update scoped to `auth.uid()`.
+- RLS requires an active staff allowlist entry and an `aal2` MFA session.
 - There is **no `DELETE` policy** — deactivation is soft, so a card in someone's
   hand always resolves to something.
-- `increment_scan_count` is `security definer` with `EXECUTE` revoked from `anon`
-  and `authenticated`, so nobody can inflate a client's scan count.
-- Destination URLs are constrained to `https://` in both Zod and a Postgres
-  `CHECK`, which blocks `javascript:` and `data:` payloads at the database.
+- Table/column grants protect ownership, slugs, timestamps and counters from
+  direct client mutation.
+- New or changed destinations are limited to approved HTTPS Google URL shapes
+  in both Zod and a Postgres trigger.
 - Server Actions re-authenticate on every call — a Server Action is a public HTTP
   endpoint, not a trusted internal function.
+- Operational onboarding, offboarding, staged deployment and incident response
+  are documented in [`SECURITY.md`](./SECURITY.md).

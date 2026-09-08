@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireStaffMfa } from "@/lib/auth";
 import { batchSlug, generateBatchKey } from "@/lib/batch";
 import { resolveGoogleReviewLink } from "@/lib/google-review";
 import { generateSlug } from "@/lib/slug";
@@ -36,15 +37,8 @@ const UNIQUE_VIOLATION = "23505";
 const SLUG_ATTEMPTS = 5;
 
 async function requireUserId(): Promise<string> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Belt and braces behind proxy.ts and the dashboard layout: a Server Action
-  // is a public HTTP endpoint and must authenticate on its own.
-  if (!user) redirect("/login");
-  return user.id;
+  const { userId } = await requireStaffMfa();
+  return userId;
 }
 
 /**
@@ -132,10 +126,11 @@ export async function createRoute(
     }
 
     if (error.code !== UNIQUE_VIOLATION) {
+      console.error("[routes] create_failed", { code: error.code });
       return {
         errors: {},
         values,
-        message: `Could not save this route: ${error.message}`,
+        message: "Could not save this route. Please try again.",
       };
     }
 
@@ -212,10 +207,11 @@ export async function createBatch(
     }
 
     if (error.code !== UNIQUE_VIOLATION) {
+      console.error("[routes] batch_create_failed", { code: error.code });
       return {
         errors: {},
         values,
-        message: `Could not save this batch: ${error.message}`,
+        message: "Could not save this batch. Please try again.",
       };
     }
   }
@@ -271,10 +267,13 @@ export async function updateRoute(
     .maybeSingle();
 
   if (currentRouteError) {
+    console.error("[routes] edit_check_failed", {
+      code: currentRouteError.code,
+    });
     return {
       errors: {},
       values,
-      message: `Could not verify this route: ${currentRouteError.message}`,
+      message: "Could not verify this route. Please try again.",
     };
   }
 
@@ -310,10 +309,11 @@ export async function updateRoute(
     .eq("id", id);
 
   if (error) {
+    console.error("[routes] update_failed", { code: error.code });
     return {
       errors: {},
       values,
-      message: `Could not save your changes: ${error.message}`,
+      message: "Could not save your changes. Please try again.",
     };
   }
 
@@ -341,7 +341,10 @@ export async function toggleRouteActive(formData: FormData): Promise<void> {
     .update({ active: nextActive })
     .eq("id", id);
 
-  if (error) throw new Error(`Could not update this route: ${error.message}`);
+  if (error) {
+    console.error("[routes] status_update_failed", { code: error.code });
+    throw new Error("Could not update this route.");
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
@@ -369,7 +372,10 @@ export async function toggleRouteLocked(formData: FormData): Promise<void> {
     .update({ locked: nextLocked })
     .eq("id", id);
 
-  if (error) throw new Error(`Could not update this route: ${error.message}`);
+  if (error) {
+    console.error("[routes] lock_update_failed", { code: error.code });
+    throw new Error("Could not update this route.");
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");

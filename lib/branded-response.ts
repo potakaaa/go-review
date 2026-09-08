@@ -70,7 +70,7 @@ function page({
 </head>
 <body>
   <main class="card">
-    <div class="mark" aria-hidden="true">RR</div>
+    <div class="mark" aria-hidden="true">GR</div>
     <h1>${escapeHtml(heading)}</h1>
     <p>${escapeHtml(message)}</p>
   </main>
@@ -83,6 +83,11 @@ const HEADERS = {
   // Never let a CDN or browser hold on to a card's failure state -- the card
   // may be reactivated a minute later and must start working immediately.
   "cache-control": "no-store, no-cache, must-revalidate",
+  "content-security-policy":
+    "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+  "referrer-policy": "no-referrer",
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
 } as const;
 
 /** 404: no route with this slug has ever existed. */

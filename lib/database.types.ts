@@ -45,9 +45,33 @@ type RedirectRouteUpdate = Partial<
   }
 >;
 
+export type ShopStory = {
+  id: string;
+  shop_name: string;
+  caption: string;
+  alt_text: string;
+  image_path: string | null;
+  installed_on: string | null;
+  before_count: number | null;
+  after_count: number | null;
+  before_date: string | null;
+  after_date: string | null;
+  source_url: string | null;
+  display_order: number;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
+      shop_stories: {
+        Row: ShopStory;
+        Insert: Omit<ShopStory, "created_at" | "updated_at"> & { created_at?: string; updated_at?: string };
+        Update: Partial<Omit<ShopStory, "id" | "created_at">>;
+        Relationships: [];
+      };
       redirect_routes: {
         Row: RedirectRoute;
         Insert: RedirectRouteInsert;
@@ -57,9 +81,16 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
-      increment_scan_count: {
+      is_active_staff: {
+        Args: Record<never, never>;
+        Returns: boolean;
+      };
+      resolve_redirect: {
         Args: { p_slug: string };
-        Returns: undefined;
+        Returns: Array<{
+          route_state: "active" | "inactive";
+          destination_url: string | null;
+        }>;
       };
     };
     Enums: Record<never, never>;

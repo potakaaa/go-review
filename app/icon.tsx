@@ -26,7 +26,7 @@ export default function Icon() {
           border: "24px solid #27272a",
         }}
       >
-        RR
+        GR
       </div>
     ),
     size,

@@ -304,3 +304,84 @@ button {
     background: rgb(24 24 24 / 96%);
   }
 }
+
+/* The public page is Tailwind-first. These few rules provide small process
+   illustrations plus the restrained product/reveal motion. */
+.product-float { animation: product-float 7s ease-in-out infinite; }
+.reveal.is-visible { animation: section-arrive 750ms ease both; }
+
+.step-art {
+  position: relative;
+  display: flex;
+  height: 142px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+.mini-stand {
+  display: flex;
+  width: 77px;
+  height: 111px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px 10px;
+  transform: perspective(300px) rotateY(-14deg) rotateZ(-5deg);
+  border: 1px solid #737373;
+  border-bottom-width: 5px;
+  border-radius: 3px;
+  background: #222;
+}
+.mini-stand span:first-child { font-size: 9px; letter-spacing: -0.3px; }
+.mini-stand span:last-child { color: #aaa; font-size: 6px; }
+.counter-line {
+  position: absolute;
+  bottom: 25px;
+  width: 70%;
+  height: 1px;
+  background: var(--color-line-strong);
+}
+.mini-phone {
+  display: flex;
+  width: 61px;
+  height: 108px;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(15deg);
+  border: 2px solid #737373;
+  border-radius: 10px;
+  background: #141414;
+  box-shadow: inset 0 0 0 4px #0a0a0a;
+  font-size: 23px;
+}
+.tap-rings { display: flex; width: 63px; height: 57px; align-items: center; gap: 5px; overflow: hidden; }
+.tap-rings i { display: block; width: 13px; height: 25px; border: 1px solid #737373; border-left: 0; border-radius: 0 100% 100% 0; }
+.tap-rings i:nth-child(2) { height: 39px; }
+.tap-rings i:nth-child(3) { height: 55px; }
+.mini-review {
+  display: flex;
+  width: 170px;
+  flex-direction: column;
+  gap: 9px;
+  padding: 20px;
+  transform: rotate(-5deg);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+.mini-review > span:first-child { color: #aaa; font-size: 8px; }
+.mini-review > span:nth-child(2) { font-size: 19px; letter-spacing: 1px; }
+.review-line { width: 95%; height: 3px; border-radius: 4px; background: #333; }
+.review-line.short { width: 60%; }
+
+@keyframes product-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes section-arrive {
+  from { opacity: 0.35; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 768px) {
+  .step-art { height: 165px; margin-block: 12px 22px; }
+}

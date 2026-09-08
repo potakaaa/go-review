@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { requireStaffMfa } from "@/lib/auth";
 import type { RedirectRoute } from "@/lib/database.types";
 
 export type RouteFilters = {
@@ -30,14 +30,13 @@ export function parseFilters(params: {
 }
 
 /**
- * Every query below runs under the signed-in user's session, so RLS -- not an
- * `owner_id` filter in application code -- is what keeps one admin's routes
- * invisible to another.
+ * Every query independently requires approved staff access and MFA. RLS repeats
+ * the same boundary in the database; all active staff share the workspace.
  */
 export async function listRoutes(
   filters: Required<RouteFilters>,
 ): Promise<RedirectRoute[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireStaffMfa();
 
   let query = supabase
     .from("redirect_routes")
@@ -66,7 +65,10 @@ export async function listRoutes(
   }
 
   const { data, error } = await query;
-  if (error) throw new Error(`Could not load routes: ${error.message}`);
+  if (error) {
+    console.error("[routes] list_failed", { code: error.code });
+    throw new Error("Could not load routes.");
+  }
 
   const rows = data ?? [];
   if (!filters.q) return rows;
@@ -86,26 +88,32 @@ export async function listRoutes(
 }
 
 export async function getRoute(id: string): Promise<RedirectRoute | null> {
-  const supabase = await createClient();
+  const { supabase } = await requireStaffMfa();
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("*")
     .eq("id", id)
     .maybeSingle();
 
-  if (error) throw new Error(`Could not load route: ${error.message}`);
+  if (error) {
+    console.error("[routes] detail_failed", { code: error.code });
+    throw new Error("Could not load route.");
+  }
   return data;
 }
 
 export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireStaffMfa();
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("*")
     .eq("batch_key", batchKey)
     .order("batch_position", { ascending: true });
 
-  if (error) throw new Error(`Could not load batch routes: ${error.message}`);
+  if (error) {
+    console.error("[routes] batch_failed", { code: error.code });
+    throw new Error("Could not load batch routes.");
+  }
   return data ?? [];
 }
 
@@ -122,12 +130,15 @@ export type RouteStats = {
  * millions) counting in memory beats three separate head queries.
  */
 export async function getRouteStats(): Promise<RouteStats> {
-  const supabase = await createClient();
+  const { supabase } = await requireStaffMfa();
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("active, scan_count");
 
-  if (error) throw new Error(`Could not load stats: ${error.message}`);
+  if (error) {
+    console.error("[routes] stats_failed", { code: error.code });
+    throw new Error("Could not load route statistics.");
+  }
 
   const rows = data ?? [];
   const active = rows.filter((row) => row.active).length;
@@ -143,7 +154,7 @@ export async function getRouteStats(): Promise<RouteStats> {
 }
 
 export async function getMostUsedRoutes(limit = 10): Promise<RedirectRoute[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireStaffMfa();
   const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 50);
   const { data, error } = await supabase
     .from("redirect_routes")
@@ -153,18 +164,24 @@ export async function getMostUsedRoutes(limit = 10): Promise<RedirectRoute[]> {
     .order("created_at", { ascending: false })
     .limit(safeLimit);
 
-  if (error) throw new Error(`Could not load usage analytics: ${error.message}`);
+  if (error) {
+    console.error("[routes] analytics_failed", { code: error.code });
+    throw new Error("Could not load usage analytics.");
+  }
   return data ?? [];
 }
 
 export async function getRecentRoutes(limit = 3): Promise<RedirectRoute[]> {
-  const supabase = await createClient();
+  const { supabase } = await requireStaffMfa();
   const { data, error } = await supabase
     .from("redirect_routes")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (error) throw new Error(`Could not load recent routes: ${error.message}`);
+  if (error) {
+    console.error("[routes] recent_failed", { code: error.code });
+    throw new Error("Could not load recent routes.");
+  }
   return data ?? [];
 }

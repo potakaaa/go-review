@@ -1,8 +1,8 @@
 import QRCode from "qrcode";
 
+import { requireStaffMfa } from "@/lib/auth";
 import { BATCH_KEY_PATTERN, batchZipFileName } from "@/lib/batch";
 import { publicUrlForSlug, QR_OPTIONS, QR_PNG_SIZE, qrFileName } from "@/lib/qr";
-import { createClient } from "@/lib/supabase/server";
 import { createZip, type ZipEntry } from "@/lib/zip";
 
 export const runtime = "nodejs";
@@ -55,12 +55,7 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return new Response("Unauthorized", { status: 401 });
+  const { supabase } = await requireStaffMfa();
 
   const { data: routes, error } = await supabase
     .from("redirect_routes")
@@ -71,9 +66,8 @@ export async function GET(
     .order("batch_position", { ascending: true });
 
   if (error) {
-    console.error("[batch-download] route lookup failed", {
-      batchKey,
-      message: error.message,
+    console.error("[batch-download] route_lookup_failed", {
+      code: error.code,
     });
     return new Response("Could not prepare this download.", { status: 500 });
   }
@@ -112,11 +106,8 @@ export async function GET(
         "x-content-type-options": "nosniff",
       },
     });
-  } catch (cause) {
-    console.error("[batch-download] QR generation failed", {
-      batchKey,
-      cause,
-    });
+  } catch {
+    console.error("[batch-download] qr_generation_failed");
     return new Response("Could not prepare this download.", { status: 500 });
   }
 }

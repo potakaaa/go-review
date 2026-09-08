@@ -8,10 +8,10 @@ export default function NotFound() {
       <p className="eyebrow">404 — missing route</p>
       <h1 className="display-heading mt-3 text-3xl text-ink">Page not found</h1>
       <p className="mt-3 text-sm text-muted">
-        That page doesn&apos;t exist in the dashboard.
+        That page doesn&apos;t exist.
       </p>
-      <Link href="/dashboard" className={buttonClass("primary", "mt-6")}>
-        Back to dashboard
+      <Link href="/" className={buttonClass("primary", "mt-6")}>
+        Go to Goreview
       </Link>
     </main>
   );

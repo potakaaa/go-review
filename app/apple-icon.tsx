@@ -21,7 +21,7 @@ export default function AppleIcon() {
           border: "10px solid #27272a",
         }}
       >
-        RR
+        GR
       </div>
     ),
     size,

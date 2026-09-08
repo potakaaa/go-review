@@ -1,20 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-
 import { Alert, Button } from "@/components/ui";
 
-export default function DashboardError({
-  error,
-  reset,
-}: {
+export default function DashboardError({ reset }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error("[dashboard]", error);
-  }, [error]);
-
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <Alert tone="danger" title="Something went wrong">

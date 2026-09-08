@@ -38,11 +38,9 @@ export function CreateBatchRouteForm() {
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? "",
   );
-  const [acknowledgedWarning, setAcknowledgedWarning] = useState(false);
 
   const handleConvertedReviewUrl = useCallback((reviewUrl: string) => {
     setDestination(reviewUrl);
-    setAcknowledgedWarning(false);
   }, []);
 
   const showWarning = destinationNeedsAcknowledgement(destination);
@@ -102,16 +100,9 @@ export function CreateBatchRouteForm() {
 
       <RouteDestinationField
         value={destination}
-        onChange={(value) => {
-          setDestination(value);
-          setAcknowledgedWarning(false);
-        }}
+        onChange={setDestination}
         error={state.errors?.destination_url}
-        acknowledgedWarning={acknowledgedWarning}
-        onAcknowledgedWarningChange={setAcknowledgedWarning}
         description="Filled automatically after conversion. This destination is shared by every route in the batch."
-        acknowledgementLabel="Save this destination for the whole batch"
-        warningDescription="It will still work — every card will send people wherever this points. Tick below if that's what you want."
       />
 
       <div>
@@ -130,7 +121,7 @@ export function CreateBatchRouteForm() {
       </div>
 
       <div className="mobile-submit-bar">
-        <SubmitButton disabled={showWarning && !acknowledgedWarning} />
+        <SubmitButton disabled={showWarning} />
       </div>
     </form>
   );

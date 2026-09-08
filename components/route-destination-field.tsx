@@ -10,21 +10,12 @@ export function RouteDestinationField({
   value,
   onChange,
   error,
-  acknowledgedWarning,
-  onAcknowledgedWarningChange,
   description,
-  acknowledgementLabel = "Save this destination anyway",
-  warningDescription =
-    "It will still work — the card will send people wherever this points.",
 }: {
   value: string;
   onChange: (value: string) => void;
   error?: string;
-  acknowledgedWarning: boolean;
-  onAcknowledgedWarningChange: (checked: boolean) => void;
   description: string;
-  acknowledgementLabel?: string;
-  warningDescription?: string;
 }) {
   const showWarning = destinationNeedsAcknowledgement(value);
 
@@ -54,19 +45,9 @@ export function RouteDestinationField({
 
       {showWarning ? (
         <div className="mt-2">
-          <Alert tone="warn" title="This doesn't look like a Google Review link">
-            <p>{warningDescription}</p>
-            <label className="mt-2 flex items-start gap-2 font-medium">
-              <input
-                type="checkbox"
-                checked={acknowledgedWarning}
-                onChange={(event) =>
-                  onAcknowledgedWarningChange(event.target.checked)
-                }
-                className="mt-0.5 size-4"
-              />
-              {acknowledgementLabel}
-            </label>
+          <Alert tone="warn" title="Google Review link required">
+            Convert a Google Maps share link above or paste an approved Google
+            Maps or Review URL. Other destinations cannot be saved.
           </Alert>
         </div>
       ) : null}

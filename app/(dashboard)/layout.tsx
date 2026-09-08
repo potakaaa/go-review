@@ -1,9 +1,14 @@
-import { redirect } from "next/navigation";
-
 import { BottomNav, DesktopNav } from "@/components/bottom-nav";
 import { InstallPrompt } from "@/components/install-prompt";
 import { logout } from "@/app/login/actions";
-import { createClient } from "@/lib/supabase/server";
+import { requireStaffMfa } from "@/lib/auth";
+import type { Metadata } from "next";
+import Link from "next/link";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+  manifest: "/dashboard/manifest.webmanifest",
+};
 
 /**
  * Second line of defence behind proxy.ts.
@@ -15,12 +20,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function DashboardLayout({
   children,
 }: LayoutProps<"/">) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  await requireStaffMfa();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -31,14 +31,15 @@ export default async function DashboardLayout({
               aria-hidden="true"
               className="flex size-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-[10px] font-medium tracking-tight text-ink"
             >
-              RR
+              GR
             </span>
             <span className="truncate text-sm font-medium tracking-tight">
-              Review Routes
+              Goreview Admin
             </span>
           </div>
 
           <DesktopNav />
+          <Link href="/dashboard/stories" className="text-xs text-muted tap-target inline-flex items-center md:hidden">Shop stories</Link>
 
           <form action={logout}>
             <button

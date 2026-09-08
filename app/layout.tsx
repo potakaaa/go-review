@@ -3,16 +3,17 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://goreview.rald.site"),
   title: {
-    default: "Review Routes",
-    template: "%s · Review Routes",
+    default: "Goreview",
+    template: "%s · Goreview",
   },
   description:
     "Manage the permanent QR and NFC links printed on Google Review cards.",
-  applicationName: "Review Routes",
+  applicationName: "Goreview",
   appleWebApp: {
     capable: true,
-    title: "Review Routes",
+    title: "Goreview",
     statusBarStyle: "default",
   },
   // Internal tool: keep every page out of search results.

@@ -1,11 +1,9 @@
-import { after } from "next/server";
-
 import {
   inactiveResponse,
   lookupErrorResponse,
   notFoundResponse,
 } from "@/lib/branded-response";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createPublicClient } from "@/lib/supabase/public";
 import { SLUG_MAX_LENGTH, SLUG_PATTERN } from "@/lib/slug";
 
 /**
@@ -27,33 +25,20 @@ export async function GET(
     return notFoundResponse();
   }
 
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
-    .from("redirect_routes")
-    .select("destination_url, active")
-    .eq("slug_lower", slug.toLowerCase())
-    .maybeSingle();
+    .rpc("resolve_redirect", { p_slug: slug });
 
   if (error) {
-    console.error("[redirect] lookup failed", { slug, message: error.message });
+    console.error("[redirect] lookup_failed", { slug });
     return lookupErrorResponse();
   }
 
-  if (!data) return notFoundResponse();
-  if (!data.active) return inactiveResponse();
-
-  // Runs after the response has been flushed, so the visitor never waits on it.
-  // Unlike a bare floating promise, `after` keeps the serverless invocation
-  // alive long enough for the write to land.
-  after(async () => {
-    try {
-      await supabase.rpc("increment_scan_count", { p_slug: slug });
-    } catch (cause) {
-      // A dropped count is an acceptable loss; a failed redirect is not.
-      console.error("[redirect] scan count failed", { slug, cause });
-    }
-  });
+  const resolved = data?.[0];
+  if (!resolved) return notFoundResponse();
+  if (resolved.route_state === "inactive") return inactiveResponse();
+  if (!resolved.destination_url) return lookupErrorResponse();
 
   return new Response(null, {
     // 302, never 301: browsers cache permanent redirects indefinitely, which
@@ -61,9 +46,13 @@ export async function GET(
     // was first scanned. Re-pointing cards is the entire product.
     status: 302,
     headers: {
-      location: data.destination_url,
+      location: resolved.destination_url,
       "cache-control": "no-store, no-cache, must-revalidate",
+      "content-security-policy":
+        "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
       "referrer-policy": "no-referrer",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
     },
   });
 }

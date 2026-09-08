@@ -29,13 +29,6 @@ export function supabaseAnonKey(): string {
 }
 
 /** Server-only. Bypasses RLS. */
-export function supabaseServiceRoleKey(): string {
-  return required(
-    "SUPABASE_SERVICE_ROLE_KEY",
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-  );
-}
-
 /**
  * Origin the QR codes encode, without a trailing slash.
  *

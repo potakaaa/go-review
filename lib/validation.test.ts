@@ -7,6 +7,7 @@ import {
   destinationUrlSchema,
   looksLikeGoogleReviewUrl,
   mapsUrlSchema,
+  passwordSchema,
 } from "@/lib/validation";
 
 describe("destinationUrlSchema", () => {
@@ -41,6 +42,17 @@ describe("destinationUrlSchema", () => {
   it("rejects text that isn't a URL at all", () => {
     expect(destinationUrlSchema.safeParse("bella cafe").success).toBe(false);
   });
+
+  it("rejects non-Google, credentialed and custom-port destinations", () => {
+    for (const value of [
+      "https://example.com/leave-us-a-review",
+      "https://user:pass@g.page/r/example/review",
+      "https://g.page:8443/r/example/review",
+      "https://google.com.attacker.test/maps/place/x",
+    ]) {
+      expect(destinationUrlSchema.safeParse(value).success, value).toBe(false);
+    }
+  });
 });
 
 describe("looksLikeGoogleReviewUrl", () => {
@@ -69,12 +81,10 @@ describe("looksLikeGoogleReviewUrl", () => {
     }
   });
 
-  it("is advisory only: an unrecognised https URL still validates", () => {
-    // This is the contract the create form depends on -- Google changes these
-    // URLs, and a card that cannot be created is worse than an odd destination.
+  it("blocks an unrecognised https destination", () => {
     const url = "https://example.com/leave-us-a-review";
     expect(looksLikeGoogleReviewUrl(url)).toBe(false);
-    expect(destinationUrlSchema.safeParse(url).success).toBe(true);
+    expect(destinationUrlSchema.safeParse(url).success).toBe(false);
   });
 });
 
@@ -110,6 +120,24 @@ describe("mapsUrlSchema", () => {
     expect(mapsUrlSchema.safeParse("http://maps.app.goo.gl/example").success).toBe(
       false,
     );
+  });
+});
+
+describe("passwordSchema", () => {
+  it("accepts a password matching the production Auth policy", () => {
+    expect(passwordSchema.safeParse("Correct-horse-9!").success).toBe(true);
+  });
+
+  it("requires length, lowercase, uppercase, a number and a symbol", () => {
+    for (const value of [
+      "Short-9!",
+      "NO-LOWERCASE-999!",
+      "no-uppercase-999!",
+      "No-numbers-here!",
+      "NoSymbolsHere999",
+    ]) {
+      expect(passwordSchema.safeParse(value).success, value).toBe(false);
+    }
   });
 });
 

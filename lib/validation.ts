@@ -10,9 +10,9 @@ import {
 /**
  * Hosts and paths Google uses for "leave a review" links.
  *
- * Google changes these periodically, which is exactly why a mismatch is only a
- * warning: the admin is trusted, and a card that cannot be created is worse
- * than one pointing somewhere unexpected.
+ * Google changes these periodically. Unknown shapes fail closed so a stolen
+ * staff session cannot repoint a printed client card to a phishing origin; add
+ * newly verified Google URL shapes to both this allowlist and the DB trigger.
  */
 const GOOGLE_REVIEW_PATTERNS: Array<(url: URL) => boolean> = [
   (url) => url.hostname === "g.page",
@@ -22,13 +22,15 @@ const GOOGLE_REVIEW_PATTERNS: Array<(url: URL) => boolean> = [
     url.hostname === "search.google.com" &&
     url.pathname.includes("/local/writereview"),
   (url) =>
-    /(^|\.)google\.[a-z.]+$/.test(url.hostname) &&
+    /^(?:[a-z0-9-]+\.)?google\.(?:com|[a-z]{2}|(?:co|com)\.[a-z]{2})$/i.test(
+      url.hostname,
+    ) &&
     (url.pathname.startsWith("/maps") ||
       url.searchParams.has("placeid") ||
       url.searchParams.has("place_id")),
 ];
 
-/** Best-effort check. A `false` result must never block a save. */
+/** Exact allowlist shared by UI validation and server-side mutations. */
 export function looksLikeGoogleReviewUrl(input: string): boolean {
   let url: URL;
   try {
@@ -36,11 +38,18 @@ export function looksLikeGoogleReviewUrl(input: string): boolean {
   } catch {
     return false;
   }
-  if (url.protocol !== "https:") return false;
+  if (
+    url.protocol !== "https:" ||
+    url.port ||
+    url.username ||
+    url.password
+  ) {
+    return false;
+  }
   return GOOGLE_REVIEW_PATTERNS.some((matches) => matches(url));
 }
 
-/** Advisory UI check used before saving a non-Google destination. */
+/** Client-side affordance; the server and database remain authoritative. */
 export function destinationNeedsAcknowledgement(input: string): boolean {
   const trimmed = input.trim();
   return (
@@ -51,8 +60,9 @@ export function destinationNeedsAcknowledgement(input: string): boolean {
 }
 
 /**
- * HTTPS is required, not merely preferred: an http:// destination would show a
- * "not secure" interstitial to a customer holding their phone at a table.
+ * Destinations are intentionally limited to Google's review/Maps surfaces. A
+ * compromised staff session therefore cannot repoint printed client cards to
+ * an arbitrary phishing origin.
  */
 export const destinationUrlSchema = z
   .string()
@@ -73,6 +83,13 @@ export const destinationUrlSchema = z
       ctx.addIssue({
         code: "custom",
         message: "Destination must be an https:// URL.",
+      });
+      return;
+    }
+    if (!looksLikeGoogleReviewUrl(value)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Use an approved Google Maps or Google Review URL.",
       });
     }
   });
@@ -111,6 +128,15 @@ export const businessNameSchema = z
   .trim()
   .min(1, "Business name is required.")
   .max(120, "Business name must be 120 characters or fewer.");
+
+/** Mirrors the production Supabase Auth password policy. */
+export const passwordSchema = z
+  .string()
+  .min(14, "Use at least 14 characters.")
+  .regex(/[a-z]/, "Add a lowercase letter.")
+  .regex(/[A-Z]/, "Add an uppercase letter.")
+  .regex(/[0-9]/, "Add a number.")
+  .regex(/[^A-Za-z0-9]/, "Add a symbol.");
 
 export const notesSchema = z
   .string()

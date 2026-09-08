@@ -70,7 +70,7 @@ export function InstallPrompt() {
       <div className="min-w-0 flex-1">
         <p className="eyebrow">Install on iPhone</p>
         <h2 id="install-prompt-title" className="mt-2 text-sm font-semibold">
-          Keep Review Routes one tap away
+          Keep Goreview Admin one tap away
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted">
           In Safari, tap Share, then choose <strong>Add to Home Screen</strong>.

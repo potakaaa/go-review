@@ -38,12 +38,10 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? route.destination_url,
   );
-  const [acknowledgedWarning, setAcknowledgedWarning] = useState(false);
   const [confirmation, setConfirmation] = useState("");
 
   const handleConvertedReviewUrl = useCallback((reviewUrl: string) => {
     setDestination(reviewUrl);
-    setAcknowledgedWarning(false);
   }, []);
 
   const showWarning = destinationNeedsAcknowledgement(destination);
@@ -94,13 +92,8 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
 
       <RouteDestinationField
         value={destination}
-        onChange={(value) => {
-          setDestination(value);
-          setAcknowledgedWarning(false);
-        }}
+        onChange={setDestination}
         error={state.errors?.destination_url}
-        acknowledgedWarning={acknowledgedWarning}
-        onAcknowledgedWarningChange={setAcknowledgedWarning}
         description="Filled automatically after conversion. Edit this only when you need to use another destination."
       />
 
@@ -166,7 +159,7 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
       ) : null}
 
       <div className="mobile-submit-bar">
-        <SubmitButton disabled={showWarning && !acknowledgedWarning} />
+        <SubmitButton disabled={showWarning} />
       </div>
     </form>
   );
