@@ -35,6 +35,12 @@ export function PublicHeader() {
             Guides
           </Link>
           <Link
+            className="hidden py-3.5 text-[13px] text-muted hover:text-ink lg:block"
+            href="/resellers"
+          >
+            Resellers
+          </Link>
+          <Link
             className="py-3.5 text-[13px] text-muted hover:text-ink"
             href="/#pricing"
           >
@@ -82,6 +88,9 @@ export function PublicFooter() {
         <a className="text-[13px] md:ml-6" href={ORDER_EMAIL}>
           Email ↗
         </a>
+        <Link className="ml-6 text-[13px]" href="/resellers">
+          Resellers ↗
+        </Link>
         <p className="mt-3 max-w-sm text-[12px] leading-[1.8] text-muted md:ml-auto">
           Goreview is an independent product, not affiliated with Google.
         </p>

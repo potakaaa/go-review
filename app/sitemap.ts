@@ -26,6 +26,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [REVIEW_CARD_IMAGE],
     })),
     {
+      url: `${PUBLIC_ORIGIN}/resellers`,
+      lastModified: "2026-09-09",
+      changeFrequency: "monthly",
+      priority: 0.8,
+      images: [REVIEW_CARD_IMAGE],
+    },
+    {
       url: `${PUBLIC_ORIGIN}/guides`,
       lastModified: latestGuideUpdate,
       changeFrequency: "weekly",

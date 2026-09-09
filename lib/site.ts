@@ -1,5 +1,6 @@
 export const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61593756338197";
 export const ORDER_EMAIL = "mailto:helbirog@gmail.com?subject=Goreview%20card%20inquiry";
+export const RESELLER_EMAIL = "mailto:helbirog@gmail.com?subject=Goreview%20reseller%20inquiry";
 export const PUBLIC_ORIGIN = "https://goreview.rald.site";
 
 export function adminOrigin(): string {
@@ -33,6 +34,7 @@ export function isPublicPath(path: string): boolean {
     path === "/nfc-google-review-card" ||
     path === "/google-review-qr-code" ||
     path === "/google-review-card-philippines" ||
+    path === "/resellers" ||
     path === "/guides" ||
     path.startsWith("/guides/") ||
     path.startsWith("/media/stories/") ||
