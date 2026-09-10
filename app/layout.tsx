@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 
 import { PUBLIC_ORIGIN } from "@/lib/site";
 import "./globals.css";
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="font-sans flex min-h-full flex-col bg-canvas text-ink">
         {children}
+        <Analytics />
       </body>
     </html>
   );
