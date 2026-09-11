@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "10mb" } },
+  images: {
+    // Public story images carry their database version in `?v=...`; keep the
+    // optimizer scoped to known local media paths while allowing that version.
+    localPatterns: [
+      { pathname: "/images/**", search: "" },
+      { pathname: "/media/stories/**" },
+    ],
+  },
   poweredByHeader: false,
   async headers() {
     return [

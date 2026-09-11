@@ -117,9 +117,15 @@ export async function updateSession(request: NextRequest) {
 
   if (!user) return securityHeaders(response, csp);
 
-  const { data: isStaff, error: staffError } = await supabase.rpc(
-    "is_active_staff",
-  );
+  // Identity is already verified above; these two self-scoped checks do not
+  // depend on each other, so run them together without weakening the gate.
+  const [
+    { data: isStaff, error: staffError },
+    { data: mustChangePassword, error: passwordStateError },
+  ] = await Promise.all([
+    supabase.rpc("is_active_staff"),
+    supabase.rpc("is_password_change_required"),
+  ]);
   if (staffError || !isStaff) {
     if (!staffError) await supabase.auth.signOut({ scope: "local" });
     if (isPath(pathname, LOGIN_PATH)) return securityHeaders(response, csp);
@@ -130,10 +136,6 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(loginUrl, response, csp);
   }
 
-  const {
-    data: mustChangePassword,
-    error: passwordStateError,
-  } = await supabase.rpc("is_password_change_required");
   if (passwordStateError) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;

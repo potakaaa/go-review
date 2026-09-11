@@ -10,7 +10,7 @@ import {
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { Alert, FormError, buttonClass } from "@/components/ui";
-import { destinationNeedsAcknowledgement } from "@/lib/validation";
+import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";

@@ -8,6 +8,8 @@ import { createZip, type ZipEntry } from "@/lib/zip";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const QR_GENERATION_CONCURRENCY = 4;
+
 function csvCell(value: string | number | boolean): string {
   return '"' + String(value).replace(/"/g, '""') + '"';
 }
@@ -73,24 +75,39 @@ export async function GET(
   }
 
   if (!routes?.length) return new Response("Not found", { status: 404 });
+  const routeList = routes;
 
   try {
-    const entries: ZipEntry[] = [];
+    const entries = new Array<ZipEntry>(routeList.length);
+    let nextIndex = 0;
 
-    for (const route of routes) {
-      const publicUrl = publicUrlForSlug(route.slug);
-      const png = await QRCode.toBuffer(publicUrl, {
-        ...QR_OPTIONS,
-        width: QR_PNG_SIZE,
-      });
+    async function generateEntries(): Promise<void> {
+      while (true) {
+        const index = nextIndex++;
+        if (index >= routeList.length) return;
 
-      entries.push({
-        name: qrFileName(route.business_name, route.slug) + ".png",
-        data: png,
-      });
+        const route = routeList[index];
+        const publicUrl = publicUrlForSlug(route.slug);
+        const png = await QRCode.toBuffer(publicUrl, {
+          ...QR_OPTIONS,
+          width: QR_PNG_SIZE,
+        });
+
+        entries[index] = {
+          name: qrFileName(route.business_name, route.slug) + ".png",
+          data: png,
+        };
+      }
     }
 
-    entries.push({ name: "manifest.csv", data: csvManifest(routes) });
+    await Promise.all(
+      Array.from(
+        { length: Math.min(QR_GENERATION_CONCURRENCY, routeList.length) },
+        () => generateEntries(),
+      ),
+    );
+
+    entries.push({ name: "manifest.csv", data: csvManifest(routeList) });
 
     const archive = createZip(entries);
     const body = new ArrayBuffer(archive.byteLength);

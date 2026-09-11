@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  destinationNeedsAcknowledgement,
+  looksLikeGoogleReviewUrl,
+} from "@/lib/validation-client";
+
 import { BATCH_MAX_SIZE, BATCH_MIN_SIZE } from "@/lib/batch";
 import { BATCH_EDIT_MAX_SIZE } from "@/lib/batch-edit";
 import {
@@ -8,57 +13,7 @@ import {
   validateCustomSlug,
 } from "@/lib/slug";
 
-/**
- * Hosts and paths Google uses for "leave a review" links.
- *
- * Google changes these periodically. Unknown shapes fail closed so a stolen
- * staff session cannot repoint a printed client card to a phishing origin; add
- * newly verified Google URL shapes to both this allowlist and the DB trigger.
- */
-const GOOGLE_REVIEW_PATTERNS: Array<(url: URL) => boolean> = [
-  (url) => url.hostname === "g.page",
-  (url) => url.hostname === "maps.app.goo.gl",
-  (url) => url.hostname === "goo.gl" && url.pathname.startsWith("/maps"),
-  (url) =>
-    url.hostname === "search.google.com" &&
-    url.pathname.includes("/local/writereview"),
-  (url) =>
-    /^(?:[a-z0-9-]+\.)?google\.(?:com|[a-z]{2}|(?:co|com)\.[a-z]{2})$/i.test(
-      url.hostname,
-    ) &&
-    (url.pathname.startsWith("/maps") ||
-      url.searchParams.has("placeid") ||
-      url.searchParams.has("place_id")),
-];
-
-/** Exact allowlist shared by UI validation and server-side mutations. */
-export function looksLikeGoogleReviewUrl(input: string): boolean {
-  let url: URL;
-  try {
-    url = new URL(input.trim());
-  } catch {
-    return false;
-  }
-  if (
-    url.protocol !== "https:" ||
-    url.port ||
-    url.username ||
-    url.password
-  ) {
-    return false;
-  }
-  return GOOGLE_REVIEW_PATTERNS.some((matches) => matches(url));
-}
-
-/** Client-side affordance; the server and database remain authoritative. */
-export function destinationNeedsAcknowledgement(input: string): boolean {
-  const trimmed = input.trim();
-  return (
-    trimmed.length > 0 &&
-    trimmed.startsWith("https://") &&
-    !looksLikeGoogleReviewUrl(trimmed)
-  );
-}
+export { destinationNeedsAcknowledgement, looksLikeGoogleReviewUrl };
 
 /**
  * Destinations are intentionally limited to Google's review/Maps surfaces. A

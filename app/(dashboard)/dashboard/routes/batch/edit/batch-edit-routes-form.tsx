@@ -14,7 +14,7 @@ import {
   BATCH_EDIT_MAX_SIZE,
   incrementedRouteNames,
 } from "@/lib/batch-edit";
-import { destinationNeedsAcknowledgement } from "@/lib/validation";
+import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 
 import { RouteSelectionList } from "@/app/(dashboard)/dashboard/routes/batch/edit/route-selection-list";
 import type { BatchEditRoute } from "@/app/(dashboard)/dashboard/routes/batch/edit/types";

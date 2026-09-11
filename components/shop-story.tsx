@@ -18,9 +18,12 @@ export function StoryResult({ story }: { story: ShopStory }) {
 export function ShopStoryCard({ story, preview = false }: { story: ShopStory; preview?: boolean }) {
   const provided = /^provided\/shop-[123]\.webp$/.test(story.image_path ?? "");
   const src = provided ? `/images/${story.image_path?.slice(9)}` : preview ? `/dashboard/stories/${story.id}/photo` : `/media/stories/${story.id}?v=${encodeURIComponent(story.updated_at)}`;
+  // Public story media is readable without a session, so let Next generate
+  // responsive variants. Authenticated dashboard previews must stay direct.
+  const canOptimize = provided || !preview;
   return (
     <article className="group overflow-hidden rounded-xl border border-line bg-surface">
-      {story.image_path && <div className="relative aspect-[4/5] overflow-hidden md:aspect-[3/4]"><Image className="object-cover transition-transform duration-700 group-hover:scale-[1.025]" src={src} alt={story.alt_text} fill sizes="(max-width: 767px) 90vw, 40vw" unoptimized={!provided} /></div>}
+      {story.image_path && <div className="relative aspect-[4/5] overflow-hidden md:aspect-[3/4]"><Image className="object-cover transition-transform duration-700 group-hover:scale-[1.025]" src={src} alt={story.alt_text} fill sizes="(max-width: 767px) 90vw, 40vw" unoptimized={!canOptimize} /></div>}
       <div className="p-[23px] md:p-[18px] xl:p-[23px]"><p className="eyebrow">{story.shop_name || "On the counter"}</p><p className="mt-3 text-[15px] leading-6 text-muted">{story.caption}</p><StoryResult story={story} /></div>
     </article>
   );

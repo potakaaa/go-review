@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
@@ -54,14 +55,18 @@ export async function checkStaffAccess(
 
   if (userError || !user) return { state: "anonymous" };
 
-  const { data: isStaff, error: staffError } = await supabase.rpc(
-    "is_active_staff",
-  );
+  // These checks are independent after identity is known. Keep the same
+  // fail-closed decisions while removing one serialized round trip.
+  const [
+    { data: isStaff, error: staffError },
+    { data: mustChangePassword, error: passwordStateError },
+  ] = await Promise.all([
+    supabase.rpc("is_active_staff"),
+    supabase.rpc("is_password_change_required"),
+  ]);
   if (staffError) return { state: "unavailable", userId: user.id };
   if (!isStaff) return { state: "unapproved", userId: user.id };
 
-  const { data: mustChangePassword, error: passwordStateError } =
-    await supabase.rpc("is_password_change_required");
   if (passwordStateError) return { state: "unavailable", userId: user.id };
   if (mustChangePassword) {
     return { state: "needs_password_change", userId: user.id };
@@ -85,7 +90,12 @@ const STAFF_SECTIONS: StaffSection[] = [
   "staff",
 ];
 
-export async function requireStaffMfa(): Promise<StaffContext> {
+/**
+ * React's request cache makes the layout, page and data helpers share this
+ * context during one server render. It is request-scoped, so auth state and
+ * permissions never become a cross-user cache.
+ */
+export const requireStaffMfa = cache(async (): Promise<StaffContext> => {
   if (!isAdminHost((await headers()).get("host"))) notFound();
   const supabase = await createClient();
   const access = await checkStaffAccess(supabase);
@@ -130,4 +140,4 @@ export async function requireStaffMfa(): Promise<StaffContext> {
     },
     permissions,
   };
-}
+});

@@ -10,7 +10,7 @@ import {
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { Alert, FormError, buttonClass } from "@/components/ui";
-import { destinationNeedsAcknowledgement } from "@/lib/validation";
+import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 import type { RedirectRoute } from "@/lib/database.types";
 
 const FIELD =
