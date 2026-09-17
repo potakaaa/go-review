@@ -33,8 +33,19 @@ export function isRoutePlatform(value: string): value is RoutePlatform {
   return ROUTE_PLATFORMS.includes(value as RoutePlatform);
 }
 
-export function platformLabel(platform: RoutePlatform): string {
-  return PLATFORM_DETAILS[platform].shortLabel;
+/**
+ * Legacy rows can briefly arrive without the additive platform column while
+ * the production migration is being rolled out. Treat those rows as the
+ * original Google product instead of allowing a badge render to crash a page.
+ */
+export function normalizeRoutePlatform(value: unknown): RoutePlatform {
+  return typeof value === "string" && isRoutePlatform(value)
+    ? value
+    : "google";
+}
+
+export function platformLabel(platform: unknown): string {
+  return PLATFORM_DETAILS[normalizeRoutePlatform(platform)].shortLabel;
 }
 
 export function normalizePlatformDestination(

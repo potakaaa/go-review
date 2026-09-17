@@ -6,7 +6,10 @@ import {
 } from "@/lib/permissions";
 import { sortRoutesByBusinessName } from "@/lib/batch-edit";
 import type { RedirectRoute } from "@/lib/database.types";
-import type { RoutePlatform } from "@/lib/platforms";
+import {
+  normalizeRoutePlatform,
+  type RoutePlatform,
+} from "@/lib/platforms";
 
 export type RouteFilters = {
   q?: string;
@@ -14,6 +17,21 @@ export type RouteFilters = {
   sort?: "newest" | "oldest" | "most-used";
   platform?: "all" | RoutePlatform;
 };
+
+function isMissingPlatformColumn(error: { code?: string } | null): boolean {
+  return error?.code === "PGRST204" || error?.code === "42703";
+}
+
+/**
+ * Keep the UI compatible with legacy rows while the platform migration is
+ * being applied. New writes still validate and persist an explicit platform.
+ */
+function normalizeRouteRow(route: RedirectRoute): RedirectRoute {
+  return {
+    ...route,
+    platform: normalizeRoutePlatform(route.platform),
+  };
+}
 
 /** Narrows loose `searchParams` values into the filter shape the query wants. */
 export function parseFilters(params: {
@@ -79,11 +97,58 @@ export async function listRoutes(
 
   const { data, error } = await query;
   if (error) {
+    // The platform column is additive. During a rolling deploy, an older
+    // database can still serve the unfiltered route list. A legacy-safe
+    // query keeps the Google filter useful and makes newer platform filters
+    // return an honest empty state until the migration is applied.
+    if (filters.platform !== "all" && isMissingPlatformColumn(error)) {
+      let legacyQuery = supabase.from("redirect_routes").select("*");
+      if (filters.sort === "most-used") {
+        legacyQuery = legacyQuery
+          .order("scan_count", { ascending: false })
+          .order("last_scanned_at", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false });
+      } else {
+        legacyQuery = legacyQuery.order("created_at", {
+          ascending: filters.sort === "oldest",
+        });
+      }
+      if (filters.status !== "all") {
+        legacyQuery = legacyQuery.eq("active", filters.status === "active");
+      }
+      if (filters.q) {
+        const term = filters.q.replace(/[%_,()\\]/g, "\\$&");
+        legacyQuery = legacyQuery.or(
+          `business_name.ilike.%${term}%,slug.ilike.%${term}%`,
+        );
+      }
+
+      const legacyResult = await legacyQuery;
+      if (legacyResult.error) {
+        console.error("[routes] list_failed", { code: legacyResult.error.code });
+        throw new Error("Could not load routes.");
+      }
+
+      const legacyRows = (legacyResult.data ?? []).map(normalizeRouteRow);
+      if (filters.platform !== "google") return [];
+
+      const exactIndex = filters.q
+        ? legacyRows.findIndex(
+            (route) => route.slug_lower === filters.q.toLowerCase(),
+          )
+        : -1;
+      if (exactIndex <= 0) return legacyRows;
+      return [
+        legacyRows[exactIndex],
+        ...legacyRows.slice(0, exactIndex),
+        ...legacyRows.slice(exactIndex + 1),
+      ];
+    }
     console.error("[routes] list_failed", { code: error.code });
     throw new Error("Could not load routes.");
   }
 
-  const rows = data ?? [];
+  const rows = (data ?? []).map(normalizeRouteRow);
   if (!filters.q) return rows;
 
   // Exact route-number searches should win over a partial business-name hit,
@@ -112,7 +177,7 @@ export async function getRoute(id: string): Promise<RedirectRoute | null> {
     console.error("[routes] detail_failed", { code: error.code });
     throw new Error("Could not load route.");
   }
-  return data;
+  return data ? normalizeRouteRow(data) : null;
 }
 
 export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]> {
@@ -127,7 +192,7 @@ export async function getBatchRoutes(batchKey: string): Promise<RedirectRoute[]>
     console.error("[routes] batch_failed", { code: error.code });
     throw new Error("Could not load batch routes.");
   }
-  return data ?? [];
+  return (data ?? []).map(normalizeRouteRow);
 }
 
 /** All routes for the deliberate bulk-edit screen, in human alphabetic order. */
@@ -142,7 +207,7 @@ export async function getRoutesForBatchEdit(): Promise<RedirectRoute[]> {
     throw new Error("Could not load routes for batch editing.");
   }
 
-  return sortRoutesByBusinessName(data ?? []);
+  return sortRoutesByBusinessName((data ?? []).map(normalizeRouteRow));
 }
 
 export type RouteStats = {
@@ -160,16 +225,40 @@ export type RouteStats = {
  */
 export async function getRouteStats(): Promise<RouteStats> {
   const { supabase } = await requireRouteReportingAccess();
-  const { data, error } = await supabase
+  const result = await supabase
     .from("redirect_routes")
     .select("active, scan_count, platform");
 
-  if (error) {
-    console.error("[routes] stats_failed", { code: error.code });
-    throw new Error("Could not load route statistics.");
+  type StatsRow = {
+    active: boolean;
+    scan_count: number;
+    platform: unknown;
+  };
+  let rows: StatsRow[];
+
+  if (result.error && isMissingPlatformColumn(result.error)) {
+    const legacyResult = await supabase
+      .from("redirect_routes")
+      .select("active, scan_count");
+    if (legacyResult.error) {
+      console.error("[routes] stats_failed", { code: legacyResult.error.code });
+      throw new Error("Could not load route statistics.");
+    }
+    rows = (legacyResult.data ?? []).map((row) => ({
+      ...row,
+      platform: "google",
+    }));
+  } else {
+    if (result.error) {
+      console.error("[routes] stats_failed", { code: result.error.code });
+      throw new Error("Could not load route statistics.");
+    }
+    rows = (result.data ?? []).map((row) => ({
+      ...row,
+      platform: normalizeRoutePlatform(row.platform),
+    }));
   }
 
-  const rows = data ?? [];
   const active = rows.filter((row) => row.active).length;
   const scanned = rows.filter((row) => row.scan_count > 0).length;
 
@@ -202,7 +291,7 @@ export async function getMostUsedRoutes(limit = 10): Promise<RedirectRoute[]> {
     console.error("[routes] analytics_failed", { code: error.code });
     throw new Error("Could not load usage analytics.");
   }
-  return data ?? [];
+  return (data ?? []).map(normalizeRouteRow);
 }
 
 export async function getRecentRoutes(limit = 3): Promise<RedirectRoute[]> {
@@ -217,5 +306,5 @@ export async function getRecentRoutes(limit = 3): Promise<RedirectRoute[]> {
     console.error("[routes] recent_failed", { code: error.code });
     throw new Error("Could not load recent routes.");
   }
-  return data ?? [];
+  return (data ?? []).map(normalizeRouteRow);
 }

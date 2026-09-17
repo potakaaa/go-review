@@ -24,18 +24,24 @@ export function PublicHeader() {
         >
           <Link
             className="hidden py-3.5 text-[13px] text-muted hover:text-ink sm:block"
-            href="/#cards"
+            href="/google-review-card"
           >
-            Tap cards
+            Google standee
           </Link>
           <Link
             className="hidden py-3.5 text-[13px] text-muted hover:text-ink md:block"
+            href="/#options"
+          >
+            Card options
+          </Link>
+          <Link
+            className="hidden py-3.5 text-[13px] text-muted hover:text-ink lg:block"
             href="/guides"
           >
             Guides
           </Link>
           <Link
-            className="hidden py-3.5 text-[13px] text-muted hover:text-ink lg:block"
+            className="hidden py-3.5 text-[13px] text-muted hover:text-ink xl:block"
             href="/resellers"
           >
             Resellers
@@ -48,10 +54,10 @@ export function PublicHeader() {
           </Link>
           <Link
             href="/order"
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ink bg-ink px-3 py-2 text-[12px] font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink sm:min-h-11 sm:px-4 sm:py-2.5 sm:text-[14px]"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ink bg-ink px-3 py-2 text-[12px] font-semibold text-canvas transition-colors hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink active:scale-[0.98] sm:min-h-11 sm:px-4 sm:py-2.5 sm:text-[14px]"
           >
-            <span className="sm:hidden">Get card</span>
-            <span className="hidden sm:inline">Get your card</span>
+            <span className="sm:hidden">Order</span>
+            <span className="hidden sm:inline">Order now</span>
             <span aria-hidden="true">↗</span>
           </Link>
         </nav>
@@ -103,13 +109,13 @@ export function PublicFooter() {
 
 export function PublicCta({
   title = "Put your next action within reach.",
-  description = "Get customized NFC and QR tap cards for Google, Facebook, or Instagram.",
+  description = "Start with the Google review standee, then add adhesive tap cards for other surfaces or platforms.",
 }: {
   title?: string;
   description?: string;
 }) {
   return (
-    <section className="border-y border-line bg-[radial-gradient(ellipse_at_bottom,#1c1c1c,#101010_65%)] py-16 text-center md:py-24">
+    <section className="border-y border-line bg-surface py-16 text-center md:py-24">
       <div className={container}>
         <p className="eyebrow">A simpler invitation</p>
         <h2 className="mt-5 text-[clamp(2.25rem,4.8vw,4.0625rem)] font-normal leading-[1.14] tracking-[-.05em]">
@@ -121,7 +127,7 @@ export function PublicCta({
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6">
           <Link
             href="/order"
-            className="inline-flex min-h-12 items-center justify-center gap-3 rounded-lg border border-ink bg-ink px-6 py-3 text-sm font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+            className="inline-flex min-h-12 items-center justify-center gap-3 rounded-lg border border-ink bg-ink px-6 py-3 text-sm font-semibold text-canvas transition-colors hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink active:scale-[0.98]"
           >
             Build your order <span aria-hidden="true">↗</span>
           </Link>
@@ -133,7 +139,7 @@ export function PublicCta({
           </a>
         </div>
         <p className="mt-5 text-[13px] text-muted">
-          Tap cards are ₱299 each. Minimum three total.
+          Google standee ₱699 · Tap cards ₱299 each · Minimum three cards
         </p>
       </div>
     </section>

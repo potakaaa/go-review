@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { looksLikePlatformDestination } from "@/lib/validation-client";
-import { normalizePlatformDestination } from "@/lib/platforms";
+import {
+  normalizePlatformDestination,
+  normalizeRoutePlatform,
+  platformLabel,
+} from "@/lib/platforms";
 
 describe("platform destinations", () => {
   it("accepts official Facebook page destinations", () => {
@@ -17,5 +21,10 @@ describe("platform destinations", () => {
 
   it("normalizes an Instagram handle", () => {
     expect(normalizePlatformDestination("instagram", "@cafe.cdo")).toBe("https://www.instagram.com/cafe.cdo/");
+  });
+
+  it("treats a legacy row without a platform as Google", () => {
+    expect(normalizeRoutePlatform(undefined)).toBe("google");
+    expect(platformLabel(undefined)).toBe("Google");
   });
 });

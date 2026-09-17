@@ -4,7 +4,6 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { PublicCta, PublicFooter, PublicHeader } from "@/components/public-site";
 import type { SeoLandingPage as SeoLandingPageData } from "@/lib/seo-pages";
-import { FACEBOOK_URL } from "@/lib/site";
 import {
   breadcrumbJsonLd,
   faqJsonLd,
@@ -70,14 +69,12 @@ export function SeoLandingPage({ page }: { page: SeoLandingPageData }) {
               <p className="mt-2 text-[14px] leading-[1.75] text-muted md:text-[15px]">{page.answer}</p>
             </aside>
             <div className="mt-7 flex flex-wrap items-center gap-5 md:mt-8 md:gap-6">
-              <a
-                href={FACEBOOK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center justify-between gap-5 rounded-lg border border-ink bg-ink px-5 py-3 text-sm font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+              <Link
+                href="/order"
+                className="inline-flex min-h-12 items-center justify-between gap-5 rounded-lg border border-ink bg-ink px-5 py-3 text-sm font-semibold text-canvas transition-colors hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink active:scale-[0.98]"
               >
-                Get your card <span aria-hidden="true">↗</span>
-              </a>
+                Order your standee <span aria-hidden="true">↗</span>
+              </Link>
               <Link
                 href="/guides/how-to-get-more-google-reviews"
                 className="inline-flex min-h-12 items-center gap-3 px-1 py-3 text-sm font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"

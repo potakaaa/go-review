@@ -30,14 +30,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: "2026-09-17",
       changeFrequency: "monthly",
       priority: 0.9,
-      images: [`${PUBLIC_ORIGIN}/images/facebook-tap-card-mockup-v1.png`],
+      images: [`${PUBLIC_ORIGIN}/images/facebook-tap-card-mockup-v2.png`],
     },
     {
       url: `${PUBLIC_ORIGIN}/instagram-tap-card`,
       lastModified: "2026-09-17",
       changeFrequency: "monthly",
       priority: 0.9,
-      images: [`${PUBLIC_ORIGIN}/images/instagram-tap-card-mockup-v1.png`],
+      images: [`${PUBLIC_ORIGIN}/images/instagram-tap-card-mockup-v2.png`],
     },
     {
       url: `${PUBLIC_ORIGIN}/order`,

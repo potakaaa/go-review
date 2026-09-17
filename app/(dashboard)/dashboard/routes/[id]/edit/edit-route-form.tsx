@@ -13,7 +13,10 @@ import { PlatformSelector } from "@/components/platform-selector";
 import { Alert, FormError, buttonClass } from "@/components/ui";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 import type { RedirectRoute } from "@/lib/database.types";
-import type { RoutePlatform } from "@/lib/platforms";
+import {
+  normalizeRoutePlatform,
+  type RoutePlatform,
+} from "@/lib/platforms";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -41,7 +44,7 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
     state.values?.destination_url ?? route.destination_url,
   );
   const [draftPlatform, setDraftPlatform] = useState<RoutePlatform | null>(null);
-  const platform = draftPlatform ?? route.platform;
+  const platform = normalizeRoutePlatform(draftPlatform ?? route.platform);
   const [confirmation, setConfirmation] = useState("");
 
   const handleConvertedReviewUrl = useCallback((reviewUrl: string) => {
