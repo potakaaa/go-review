@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { buttonClass } from "@/components/ui";
+import { primaryButton } from "@/components/styles";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -17,7 +17,7 @@ export default function NotFound() {
         That page doesn&apos;t exist. The link may be outdated, or the address
         may have a typo.
       </p>
-      <Link href="/" className={buttonClass("primary", "mt-6")}>
+      <Link href="/" className={`${primaryButton} mt-8 min-h-12 px-6`}>
         Go to Goreview
       </Link>
     </main>

@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+
+import { Card } from "@/components/ui";
 
 import { ForgotPasswordForm } from "@/app/forgot-password/forgot-password-form";
 
@@ -6,6 +8,8 @@ export const metadata: Metadata = {
   title: "Reset password",
   robots: { index: false, follow: false },
 };
+
+export const viewport: Viewport = { themeColor: "#0a0a0a" };
 
 export default async function ForgotPasswordPage({
   searchParams,
@@ -15,7 +19,10 @@ export default async function ForgotPasswordPage({
   const { error } = await searchParams;
 
   return (
-    <main className="relative flex min-h-dvh flex-col justify-center overflow-hidden px-5 py-12">
+    <main
+      data-theme="admin"
+      className="relative flex min-h-dvh flex-col justify-center overflow-hidden bg-canvas px-5 py-12 text-ink"
+    >
       <div
         aria-hidden="true"
         className="page-grid pointer-events-none absolute inset-0 opacity-60"
@@ -24,7 +31,7 @@ export default async function ForgotPasswordPage({
         <div className="mb-8">
           <div
             aria-hidden="true"
-            className="mb-6 flex size-11 items-center justify-center rounded-xl border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
+            className="mb-6 flex size-11 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
           >
             KEY
           </div>
@@ -38,7 +45,7 @@ export default async function ForgotPasswordPage({
           </p>
         </div>
 
-        <div className="glass glass-sheen rounded-2xl p-5 sm:p-6">
+        <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
           <ForgotPasswordForm
             initialError={
               error === "invalid_link"
@@ -46,7 +53,7 @@ export default async function ForgotPasswordPage({
                 : undefined
             }
           />
-        </div>
+        </Card>
       </div>
     </main>
   );

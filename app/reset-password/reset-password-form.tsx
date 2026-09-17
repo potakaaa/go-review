@@ -10,7 +10,7 @@ import {
 import { Alert, buttonClass, FormError } from "@/components/ui";
 
 const FIELD =
-  "w-full rounded-xl border border-line-strong bg-canvas px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
+  "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

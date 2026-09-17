@@ -7,7 +7,7 @@ import { Alert, buttonClass } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
 const FIELD =
-  "w-full rounded-xl border border-line-strong bg-canvas px-4 py-3 text-center font-mono text-xl tracking-[0.28em] text-ink transition-colors duration-150 placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
+  "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-center font-mono text-xl tracking-[0.28em] text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
 
 type SetupState =
   | { status: "loading" }
