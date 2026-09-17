@@ -4,9 +4,13 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 import { MILESTONE_CARD_SIZE, milestoneCard } from "@/components/milestone-card";
-import { milestoneFileName, scanMilestone } from "@/lib/milestone";
+import {
+  averageScansPerCard,
+  milestoneFileName,
+  scanMilestone,
+} from "@/lib/milestone";
 import { requirePermission } from "@/lib/permissions";
-import { getRouteStats } from "@/lib/routes";
+import { getMostUsedRoutes, getRouteStats } from "@/lib/routes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,10 +30,25 @@ const [interRegular, interSemiBold, bitcountMedium] = await Promise.all([
 export async function GET(): Promise<Response> {
   await requirePermission("analytics", "view");
 
-  const stats = await getRouteStats();
+  const [stats, routes] = await Promise.all([
+    getRouteStats(),
+    getMostUsedRoutes(3),
+  ]);
   const milestone = scanMilestone(stats.totalScans);
 
-  return new ImageResponse(milestoneCard(milestone), {
+  const card = milestoneCard({
+    milestone,
+    cardsLive: stats.active,
+    averagePerCard: averageScansPerCard(stats.totalScans, stats.scanned),
+    topRoutes: routes
+      .filter((route) => route.scan_count > 0)
+      .map((route) => ({
+        businessName: route.business_name,
+        scans: route.scan_count,
+      })),
+  });
+
+  return new ImageResponse(card, {
     ...MILESTONE_CARD_SIZE,
     fonts: [
       { name: "Inter", data: interRegular, weight: 400, style: "normal" },

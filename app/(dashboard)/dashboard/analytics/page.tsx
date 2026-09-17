@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ButtonLink, buttonClass, Card, EmptyState } from "@/components/ui";
+import { ShareMilestone } from "@/components/share-milestone";
+import { ButtonLink, Card, EmptyState } from "@/components/ui";
 import { formatRelativeDate } from "@/lib/format";
 import { milestoneFileName, scanMilestone } from "@/lib/milestone";
 import { getMostUsedRoutes, getRouteStats } from "@/lib/routes";
@@ -31,6 +32,9 @@ export default async function AnalyticsPage() {
   ]);
   const usedRoutes = routes.filter((route) => route.scan_count > 0);
   const milestone = scanMilestone(stats.totalScans);
+  const summary = milestone.exact
+    ? `A 9:16 card for stories and reels, leading with the exact count of ${stats.totalScans} scans, over ${stats.active} live cards. Past 50 it rounds down to the nearest 50.`
+    : `A 9:16 card for stories and reels: ${milestone.label} scans — rounded down from ${stats.totalScans} — over ${stats.active} live cards, with your three busiest named.`;
 
   return (
     <div className="space-y-8 pb-16">
@@ -44,16 +48,22 @@ export default async function AnalyticsPage() {
             See which permanent links are getting used most.
           </p>
         </div>
-        {canViewRoutes ? (
-          <div className="grid gap-2 sm:flex">
-            <ButtonLink href="/dashboard/routes?sort=most-used" variant="secondary">
-              Most used in routes
-            </ButtonLink>
-            <ButtonLink href="/dashboard/routes" variant="secondary">
-              All routes
-            </ButtonLink>
-          </div>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {canViewRoutes ? (
+            <div className="grid flex-1 gap-2 sm:flex">
+              <ButtonLink href="/dashboard/routes?sort=most-used" variant="secondary">
+                Most used in routes
+              </ButtonLink>
+              <ButtonLink href="/dashboard/routes" variant="secondary">
+                All routes
+              </ButtonLink>
+            </div>
+          ) : null}
+          <ShareMilestone
+            fileName={milestoneFileName(milestone)}
+            summary={summary}
+          />
+        </div>
       </header>
 
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
@@ -68,49 +78,6 @@ export default async function AnalyticsPage() {
         <Metric label="Facebook" value={stats.byPlatform.facebook} />
         <Metric label="Instagram" value={stats.byPlatform.instagram} />
       </div>
-
-      <section>
-        <div className="mb-5 flex items-baseline justify-between gap-3 border-b border-line pb-4">
-          <div>
-            <p className="eyebrow">Share</p>
-            <h2 className="display-heading mt-2 text-2xl text-ink">
-              Milestone card
-            </h2>
-          </div>
-          <span className="hidden text-xs text-subtle sm:inline">
-            1080 × 1920
-          </span>
-        </div>
-
-        <Card className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center">
-          <div className="w-32 shrink-0 overflow-hidden rounded-xl border border-line sm:w-40">
-            {/* eslint-disable-next-line @next/next/no-img-element -- a
-                per-request PNG behind an auth check; next/image would cache a
-                private number on a CDN and has nothing to optimise here. */}
-            <img
-              src="/dashboard/analytics/share-image"
-              alt={`Share card reading ${milestone.label} all-time scans`}
-              width={1080}
-              height={1920}
-              className="block w-full"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm leading-6 text-muted">
-              {milestone.exact
-                ? `A 9:16 graphic for stories and reels, leading with the exact count of ${stats.totalScans}. Past 50 it rounds down to the nearest 50 and gains a plus.`
-                : `A 9:16 graphic for stories and reels, leading with ${milestone.label} — rounded down from ${stats.totalScans}, so the number on the post is always one the dashboard can back up.`}
-            </p>
-            <a
-              href="/dashboard/analytics/share-image"
-              download={milestoneFileName(milestone)}
-              className={buttonClass("primary", "mt-4")}
-            >
-              Download image
-            </a>
-          </div>
-        </Card>
-      </section>
 
       <section>
         <div className="mb-5 flex items-baseline justify-between gap-3 border-b border-line pb-4">

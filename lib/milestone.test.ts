@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { milestoneFileName, scanMilestone } from "./milestone";
+import {
+  averageScansPerCard,
+  milestoneFileName,
+  scanMilestone,
+} from "./milestone";
 
 describe("scanMilestone", () => {
   it("shows small counts exactly, with no plus to overstate them", () => {
@@ -25,5 +29,15 @@ describe("scanMilestone", () => {
 
   it("names the download after the rounded figure", () => {
     expect(milestoneFileName(scanMilestone(237))).toBe("goreview-200-scans.png");
+  });
+});
+
+describe("averageScansPerCard", () => {
+  it("averages over the cards that have been used", () => {
+    expect(averageScansPerCard(237, 18)).toBe(13);
+  });
+
+  it("has nothing to report before the first scan", () => {
+    expect(averageScansPerCard(0, 0)).toBeNull();
   });
 });

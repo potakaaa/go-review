@@ -459,6 +459,53 @@ button {
 }
 
 /*
+ * The share dialog. A native <dialog> already handles the top layer, focus and
+ * Escape; all this adds is the arrival, including the exit -- `allow-discrete`
+ * is what keeps `display` and `overlay` around long enough to animate out.
+ * The reduced-motion rule below collapses it to a plain cut.
+ */
+.share-dialog {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 0.22s var(--ease-settle),
+    transform 0.22s var(--ease-settle),
+    overlay 0.22s var(--ease-settle) allow-discrete,
+    display 0.22s var(--ease-settle) allow-discrete;
+}
+
+.share-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .share-dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.share-dialog::backdrop {
+  background: rgb(0 0 0 / 65%);
+  opacity: 0;
+  transition:
+    opacity 0.22s var(--ease-settle),
+    overlay 0.22s var(--ease-settle) allow-discrete,
+    display 0.22s var(--ease-settle) allow-discrete;
+}
+
+.share-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .share-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/*
  * Accessibility. Reduced motion means a gentler equivalent, not the absence
  * of feedback: opacity still changes, travel and overshoot do not.
  */

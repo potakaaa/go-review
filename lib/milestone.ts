@@ -32,3 +32,16 @@ export function scanMilestone(totalScans: number): ScanMilestone {
 export function milestoneFileName(milestone: ScanMilestone): string {
   return `goreview-${milestone.value}-scans.png`;
 }
+
+/**
+ * Scans per card that has actually been used. Dividing by every card ever
+ * created would quietly punish the card printed yesterday, so the cards with
+ * no scans yet stay out of the denominator.
+ */
+export function averageScansPerCard(
+  totalScans: number,
+  scannedCards: number,
+): number | null {
+  if (scannedCards <= 0) return null;
+  return Math.round(totalScans / scannedCards);
+}
