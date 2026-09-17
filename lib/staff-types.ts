@@ -13,6 +13,7 @@ export const STAFF_SECTIONS: Array<{
   { id: "analytics", label: "Analytics", description: "Scan counts and usage rankings" },
   { id: "convert", label: "Convert", description: "Google Maps review-link conversion" },
   { id: "stories", label: "Shop Stories", description: "Website story content and photos" },
+  { id: "orders", label: "Orders", description: "Customer inquiries and order status" },
   { id: "staff", label: "Staff", description: "Other staff accounts and permissions" },
 ];
 

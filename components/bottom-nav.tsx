@@ -34,6 +34,13 @@ const ITEMS = [
     icon: "M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm10-2h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2zm4 0v2h-2v-2h2z",
   },
   {
+    href: "/dashboard/orders",
+    label: "Orders",
+    exact: false,
+    section: "orders",
+    icon: "M7 4V3h10v1h3v17H4V4h3zm2 0h6V3H9v1zm-2 4v2h10V8H7zm0 5v2h10v-2H7z",
+  },
+  {
     href: "/dashboard/analytics",
     label: "Analytics",
     exact: true,
@@ -47,6 +54,7 @@ const DESKTOP_ITEMS = [
   { href: "/dashboard/staff", label: "Staff", exact: false, section: "staff" },
   { href: "/dashboard", label: "Dashboard", exact: true, section: undefined },
   { href: "/dashboard/routes", label: "Routes", exact: false, section: "routes" },
+  { href: "/dashboard/orders", label: "Orders", exact: false, section: "orders" },
   { href: "/dashboard/analytics", label: "Analytics", exact: true, section: "analytics" },
   { href: "/dashboard/convert", label: "Convert", exact: true, section: "convert" },
 ] as const;

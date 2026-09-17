@@ -12,6 +12,7 @@ import {
 import { domainOf, formatDate } from "@/lib/format";
 import { publicUrlForSlug } from "@/lib/qr";
 import type { RedirectRoute } from "@/lib/database.types";
+import { platformLabel } from "@/lib/platforms";
 
 function MobileStatus({ active }: { active: boolean }) {
   return (
@@ -46,6 +47,9 @@ function CompactRouteCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-wrap gap-1.5">
           <MobileStatus active={route.active} />
+          <span className="inline-flex rounded border border-line bg-elevated px-1.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
+            {platformLabel(route.platform)}
+          </span>
           {route.publication_status === "draft" ? (
             <span className="inline-flex rounded border border-warn/30 bg-warn-soft px-1.5 py-1 text-[10px] font-medium uppercase tracking-wide text-warn">
               Draft
@@ -131,6 +135,9 @@ function FullRouteCard({
           <p className="mt-1 font-mono text-xs text-muted">/r/{route.slug}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded border border-line bg-elevated px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
+            {platformLabel(route.platform)}
+          </span>
           <StatusBadge active={route.active} />
           <PublicationBadge status={route.publication_status} />
           {route.locked ? <LockBadge /> : null}

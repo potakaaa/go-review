@@ -18,6 +18,7 @@ import { publicUrlForSlug } from "@/lib/qr";
 import { getRoute } from "@/lib/routes";
 import { requirePermission, isSuperadmin } from "@/lib/permissions";
 import { publishRoute } from "@/app/(dashboard)/dashboard/routes/actions";
+import { platformLabel } from "@/lib/platforms";
 
 export const metadata: Metadata = { title: "Route" };
 
@@ -99,6 +100,10 @@ export default async function RouteDetailPage({
       </div>
 
       <Card className="divide-y divide-line">
+        <div className="px-4 py-3">
+          <p className="eyebrow">Platform</p>
+          <p className="mt-0.5 text-sm">{platformLabel(route.platform)}</p>
+        </div>
         {route.maps_url ? (
           <div className="px-4 py-3">
             <p className="eyebrow">Original Google Maps link</p>

@@ -45,6 +45,7 @@ export default async function BatchEditRoutesPage() {
               active: route.active,
               locked: route.locked,
               scan_count: route.scan_count,
+              platform: route.platform,
             }))}
           />
         </Card>

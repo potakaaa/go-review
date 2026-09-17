@@ -9,8 +9,10 @@ import {
 } from "@/app/(dashboard)/dashboard/routes/actions";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
+import { PlatformSelector } from "@/components/platform-selector";
 import { Alert, FormError, buttonClass } from "@/components/ui";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
+import { isRoutePlatform, type RoutePlatform } from "@/lib/platforms";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -43,6 +45,10 @@ export function CreateRouteForm() {
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? "",
   );
+  const [platform, setPlatform] = useState<RoutePlatform>(() => {
+    const value = state.values?.platform ?? "google";
+    return isRoutePlatform(value) ? value : "google";
+  });
   const [showSlugField, setShowSlugField] = useState(
     Boolean(state.values?.slug),
   );
@@ -51,17 +57,28 @@ export function CreateRouteForm() {
     setDestination(reviewUrl);
   }, []);
 
-  const showWarning = destinationNeedsAcknowledgement(destination);
+  const showWarning = destinationNeedsAcknowledgement(destination, platform);
 
   return (
     <form action={formAction} className="space-y-6">
       {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
-      <GoogleReviewConverter
-        embedded
-        onConverted={handleConvertedReviewUrl}
-        sourceError={state.errors?.maps_url}
+      <PlatformSelector
+        value={platform}
+        onChange={(next) => {
+          setPlatform(next);
+          setDestination("");
+        }}
+        error={state.errors?.platform}
       />
+
+      {platform === "google" ? (
+        <GoogleReviewConverter
+          embedded
+          onConverted={handleConvertedReviewUrl}
+          sourceError={state.errors?.maps_url}
+        />
+      ) : null}
 
       <div>
         <label htmlFor="business_name" className="eyebrow mb-2 block">
@@ -83,6 +100,7 @@ export function CreateRouteForm() {
       </div>
 
       <RouteDestinationField
+        platform={platform}
         value={destination}
         onChange={setDestination}
         error={state.errors?.destination_url}
@@ -151,7 +169,7 @@ export function CreateRouteForm() {
           disabled={showWarning}
           label={
             showWarning
-              ? "Use a Google Review link"
+              ? `Use a valid ${platform} link`
               : "Create route"
           }
         />

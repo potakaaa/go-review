@@ -87,6 +87,7 @@ const STAFF_SECTIONS: StaffSection[] = [
   "analytics",
   "convert",
   "stories",
+  "orders",
   "staff",
 ];
 

@@ -9,9 +9,11 @@ import {
 } from "@/app/(dashboard)/dashboard/routes/actions";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
+import { PlatformSelector } from "@/components/platform-selector";
 import { Alert, FormError, buttonClass } from "@/components/ui";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 import type { RedirectRoute } from "@/lib/database.types";
+import type { RoutePlatform } from "@/lib/platforms";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -38,19 +40,31 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? route.destination_url,
   );
+  const [draftPlatform, setDraftPlatform] = useState<RoutePlatform | null>(null);
+  const platform = draftPlatform ?? route.platform;
   const [confirmation, setConfirmation] = useState("");
 
   const handleConvertedReviewUrl = useCallback((reviewUrl: string) => {
     setDestination(reviewUrl);
   }, []);
 
-  const showWarning = destinationNeedsAcknowledgement(destination);
+  const showWarning = destinationNeedsAcknowledgement(destination, platform);
 
   return (
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="id" value={route.id} />
 
       {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
+
+      <PlatformSelector
+        value={platform}
+        onChange={(next) => {
+          setDraftPlatform(next);
+          setDestination("");
+        }}
+        disabled={route.publication_status === "published"}
+        error={state.errors?.platform}
+      />
 
       {/* Read-only, and never read by the server action. The slug is printed on
           a physical card; changing the destination must not change the URL. */}
@@ -65,13 +79,15 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
         </p>
       </div>
 
-      <GoogleReviewConverter
-        embedded
-        autoFocus
-        initialUrl={route.maps_url ?? ""}
-        onConverted={handleConvertedReviewUrl}
-        sourceError={state.errors?.maps_url}
-      />
+      {platform === "google" ? (
+        <GoogleReviewConverter
+          embedded
+          autoFocus
+          initialUrl={route.maps_url ?? ""}
+          onConverted={handleConvertedReviewUrl}
+          sourceError={state.errors?.maps_url}
+        />
+      ) : null}
 
       <div>
         <label htmlFor="business_name" className="eyebrow mb-2 block">
@@ -91,6 +107,7 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
       </div>
 
       <RouteDestinationField
+        platform={platform}
         value={destination}
         onChange={setDestination}
         error={state.errors?.destination_url}

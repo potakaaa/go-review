@@ -21,7 +21,7 @@ const staffIdentitySchema = z.object({
 });
 
 const staffIdSchema = z.uuid("Invalid staff member.");
-const sections: StaffSection[] = ["routes", "analytics", "convert", "stories", "staff"];
+const sections: StaffSection[] = ["routes", "analytics", "convert", "stories", "orders", "staff"];
 
 function selectedPermissions(formData: FormData): Json[] {
   return sections.flatMap((section) => {

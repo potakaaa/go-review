@@ -36,6 +36,7 @@ export function RouteFilters({ total }: { total: number }) {
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const status = searchParams.get("status") ?? "all";
   const sort = searchParams.get("sort") ?? "newest";
+  const platform = searchParams.get("platform") ?? "all";
 
   // Skip the first run so simply landing on the page doesn't push a duplicate
   // history entry.
@@ -143,6 +144,21 @@ export function RouteFilters({ total }: { total: number }) {
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+        <div className="relative min-w-0">
+          <select
+            value={platform}
+            aria-label="Filter by platform"
+            onChange={(event) => setParam("platform", event.target.value, "all")}
+            className={select}
+          >
+            <option value="all">All platforms</option>
+            <option value="google">Google</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+          </select>
+          <SelectChevron />
+        </div>
+
         <div className="relative min-w-0">
           <select
             value={status}

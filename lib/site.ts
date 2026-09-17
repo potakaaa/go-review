@@ -34,6 +34,10 @@ export function isPublicPath(path: string): boolean {
     path === "/nfc-google-review-card" ||
     path === "/google-review-qr-code" ||
     path === "/google-review-card-philippines" ||
+    path === "/facebook-tap-card" ||
+    path === "/instagram-tap-card" ||
+    path === "/order" ||
+    path === "/privacy" ||
     path === "/resellers" ||
     path === "/guides" ||
     path.startsWith("/guides/") ||

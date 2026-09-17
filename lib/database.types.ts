@@ -12,7 +12,9 @@ export type StaffSection =
   | "analytics"
   | "convert"
   | "stories"
+  | "orders"
   | "staff";
+export type RoutePlatform = "google" | "facebook" | "instagram";
 export type RouteAccessLevel = "view" | "manage";
 
 /**
@@ -30,6 +32,7 @@ export type RedirectRoute = {
   batch_key: string | null;
   batch_position: number | null;
   business_name: string;
+  platform: RoutePlatform;
   destination_url: string;
   maps_url: string | null;
   notes: string | null;
@@ -49,6 +52,7 @@ type RedirectRouteInsert = {
   batch_key?: string | null;
   batch_position?: number | null;
   business_name: string;
+  platform?: RoutePlatform;
   destination_url: string;
   maps_url?: string | null;
   notes?: string | null;
@@ -95,6 +99,12 @@ export type Database = {
         Row: RedirectRoute;
         Insert: RedirectRouteInsert;
         Update: RedirectRouteUpdate;
+        Relationships: [];
+      };
+      order_inquiries: {
+        Row: OrderInquiry;
+        Insert: Pick<OrderInquiry, "customer_name" | "business_name" | "mobile" | "email" | "preferred_contact" | "city" | "barangay" | "delivery_area" | "standee_quantity" | "google_card_quantity" | "facebook_card_quantity" | "instagram_card_quantity" | "customer_notes"> & Partial<Pick<OrderInquiry, "status" | "internal_notes" | "notification_status" | "notification_attempts" | "notification_sent_at" | "notification_error">>;
+        Update: Partial<Pick<OrderInquiry, "status" | "internal_notes" | "notification_status" | "notification_attempts" | "notification_sent_at" | "notification_error">>;
         Relationships: [];
       };
     };
@@ -182,6 +192,7 @@ export type Database = {
         Args: {
           p_route_ids: string[];
           p_business_names: string[];
+          p_platform: RoutePlatform;
           p_destination_url: string;
           p_maps_url: string | null;
         };
@@ -198,4 +209,32 @@ export type Database = {
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };
+};
+
+export type OrderStatus = "new" | "contacted" | "confirmed" | "completed" | "cancelled";
+export type OrderInquiry = {
+  id: number;
+  reference_number: string;
+  customer_name: string;
+  business_name: string;
+  mobile: string;
+  email: string | null;
+  preferred_contact: "mobile" | "email";
+  city: string;
+  barangay: string;
+  delivery_area: "cdo" | "outside_cdo";
+  standee_quantity: number;
+  google_card_quantity: number;
+  facebook_card_quantity: number;
+  instagram_card_quantity: number;
+  estimated_total: number;
+  customer_notes: string | null;
+  status: OrderStatus;
+  internal_notes: string | null;
+  notification_status: "pending" | "sent" | "failed";
+  notification_attempts: number;
+  notification_sent_at: string | null;
+  notification_error: string | null;
+  created_at: string;
+  updated_at: string;
 };

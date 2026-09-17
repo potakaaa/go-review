@@ -19,6 +19,11 @@ export async function proxy(request: NextRequest) {
     if (admin) response.headers.set("X-Robots-Tag", "noindex, nofollow");
     return response;
   }
+  // The public order form submits through a Next.js Server Action on this
+  // exact path. All other public-host mutations remain closed.
+  if (path === "/order" && request.method === "POST") {
+    return NextResponse.next();
+  }
   if (!admin) return new NextResponse("Not found", { status: 404, headers: { "X-Robots-Tag": "noindex", "Cache-Control": "no-store" } });
   const response = await updateSession(request);
   response.headers.set("X-Robots-Tag", "noindex, nofollow");

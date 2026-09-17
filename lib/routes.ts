@@ -6,11 +6,13 @@ import {
 } from "@/lib/permissions";
 import { sortRoutesByBusinessName } from "@/lib/batch-edit";
 import type { RedirectRoute } from "@/lib/database.types";
+import type { RoutePlatform } from "@/lib/platforms";
 
 export type RouteFilters = {
   q?: string;
   status?: "all" | "active" | "inactive";
   sort?: "newest" | "oldest" | "most-used";
+  platform?: "all" | RoutePlatform;
 };
 
 /** Narrows loose `searchParams` values into the filter shape the query wants. */
@@ -18,18 +20,24 @@ export function parseFilters(params: {
   q?: string | string[];
   status?: string | string[];
   sort?: string | string[];
+  platform?: string | string[];
 }): Required<RouteFilters> {
   const first = (value?: string | string[]) =>
     Array.isArray(value) ? value[0] : value;
 
   const status = first(params.status);
   const sort = first(params.sort);
+  const platform = first(params.platform);
 
   return {
     q: (first(params.q) ?? "").trim(),
     status: status === "active" || status === "inactive" ? status : "all",
     sort:
       sort === "oldest" || sort === "most-used" ? sort : "newest",
+    platform:
+      platform === "google" || platform === "facebook" || platform === "instagram"
+        ? platform
+        : "all",
   };
 }
 
@@ -60,6 +68,7 @@ export async function listRoutes(
   if (filters.status !== "all") {
     query = query.eq("active", filters.status === "active");
   }
+  if (filters.platform !== "all") query = query.eq("platform", filters.platform);
 
   if (filters.q) {
     // Escape PostgREST's `or` delimiters and LIKE wildcards so a search for
@@ -142,6 +151,7 @@ export type RouteStats = {
   inactive: number;
   scanned: number;
   totalScans: number;
+  byPlatform: Record<RoutePlatform, number>;
 };
 
 /**
@@ -152,7 +162,7 @@ export async function getRouteStats(): Promise<RouteStats> {
   const { supabase } = await requireRouteReportingAccess();
   const { data, error } = await supabase
     .from("redirect_routes")
-    .select("active, scan_count");
+    .select("active, scan_count, platform");
 
   if (error) {
     console.error("[routes] stats_failed", { code: error.code });
@@ -169,6 +179,11 @@ export async function getRouteStats(): Promise<RouteStats> {
     inactive: rows.length - active,
     scanned,
     totalScans: rows.reduce((sum, row) => sum + row.scan_count, 0),
+    byPlatform: {
+      google: rows.filter((row) => row.platform === "google").length,
+      facebook: rows.filter((row) => row.platform === "facebook").length,
+      instagram: rows.filter((row) => row.platform === "instagram").length,
+    },
   };
 }
 

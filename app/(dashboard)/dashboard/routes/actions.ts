@@ -19,6 +19,7 @@ import {
 } from "@/lib/batch-edit";
 import { resolveGoogleReviewLink } from "@/lib/google-review";
 import { generateSlug } from "@/lib/slug";
+import { isRoutePlatform, normalizePlatformDestination } from "@/lib/platforms";
 import {
   batchEditRouteSchema,
   businessNameSchema,
@@ -93,6 +94,7 @@ export async function createRoute(
   if (!hasPermission(access, "routes", "manage")) notFound();
 
   const values = {
+    platform: String(formData.get("platform") ?? "google"),
     business_name: String(formData.get("business_name") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
     maps_url: String(formData.get("maps_url") ?? ""),
@@ -100,6 +102,8 @@ export async function createRoute(
     slug: String(formData.get("slug") ?? ""),
   };
 
+  const platform = isRoutePlatform(values.platform) ? values.platform : "google";
+  values.destination_url = normalizePlatformDestination(platform, values.destination_url);
   const parsed = createRouteSchema.safeParse(values);
   if (!parsed.success) {
     return { errors: fieldErrors(parsed.error), values };
@@ -125,6 +129,7 @@ export async function createRoute(
         owner_id: ownerId,
         slug,
         business_name: parsed.data.business_name,
+        platform: parsed.data.platform,
         destination_url: parsed.data.destination_url,
         maps_url: parsed.data.maps_url,
         notes: parsed.data.notes,
@@ -183,6 +188,7 @@ export async function createBatch(
   if (!hasPermission(access, "routes", "manage")) notFound();
 
   const values = {
+    platform: String(formData.get("platform") ?? "google"),
     business_name: String(formData.get("business_name") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
     maps_url: String(formData.get("maps_url") ?? ""),
@@ -190,6 +196,8 @@ export async function createBatch(
     quantity: String(formData.get("quantity") ?? ""),
   };
 
+  const platform = isRoutePlatform(values.platform) ? values.platform : "google";
+  values.destination_url = normalizePlatformDestination(platform, values.destination_url);
   const parsed = createBatchRouteSchema.safeParse(values);
   if (!parsed.success) {
     return { errors: fieldErrors(parsed.error), values };
@@ -213,6 +221,7 @@ export async function createBatch(
       batch_key: candidate,
       batch_position: index + 1,
       business_name: parsed.data.business_name,
+      platform: parsed.data.platform,
       destination_url: parsed.data.destination_url,
       maps_url: parsed.data.maps_url,
       notes: parsed.data.notes,
@@ -261,6 +270,7 @@ export async function batchUpdateRoutes(
 ): Promise<RouteFormState> {
   const access = await requirePermission("routes", "manage");
   const values = {
+    platform: String(formData.get("platform") ?? "google"),
     name_seed: String(formData.get("name_seed") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
     maps_url: String(formData.get("maps_url") ?? ""),
@@ -269,6 +279,8 @@ export async function batchUpdateRoutes(
     .getAll("route_ids")
     .filter((value): value is string => typeof value === "string");
 
+  const platform = isRoutePlatform(values.platform) ? values.platform : "google";
+  values.destination_url = normalizePlatformDestination(platform, values.destination_url);
   const parsed = batchEditRouteSchema.safeParse({
     ...values,
     route_ids: routeIds,
@@ -284,7 +296,7 @@ export async function batchUpdateRoutes(
   // authoritative even if the page has been left open for a while.
   const { data: selectedRows, error: selectedRowsError } = await supabase
     .from("redirect_routes")
-    .select("id, business_name, locked")
+    .select("id, business_name, locked, platform")
     .in("id", parsed.data.route_ids);
 
   if (selectedRowsError) {
@@ -319,6 +331,13 @@ export async function batchUpdateRoutes(
     };
   }
 
+  if (selectedRoutes.some((route) => route.platform !== parsed.data.platform)) {
+    return {
+      errors: { route_ids: "Select routes from the same platform." },
+      values,
+    };
+  }
+
   const businessNames = incrementedRouteNames(
     parsed.data.name_seed,
     selectedRoutes.length,
@@ -341,6 +360,7 @@ export async function batchUpdateRoutes(
     {
       p_route_ids: selectedRoutes.map((route) => route.id),
       p_business_names: businessNames,
+      p_platform: parsed.data.platform,
       p_destination_url: parsed.data.destination_url,
       p_maps_url: parsed.data.maps_url,
     },
@@ -351,7 +371,7 @@ export async function batchUpdateRoutes(
       return {
         errors: {
           destination_url:
-            "Use an approved Google Maps or Google Review URL.",
+            "Use an approved destination for the selected platform.",
         },
         values,
       };
@@ -403,6 +423,7 @@ export async function updateRoute(
   if (!id) return { errors: {}, message: "Missing route id." };
 
   const values = {
+    platform: String(formData.get("platform") ?? "google"),
     business_name: String(formData.get("business_name") ?? ""),
     destination_url: String(formData.get("destination_url") ?? ""),
     maps_url: String(formData.get("maps_url") ?? ""),
@@ -410,6 +431,8 @@ export async function updateRoute(
     confirm_business_name: String(formData.get("confirm_business_name") ?? ""),
   };
 
+  const platform = isRoutePlatform(values.platform) ? values.platform : "google";
+  values.destination_url = normalizePlatformDestination(platform, values.destination_url);
   const parsed = updateRouteSchema.safeParse({
     ...values,
     active: formData.get("active") === "on",
@@ -427,7 +450,7 @@ export async function updateRoute(
   // value in the same request.
   const { data: currentRoute, error: currentRouteError } = await supabase
     .from("redirect_routes")
-    .select("business_name, locked")
+    .select("business_name, locked, platform, publication_status")
     .eq("id", id)
     .maybeSingle();
 
@@ -444,6 +467,16 @@ export async function updateRoute(
 
   if (!currentRoute) {
     return { errors: {}, values, message: "Could not find this route." };
+  }
+
+  if (
+    currentRoute.publication_status === "published" &&
+    parsed.data.platform !== currentRoute.platform
+  ) {
+    return {
+      errors: { platform: "The platform is fixed after a route is published." },
+      values,
+    };
   }
 
   const submittedConfirmation = values.confirm_business_name.trim().toLowerCase();
@@ -466,6 +499,7 @@ export async function updateRoute(
     .from("redirect_routes")
     .update({
       business_name: parsed.data.business_name,
+      platform: parsed.data.platform,
       destination_url: parsed.data.destination_url,
       maps_url: parsed.data.maps_url,
       notes: parsed.data.notes,

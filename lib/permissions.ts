@@ -60,7 +60,10 @@ export async function requireDashboardAccess(): Promise<StaffContext> {
   if (
     !isSuperadmin(context) &&
     !hasPermission(context, "routes", "view") &&
-    !hasPermission(context, "analytics", "view")
+    !hasPermission(context, "analytics", "view") &&
+    !hasPermission(context, "convert", "view") &&
+    !hasPermission(context, "stories", "view") &&
+    !hasPermission(context, "orders", "view")
   ) {
     notFound();
   }

@@ -3,7 +3,9 @@ import { z } from "zod";
 import {
   destinationNeedsAcknowledgement,
   looksLikeGoogleReviewUrl,
+  looksLikePlatformDestination,
 } from "@/lib/validation-client";
+import { ROUTE_PLATFORMS, type RoutePlatform } from "@/lib/platforms";
 
 import { BATCH_MAX_SIZE, BATCH_MIN_SIZE } from "@/lib/batch";
 import { BATCH_EDIT_MAX_SIZE } from "@/lib/batch-edit";
@@ -20,7 +22,7 @@ export { destinationNeedsAcknowledgement, looksLikeGoogleReviewUrl };
  * compromised staff session therefore cannot repoint printed client cards to
  * an arbitrary phishing origin.
  */
-export const destinationUrlSchema = z
+const httpsDestinationSchema = z
   .string()
   .trim()
   .min(1, "Destination URL is required.")
@@ -42,13 +44,41 @@ export const destinationUrlSchema = z
       });
       return;
     }
-    if (!looksLikeGoogleReviewUrl(value)) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Use an approved Google Maps or Google Review URL.",
-      });
-    }
   });
+
+/** Backwards-compatible Google-only schema used by the converter and tests. */
+export const destinationUrlSchema = httpsDestinationSchema.superRefine((value, ctx) => {
+  if (!looksLikeGoogleReviewUrl(value)) {
+    ctx.addIssue({ code: "custom", message: "Use an approved Google Maps or Google Review URL." });
+  }
+});
+
+export const platformSchema = z.enum(ROUTE_PLATFORMS).default("google");
+
+function addPlatformDestinationIssues(
+  value: { platform: RoutePlatform; destination_url: string; maps_url?: string | null },
+  ctx: z.RefinementCtx,
+) {
+  if (!looksLikePlatformDestination(value.platform, value.destination_url)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["destination_url"],
+      message:
+        value.platform === "google"
+          ? "Use an approved Google Maps or Google Review URL."
+          : value.platform === "facebook"
+            ? "Use a valid Facebook Page, Reviews, or Recommendations URL."
+            : "Use a valid Instagram profile URL.",
+    });
+  }
+  if (value.platform !== "google" && value.maps_url) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["maps_url"],
+      message: "Google Maps source links are only used for Google routes.",
+    });
+  }
+}
 
 /** Optional source URL retained so an admin can edit the route from the same place later. */
 export const mapsUrlSchema = z
@@ -116,16 +146,18 @@ const customSlugSchema = z
   });
 
 export const createRouteSchema = z.object({
+  platform: platformSchema,
   business_name: businessNameSchema,
-  destination_url: destinationUrlSchema,
+  destination_url: httpsDestinationSchema,
   maps_url: mapsUrlSchema,
   notes: notesSchema,
   slug: customSlugSchema,
-});
+}).superRefine(addPlatformDestinationIssues);
 
 export const createBatchRouteSchema = z.object({
+  platform: platformSchema,
   business_name: businessNameSchema,
-  destination_url: destinationUrlSchema,
+  destination_url: httpsDestinationSchema,
   maps_url: mapsUrlSchema,
   notes: notesSchema,
   quantity: z.coerce
@@ -133,9 +165,10 @@ export const createBatchRouteSchema = z.object({
     .int("Enter a whole number of routes.")
     .min(BATCH_MIN_SIZE, `Create at least ${BATCH_MIN_SIZE} routes.`)
     .max(BATCH_MAX_SIZE, `Create at most ${BATCH_MAX_SIZE} routes at a time.`),
-});
+}).superRefine(addPlatformDestinationIssues);
 
 export const batchEditRouteSchema = z.object({
+  platform: platformSchema,
   route_ids: z
     .array(z.uuid("Select valid routes."))
     .min(1, "Select at least one route.")
@@ -152,17 +185,18 @@ export const batchEditRouteSchema = z.object({
       }
   }),
   name_seed: businessNameSchema,
-  destination_url: destinationUrlSchema,
+  destination_url: httpsDestinationSchema,
   maps_url: mapsUrlSchema,
-});
+}).superRefine(addPlatformDestinationIssues);
 
 export const updateRouteSchema = z.object({
+  platform: platformSchema,
   business_name: businessNameSchema,
-  destination_url: destinationUrlSchema,
+  destination_url: httpsDestinationSchema,
   maps_url: mapsUrlSchema,
   notes: notesSchema,
   active: z.boolean(),
-});
+}).superRefine(addPlatformDestinationIssues);
 
 export type CreateRouteInput = z.infer<typeof createRouteSchema>;
 export type CreateBatchRouteInput = z.infer<typeof createBatchRouteSchema>;

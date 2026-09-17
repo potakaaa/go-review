@@ -1,17 +1,18 @@
 # Goreview
 
-> Goreview makes customized NFC and QR Google review cards for businesses in the Philippines.
+> Goreview makes customized NFC and QR tap cards for Google, Facebook, and Instagram for businesses in the Philippines.
 
-Goreview helps a business give customers a direct, voluntary path to its Google review page. Customers can tap an NFC-enabled phone or scan a QR code; they do not need to search for the business listing first.
+Goreview gives customers a direct path to a business's chosen Google review screen, Facebook Page, or Instagram profile. Customers tap an NFC-enabled phone or scan a QR code.
 
 ## Important facts
 
-- Product: customized NFC and QR Google review cards.
-- Price: from PHP 699 with a one-time payment.
+- Products: PHP 299 adhesive 3x4-inch tap cards for Google, Facebook, or Instagram; PHP 699 Google review standee.
+- Tap-card minimum: 3 total, with any mix of the three platforms.
+- Delivery: free within Cagayan de Oro for qualifying tap-card orders; shipping elsewhere is quoted separately.
 - Support: lifetime support is included.
 - Coverage: cards are made for businesses in the Philippines and can ship across the Philippines.
 - Review policy: Goreview does not filter feedback, require a positive rating, offer incentives for reviews, or guarantee review volume, ratings, or search rankings.
-- Brand relationship: Goreview is an independent product by Helbi Solutions and is not affiliated with Google.
+- Brand relationship: Goreview is an independent product by Helbi Solutions and is not affiliated with Google or Meta.
 
 ## Canonical pages
 
@@ -19,6 +20,9 @@ Goreview helps a business give customers a direct, voluntary path to its Google 
 - [NFC Google review cards](https://goreview.rald.site/nfc-google-review-card): how tap-to-review cards work and when QR is useful as a fallback.
 - [Google review QR code cards](https://goreview.rald.site/google-review-qr-code): how a QR code sends customers to a business review page.
 - [Google review cards in the Philippines](https://goreview.rald.site/google-review-card-philippines): local ordering, setup, shipping, and support information.
+- [Facebook tap cards](https://goreview.rald.site/facebook-tap-card): NFC and QR cards that open a Facebook Page or its reviews.
+- [Instagram tap cards](https://goreview.rald.site/instagram-tap-card): NFC and QR cards that open an Instagram profile.
+- [Order inquiry](https://goreview.rald.site/order): choose products and send an order inquiry; no online payment is collected.
 
 ## Guides
 

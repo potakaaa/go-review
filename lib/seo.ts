@@ -4,7 +4,7 @@ import { FACEBOOK_URL, PUBLIC_ORIGIN } from "@/lib/site";
 
 export const SITE_NAME = "Goreview";
 export const SITE_DESCRIPTION =
-  "Get more genuine Google reviews with customized NFC and QR Google review cards for businesses in the Philippines. One-time payment, lifetime support.";
+  "Customized NFC and QR tap cards for Google reviews, Facebook, and Instagram for businesses in the Philippines.";
 export const SEO_IMAGE = `${PUBLIC_ORIGIN}/opengraph-image`;
 export const REVIEW_CARD_IMAGE = `${PUBLIC_ORIGIN}/images/goreview-card-clean-v2.webp`;
 export const ORGANIZATION_ID = `${PUBLIC_ORIGIN}#organization`;
@@ -26,7 +26,7 @@ export const organizationJsonLd = {
   name: SITE_NAME,
   url: PUBLIC_ORIGIN,
   description:
-    "Custom NFC and QR Google review cards for businesses in the Philippines.",
+    "Custom NFC and QR tap cards for businesses in the Philippines.",
   logo: publicUrl("/icon"),
   sameAs: [FACEBOOK_URL],
 } as const;
@@ -36,7 +36,7 @@ export const websiteJsonLd = {
   "@type": "WebSite",
   "@id": WEBSITE_ID,
   name: SITE_NAME,
-  alternateName: "Goreview Google Review Cards",
+  alternateName: "Goreview Tap Cards",
   url: PUBLIC_ORIGIN,
   description: SITE_DESCRIPTION,
   inLanguage: "en-PH",

@@ -22,7 +22,8 @@ export default async function RoutesPage({
     : params.updated;
   const updatedCount = Number(updatedValue);
 
-  const isFiltered = filters.q !== "" || filters.status !== "all";
+  const isFiltered =
+    filters.q !== "" || filters.status !== "all" || filters.platform !== "all";
 
   return (
     <div className="space-y-8 pb-16">

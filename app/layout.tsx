@@ -7,10 +7,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(PUBLIC_ORIGIN),
   title: {
-    default: "Goreview | Google Review Cards for Philippine Businesses",
+    default: "Goreview | NFC & QR Tap Cards for Philippine Businesses",
     template: "%s · Goreview",
   },
-  description: "Get more genuine Google reviews with customized NFC and QR Google review cards for businesses in the Philippines. One-time payment, lifetime support.",
+  description: "Customized NFC and QR tap cards for Google reviews, Facebook, and Instagram for businesses in the Philippines.",
   applicationName: "Goreview",
   creator: "Goreview by Helbi Solutions",
   publisher: "Goreview by Helbi Solutions",
@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   category: "Business services",
   alternates: { canonical: PUBLIC_ORIGIN },
   openGraph: {
-    title: "Goreview | Google Review Cards for Philippine Businesses",
-    description: "Get more genuine Google reviews with customized NFC and QR Google review cards for businesses in the Philippines. One-time payment, lifetime support.",
+    title: "Goreview | NFC & QR Tap Cards for Philippine Businesses",
+    description: "Customized NFC and QR tap cards for Google reviews, Facebook, and Instagram.",
     url: PUBLIC_ORIGIN,
     siteName: "Goreview",
     type: "website",
@@ -28,13 +28,13 @@ export const metadata: Metadata = {
       url: "/opengraph-image",
       width: 1200,
       height: 630,
-      alt: "Goreview NFC and QR Google review cards",
+      alt: "Goreview NFC and QR tap cards",
     }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Goreview | Google Review Cards for Philippine Businesses",
-    description: "Get more genuine Google reviews with customized NFC and QR Google review cards for businesses in the Philippines.",
+    title: "Goreview | NFC & QR Tap Cards for Philippine Businesses",
+    description: "NFC and QR tap cards for Google, Facebook, and Instagram.",
     images: ["/opengraph-image"],
   },
   appleWebApp: {

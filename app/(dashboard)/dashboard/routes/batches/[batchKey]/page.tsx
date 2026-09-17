@@ -6,6 +6,7 @@ import { Alert, ButtonLink, Card, StatusBadge, buttonClass } from "@/components/
 import { formatDate } from "@/lib/format";
 import { publicUrlForSlug } from "@/lib/qr";
 import { getBatchRoutes } from "@/lib/routes";
+import { platformLabel } from "@/lib/platforms";
 
 export const metadata: Metadata = { title: "Route batch" };
 
@@ -42,7 +43,7 @@ export default async function BatchRoutesPage({
           </h1>
           <p className="mt-2 font-mono text-xs text-muted">
             Batch {batchKey} · {createdCount}{" "}
-            {createdCount === 1 ? "route" : "routes"} · Created{" "}
+            {createdCount === 1 ? "route" : "routes"} · {platformLabel(firstRoute.platform)} · Created{" "}
             {formatDate(firstRoute.created_at)}
           </p>
         </div>

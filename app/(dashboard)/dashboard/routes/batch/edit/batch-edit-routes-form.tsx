@@ -9,12 +9,14 @@ import {
 } from "@/app/(dashboard)/dashboard/routes/actions";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
+import { PlatformSelector } from "@/components/platform-selector";
 import { Alert, FormError, buttonClass } from "@/components/ui";
 import {
   BATCH_EDIT_MAX_SIZE,
   incrementedRouteNames,
 } from "@/lib/batch-edit";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
+import type { RoutePlatform } from "@/lib/platforms";
 
 import { RouteSelectionList } from "@/app/(dashboard)/dashboard/routes/batch/edit/route-selection-list";
 import type { BatchEditRoute } from "@/app/(dashboard)/dashboard/routes/batch/edit/types";
@@ -44,9 +46,11 @@ export function BatchEditRoutesForm({ routes }: { routes: BatchEditRoute[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [nameSeed, setNameSeed] = useState("");
   const [destination, setDestination] = useState("");
+  const [platform, setPlatform] = useState<RoutePlatform>("google");
 
-  const editableRoutes = routes.filter((route) => !route.locked);
-  const selectedRoutes = routes.filter((route) => selectedIds.has(route.id));
+  const platformRoutes = routes.filter((route) => route.platform === platform);
+  const editableRoutes = platformRoutes.filter((route) => !route.locked);
+  const selectedRoutes = platformRoutes.filter((route) => selectedIds.has(route.id));
   const generatedNames = incrementedRouteNames(
     nameSeed,
     selectedRoutes.length,
@@ -81,12 +85,22 @@ export function BatchEditRoutesForm({ routes }: { routes: BatchEditRoute[] }) {
     );
   };
 
-  const showWarning = destinationNeedsAcknowledgement(destination);
+  const showWarning = destinationNeedsAcknowledgement(destination, platform);
   const selectionLimitExceeded = selectedRoutes.length > BATCH_EDIT_MAX_SIZE;
 
   return (
     <form action={formAction} className="space-y-7">
       {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
+
+      <PlatformSelector
+        value={platform}
+        onChange={(next) => {
+          setPlatform(next);
+          setSelectedIds(new Set());
+          setDestination("");
+        }}
+        error={state.errors?.platform}
+      />
 
       <div>
         <label htmlFor="name_seed" className="eyebrow mb-2 block">
@@ -113,13 +127,16 @@ export function BatchEditRoutesForm({ routes }: { routes: BatchEditRoute[] }) {
         <FormError>{state.errors?.name_seed}</FormError>
       </div>
 
-      <GoogleReviewConverter
-        embedded
-        onConverted={handleConvertedReviewUrl}
-        sourceError={state.errors?.maps_url}
-      />
+      {platform === "google" ? (
+        <GoogleReviewConverter
+          embedded
+          onConverted={handleConvertedReviewUrl}
+          sourceError={state.errors?.maps_url}
+        />
+      ) : null}
 
       <RouteDestinationField
+        platform={platform}
         value={destination}
         onChange={setDestination}
         error={state.errors?.destination_url}
@@ -127,7 +144,7 @@ export function BatchEditRoutesForm({ routes }: { routes: BatchEditRoute[] }) {
       />
 
       <RouteSelectionList
-        routes={routes}
+        routes={platformRoutes}
         selectedIds={selectedIds}
         previewNameById={previewNameById}
         error={state.errors?.route_ids}

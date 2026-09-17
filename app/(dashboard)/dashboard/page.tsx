@@ -29,11 +29,13 @@ export default async function DashboardPage() {
     isSuperadmin(access) || access.permissions.analytics.canView;
   const canConvert =
     isSuperadmin(access) || access.permissions.convert.canView;
+  const canViewOrders =
+    isSuperadmin(access) || access.permissions.orders.canView;
+  const canViewRouteReporting = canViewRoutes || canViewAnalytics;
   // One request, two queries in flight together rather than in sequence.
-  const [stats, recent] = await Promise.all([
-    getRouteStats(),
-    getRecentRoutes(3),
-  ]);
+  const [stats, recent] = canViewRouteReporting
+    ? await Promise.all([getRouteStats(), getRecentRoutes(3)])
+    : [{ total: 0, active: 0, inactive: 0, scanned: 0, totalScans: 0, byPlatform: { google: 0, facebook: 0, instagram: 0 } }, []];
 
   return (
     <div className="space-y-10">
@@ -80,11 +82,19 @@ export default async function DashboardPage() {
         ) : null}
       </header>
 
-      <div className="grid overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
+      {canViewOrders ? (
+        <Card className="transition-colors hover:border-line-strong">
+          <Link href="/dashboard/orders" className="flex min-h-16 items-center justify-between px-5 py-4">
+            <span><span className="eyebrow block">Customer pipeline</span><span className="mt-1 block text-sm text-muted">Open order inquiries and follow-ups</span></span><span aria-hidden="true">↗</span>
+          </Link>
+        </Card>
+      ) : null}
+
+      {canViewRouteReporting ? <div className="grid overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
         <Stat label="Total" value={stats.total} />
         <Stat label="Active" value={stats.active} />
         <Stat label="Inactive" value={stats.inactive} />
-      </div>
+      </div> : null}
 
       {stats.total > 0 && canViewAnalytics ? (
         <Card className="transition-colors hover:border-line-strong">
@@ -111,7 +121,7 @@ export default async function DashboardPage() {
         </Card>
       ) : null}
 
-      <section>
+      {canViewRouteReporting ? <section>
         <div className="mb-5 flex items-baseline justify-between gap-3 border-b border-line pb-4">
           <div>
             <p className="eyebrow">Recent activity</p>
@@ -151,7 +161,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
-      </section>
+      </section> : null}
     </div>
   );
 }

@@ -26,6 +26,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [REVIEW_CARD_IMAGE],
     })),
     {
+      url: `${PUBLIC_ORIGIN}/facebook-tap-card`,
+      lastModified: "2026-09-17",
+      changeFrequency: "monthly",
+      priority: 0.9,
+      images: [`${PUBLIC_ORIGIN}/images/facebook-tap-card-mockup-v1.png`],
+    },
+    {
+      url: `${PUBLIC_ORIGIN}/instagram-tap-card`,
+      lastModified: "2026-09-17",
+      changeFrequency: "monthly",
+      priority: 0.9,
+      images: [`${PUBLIC_ORIGIN}/images/instagram-tap-card-mockup-v1.png`],
+    },
+    {
+      url: `${PUBLIC_ORIGIN}/order`,
+      lastModified: "2026-09-17",
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${PUBLIC_ORIGIN}/resellers`,
       lastModified: "2026-09-09",
       changeFrequency: "monthly",

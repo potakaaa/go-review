@@ -24,9 +24,9 @@ export function PublicHeader() {
         >
           <Link
             className="hidden py-3.5 text-[13px] text-muted hover:text-ink sm:block"
-            href="/google-review-card"
+            href="/#cards"
           >
-            Google review cards
+            Tap cards
           </Link>
           <Link
             className="hidden py-3.5 text-[13px] text-muted hover:text-ink md:block"
@@ -46,16 +46,14 @@ export function PublicHeader() {
           >
             Pricing
           </Link>
-          <a
-            href={FACEBOOK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/order"
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ink bg-ink px-3 py-2 text-[12px] font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink sm:min-h-11 sm:px-4 sm:py-2.5 sm:text-[14px]"
           >
             <span className="sm:hidden">Get card</span>
             <span className="hidden sm:inline">Get your card</span>
             <span aria-hidden="true">↗</span>
-          </a>
+          </Link>
         </nav>
       </div>
     </header>
@@ -91,8 +89,12 @@ export function PublicFooter() {
         <Link className="ml-6 text-[13px]" href="/resellers">
           Resellers ↗
         </Link>
+        <Link className="ml-6 text-[13px]" href="/privacy">
+          Privacy ↗
+        </Link>
         <p className="mt-3 max-w-sm text-[12px] leading-[1.8] text-muted md:ml-auto">
-          Goreview is an independent product, not affiliated with Google.
+          Goreview is independent and is not affiliated with Google, Meta,
+          Facebook, or Instagram.
         </p>
       </div>
     </footer>
@@ -100,8 +102,8 @@ export function PublicFooter() {
 }
 
 export function PublicCta({
-  title = "Make your next review easier to reach.",
-  description = "Get a customized NFC and QR Google review card for your business.",
+  title = "Put your next action within reach.",
+  description = "Get customized NFC and QR tap cards for Google, Facebook, or Instagram.",
 }: {
   title?: string;
   description?: string;
@@ -117,14 +119,12 @@ export function PublicCta({
           {description}
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6">
-          <a
-            href={FACEBOOK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/order"
             className="inline-flex min-h-12 items-center justify-center gap-3 rounded-lg border border-ink bg-ink px-6 py-3 text-sm font-semibold text-canvas transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
           >
-            Get your Goreview card <span aria-hidden="true">↗</span>
-          </a>
+            Build your order <span aria-hidden="true">↗</span>
+          </Link>
           <a
             href={ORDER_EMAIL}
             className="inline-flex min-h-12 items-center gap-3 px-2 py-3 text-sm font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
@@ -133,7 +133,7 @@ export function PublicCta({
           </a>
         </div>
         <p className="mt-5 text-[13px] text-muted">
-          One-time payment. Lifetime support.
+          Tap cards are ₱299 each. Minimum three total.
         </p>
       </div>
     </section>

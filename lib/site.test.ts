@@ -26,6 +26,10 @@ describe("site host boundaries", () => {
     expect(isPublicPath("/media/stories/one")).toBe(true);
     expect(isPublicPath("/llms.txt")).toBe(true);
     expect(isPublicPath("/google-review-card")).toBe(true);
+    expect(isPublicPath("/facebook-tap-card")).toBe(true);
+    expect(isPublicPath("/instagram-tap-card")).toBe(true);
+    expect(isPublicPath("/order")).toBe(true);
+    expect(isPublicPath("/privacy")).toBe(true);
     expect(isPublicPath("/resellers")).toBe(true);
     expect(isPublicPath("/guides/how-to-get-more-google-reviews")).toBe(true);
     expect(isPublicPath("/login")).toBe(false);

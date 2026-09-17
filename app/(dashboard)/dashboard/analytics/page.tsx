@@ -5,6 +5,7 @@ import { ButtonLink, Card, EmptyState } from "@/components/ui";
 import { formatRelativeDate } from "@/lib/format";
 import { getMostUsedRoutes, getRouteStats } from "@/lib/routes";
 import { requirePermission } from "@/lib/permissions";
+import { platformLabel } from "@/lib/platforms";
 
 export const metadata: Metadata = { title: "Analytics" };
 
@@ -60,6 +61,12 @@ export default async function AnalyticsPage() {
         <Metric label="All links" value={stats.total} />
       </div>
 
+      <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line">
+        <Metric label="Google" value={stats.byPlatform.google} />
+        <Metric label="Facebook" value={stats.byPlatform.facebook} />
+        <Metric label="Instagram" value={stats.byPlatform.instagram} />
+      </div>
+
       <section>
         <div className="mb-5 flex items-baseline justify-between gap-3 border-b border-line pb-4">
           <div>
@@ -112,7 +119,7 @@ export default async function AnalyticsPage() {
                       /r/{route.slug}
                     </p>
                     <p className="mt-1 truncate text-[11px] text-subtle">
-                      {route.active ? "Active" : "Inactive"} · last used{" "}
+                      {platformLabel(route.platform)} · {route.active ? "Active" : "Inactive"} · last used{" "}
                       {route.last_scanned_at
                         ? formatRelativeDate(route.last_scanned_at).toLowerCase()
                         : "unknown"}
