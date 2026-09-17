@@ -404,53 +404,6 @@ button {
 }
 
 /*
- * The public marketing pages animate with springs from `motion`, which start
- * at the element's live on-screen value and so survive being interrupted.
- * The two rules below are the exceptions that never need interrupting: an
- * ambient product drift and the reveal used on the reseller page.
- */
-.product-float {
-  animation: product-float 7s ease-in-out infinite;
-}
-
-.reveal.is-visible {
-  animation: section-arrive 700ms var(--ease-settle) both;
-}
-
-.mobile-order-bar {
-  transition:
-    opacity 180ms var(--ease-settle),
-    transform 180ms var(--ease-settle);
-}
-
-.mobile-order-bar.is-comparison-visible {
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-@keyframes product-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-@keyframes section-arrive {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/*
  * Accessibility. Reduced motion means a gentler equivalent, not the absence
  * of feedback: opacity still changes, travel and overshoot do not.
  */

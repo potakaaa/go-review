@@ -19,3 +19,9 @@ supabase/.temp/
 # OS/editor files
 .DS_Store
 *.log
+
+# Coding-agent tooling: installed skills and their lockfile. Not app code, and
+# not something a product repo should carry.
+.agents/
+.claude/
+skills-lock.json
