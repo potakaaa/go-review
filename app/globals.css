@@ -145,12 +145,13 @@ select {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 16px minimum on form controls -- anything smaller makes iOS zoom the
-   viewport on focus, which reads as the layout breaking. */
+/* 16px minimum on the controls iOS zooms into on focus -- anything smaller
+   there makes the viewport jump, which reads as the layout breaking. Buttons
+   are deliberately not in this list: they never trigger that zoom, and an
+   unlayered rule here would quietly outrank every `text-sm` on a button. */
 input,
 textarea,
-select,
-button {
+select {
   font-size: 16px;
 }
 
@@ -338,7 +339,11 @@ button {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* One column per item, however many the viewer's permissions leave. A fixed
+     count silently wrapped the last tab onto a second, clipped row the day a
+     fourth section was added. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 0.125rem;
   height: 100%;
   width: 100%;

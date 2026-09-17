@@ -28,7 +28,7 @@ export default async function DashboardLayout({
   return (
     <div data-theme="admin" className="flex min-h-dvh flex-col bg-canvas text-ink">
       <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
             <span
               aria-hidden="true"
@@ -36,6 +36,9 @@ export default async function DashboardLayout({
             >
               GR
             </span>
+            {/* The one thing here allowed to give way: everything to the
+                right is nowrap, so a narrow phone truncates the name rather
+                than wrapping the links. */}
             <span className="truncate text-sm font-medium tracking-tight">
               Goreview Admin
             </span>
@@ -45,26 +48,26 @@ export default async function DashboardLayout({
             role={access.profile.role}
             permissions={access.permissions}
           />
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="flex shrink-0 items-center gap-3 md:hidden">
             {(
               access.profile.role === "superadmin" ||
               access.permissions.stories.canView
             ) ? (
-              <Link href="/dashboard/stories" className="text-xs text-muted tap-target inline-flex items-center">
+              <Link href="/dashboard/stories" className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
                 Shop stories
               </Link>
             ) : null}
             {access.profile.role === "superadmin" ? (
-              <Link href="/dashboard/staff" className="text-xs text-muted tap-target inline-flex items-center">
+              <Link href="/dashboard/staff" className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
                 Staff
               </Link>
             ) : null}
           </div>
 
-          <form action={logout}>
+          <form action={logout} className="shrink-0">
             <button
               type="submit"
-              className="rounded-full px-3 py-2 text-xs font-medium text-subtle tap-target hover:bg-elevated hover:text-ink"
+              className="whitespace-nowrap rounded-full px-3 py-2 text-xs font-medium text-subtle tap-target hover:bg-elevated hover:text-ink"
             >
               Sign out
             </button>
