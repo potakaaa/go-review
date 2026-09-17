@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ResetPasswordForm } from "@/app/reset-password/reset-password-form";
-import { Card } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -34,7 +33,7 @@ export default async function ResetPasswordPage({
         <div className="mb-8">
           <div
             aria-hidden="true"
-            className="mb-6 flex size-11 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
+            className="mb-6 flex size-11 items-center justify-center rounded-xl border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
           >
             NEW
           </div>
@@ -51,9 +50,9 @@ export default async function ResetPasswordPage({
           </p>
         </div>
 
-        <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
+        <div className="glass glass-sheen rounded-2xl p-5 sm:p-6">
           <ResetPasswordForm />
-        </Card>
+        </div>
       </div>
     </main>
   );

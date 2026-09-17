@@ -18,12 +18,12 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0a0a0a",
+          background: "#1d1d1f",
           color: "#ffffff",
           fontSize: 240,
           fontWeight: 500,
           letterSpacing: "-0.05em",
-          border: "24px solid #27272a",
+          border: "24px solid #3a3a3d",
         }}
       >
         GR

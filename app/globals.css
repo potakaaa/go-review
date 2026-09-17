@@ -8,53 +8,70 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Bitcount Prop Single Variable";
-  src: url("/fonts/bitcount-prop-single-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-
 /*
- * Quiet dark workspace palette inspired by the corrected portfolio reference:
- * neutral surfaces, hairline borders, and white as the single action color.
- * Semantic colors stay reserved for route health and validation feedback.
+ * Light workspace palette, built on Apple's light stack: a pure white page, a
+ * single grey step for alternating sections, and near-black rather than pure
+ * black for text. White is no longer the action colour -- ink is -- so buttons
+ * read as solid objects on the page instead of holes punched through it.
+ *
+ * Semantic colours stay reserved for route health and validation feedback.
  */
 @theme {
-  --color-canvas: #0a0a0a;
-  --color-surface: #111111;
-  --color-elevated: #181818;
-  --color-ink: #f5f5f5;
-  --color-muted: #a3a3a3;
-  --color-subtle: #737373;
-  --color-line: #27272a;
-  --color-line-strong: #3f3f46;
+  --color-canvas: #ffffff;
+  --color-surface: #f5f5f7;
+  --color-elevated: #ebebef;
+  --color-ink: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-subtle: #86868b;
+  --color-line: #e4e4e9;
+  --color-line-strong: #d2d2d7;
 
-  --color-brand: #f5f5f5;
-  --color-brand-strong: #d4d4d4;
-  --color-brand-soft: #262626;
+  --color-brand: #1d1d1f;
+  --color-brand-strong: #000000;
+  --color-brand-soft: #f5f5f7;
 
-  --color-ok: #4ade80;
-  --color-ok-soft: #132a1a;
-  --color-warn: #facc15;
-  --color-warn-soft: #2a2106;
-  --color-danger: #fb7185;
-  --color-danger-soft: #2b1118;
+  --color-ok: #0b7a41;
+  --color-ok-soft: #e7f4ec;
+  --color-warn: #8a5a00;
+  --color-warn-soft: #fdf3e0;
+  --color-danger: #c02a1e;
+  --color-danger-soft: #fdeceb;
 
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bitcount Prop Single Variable", ui-monospace, monospace;
+  --font-display: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Two springs, matching Apple's damping/response pairs. `settle` is
+     critically damped for anything that just appears; `bounce` carries a
+     little overshoot and is reserved for motion a gesture set going. */
+  --ease-settle: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+
+  /* Liquid glass, as one material definition every floating surface reuses.
+     A translucent white body, a bright top edge where light catches the
+     material, and a shadow that grows with the surface. */
+  --glass-tint: rgb(255 255 255 / 72%);
+  --glass-tint-strong: rgb(255 255 255 / 86%);
+  --glass-border: rgb(255 255 255 / 70%);
+  --glass-blur: blur(24px) saturate(180%);
+  /* A white border alone vanishes against a light page, so the material also
+     carries an outer hairline. Bright edge on top, hairline around, then the
+     drop shadow that says how far it is floating above the content. */
+  --glass-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 90%),
+    inset 0 -1px 0 rgb(0 0 0 / 4%),
+    0 0 0 1px rgb(29 29 31 / 7%),
+    0 1px 2px rgb(29 29 31 / 5%),
+    0 10px 30px rgb(29 29 31 / 9%);
 }
 
 html {
   height: 100%;
   scroll-behavior: smooth;
-  /* Bottom nav is fixed; keep iOS from rubber-banding the whole page. */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -64,6 +81,9 @@ body {
   /* Long destination URLs must never widen the viewport. */
   overflow-x: hidden;
   font-synthesis: none;
+  /* Inter's optical sizing keeps large text from looking loose and small text
+     from looking cramped -- the same job SF Pro does across its two cuts. */
+  font-optical-sizing: auto;
 }
 
 ::selection {
@@ -88,16 +108,6 @@ button {
   font-size: 16px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 @utility tap-target {
   min-height: 44px;
   min-width: 44px;
@@ -109,39 +119,134 @@ button {
   word-break: break-word;
 }
 
+/*
+ * Type. Tracking is size-specific on purpose: letters read too far apart as
+ * they grow, so display sizes pull in and body copy sits near zero. One
+ * `letter-spacing` for every size would be wrong somewhere.
+ */
+/* Weight and tracking only -- colour is set at the call site, so this never
+   competes with a `text-*` utility for the same property. */
 @utility display-heading {
   font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.055em;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+@utility text-display {
+  font-size: clamp(2.75rem, 6.5vw, 4.75rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+@utility text-title {
+  font-size: clamp(2rem, 4.4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.024em;
+}
+
+@utility text-subtitle {
+  font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.016em;
+}
+
+@utility text-body-lg {
+  font-size: clamp(1.0625rem, 1.4vw, 1.1875rem);
+  line-height: 1.6;
+  letter-spacing: -0.003em;
 }
 
 @utility eyebrow {
-  color: var(--color-subtle);
+  color: var(--color-muted);
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  line-height: 1.2;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 
+/*
+ * Materials. `glass` is the floating layer content scrolls beneath; the
+ * ::after highlight is the specular sheen that makes it read as a material
+ * rather than a tinted box. Never stack one glass surface on another.
+ */
+@utility glass {
+  position: relative;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-tint);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+@utility glass-sheen {
+  &::after {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    content: "";
+    background: radial-gradient(
+      120% 100% at 15% -40%,
+      rgb(255 255 255 / 85%),
+      transparent 55%
+    );
+  }
+}
+
+/*
+ * The product's own palette -- Google's four plus Instagram's magenta --
+ * softened into a page wash. Two strengths, because the same mix has to do
+ * two different jobs.
+ *
+ * `brand-wash` covers whole hero sections, so its alphas stay low enough that
+ * ink text keeps well over 12:1 on top of it and the page still reads as
+ * white. `brand-glow` is small, sits behind a glass panel, and is meant to be
+ * refracted, so it is saturated and blurred instead.
+ */
+@utility brand-wash {
+  background:
+    radial-gradient(58% 52% at 16% 22%, rgb(66 133 244 / 15%), transparent 62%),
+    radial-gradient(54% 48% at 84% 34%, rgb(225 48 108 / 12%), transparent 62%),
+    radial-gradient(48% 44% at 56% 4%, rgb(250 188 5 / 12%), transparent 60%),
+    radial-gradient(54% 50% at 36% 68%, rgb(52 168 83 / 10%), transparent 62%);
+}
+
+@utility brand-glow {
+  background:
+    radial-gradient(circle at 20% 38%, rgb(66 133 244 / 62%), transparent 55%),
+    radial-gradient(circle at 80% 62%, rgb(225 48 108 / 48%), transparent 55%),
+    radial-gradient(circle at 54% 24%, rgb(250 188 5 / 38%), transparent 52%),
+    radial-gradient(circle at 38% 80%, rgb(52 168 83 / 38%), transparent 55%);
+  filter: blur(55px);
+}
+
+/* The faint grid behind the auth screens. */
 @utility page-grid {
   background-image: linear-gradient(
       to right,
-      color-mix(in srgb, var(--color-line) 38%, transparent) 1px,
+      color-mix(in srgb, var(--color-line-strong) 55%, transparent) 1px,
       transparent 1px
     ),
     linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--color-line) 38%, transparent) 1px,
+      color-mix(in srgb, var(--color-line-strong) 55%, transparent) 1px,
       transparent 1px
     );
   background-size: 48px 48px;
   mask-image: linear-gradient(to bottom, black, transparent 78%);
 }
 
-/* A compact iOS-style glass dock. Safe-area space belongs outside the dock,
-   so it does not make the visible control taller than the content requires. */
+/*
+ * A compact iOS-style glass dock for the admin workspace. Safe-area space
+ * belongs outside the dock, so it does not make the visible control taller
+ * than the content requires.
+ */
 .mobile-nav-shell {
   bottom: calc(0.75rem + env(safe-area-inset-bottom));
   left: 50%;
@@ -152,22 +257,15 @@ button {
   padding: 0.25rem;
   transform: translateX(-50%);
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 16%);
+  border: 1px solid var(--glass-border);
   border-radius: 1.25rem;
-  background:
-    linear-gradient(
-      180deg,
-      rgb(255 255 255 / 12%),
-      rgb(255 255 255 / 4%) 44%,
-      rgb(0 0 0 / 18%)
-    ),
-    rgb(24 24 24 / 78%);
+  background: var(--glass-tint-strong);
   box-shadow:
-    0 18px 42px rgb(0 0 0 / 42%),
-    inset 0 1px rgb(255 255 255 / 14%),
-    inset 0 -1px rgb(0 0 0 / 28%);
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
-  backdrop-filter: blur(22px) saturate(150%);
+    inset 0 1px 0 rgb(255 255 255 / 95%),
+    0 2px 6px rgb(0 0 0 / 5%),
+    0 18px 42px rgb(0 0 0 / 12%);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
 .mobile-nav-shell::before {
@@ -178,7 +276,7 @@ button {
   content: "";
   background: radial-gradient(
     circle at 22% -80%,
-    rgb(255 255 255 / 24%),
+    rgb(255 255 255 / 90%),
     transparent 52%
   );
 }
@@ -216,7 +314,15 @@ button {
   font-weight: 500;
   line-height: 1;
   text-align: center;
-  transition: color 200ms ease-out, background-color 200ms ease-out;
+  /* Feedback lands on the press, not the release. */
+  transition:
+    color 160ms var(--ease-settle),
+    background-color 160ms var(--ease-settle),
+    transform 120ms var(--ease-settle);
+}
+
+.mobile-nav-link:active {
+  transform: scale(0.94);
 }
 
 .mobile-nav-link:focus-visible {
@@ -246,10 +352,8 @@ button {
 }
 
 .mobile-nav-link-active {
-  background: rgb(250 250 250 / 95%);
-  box-shadow:
-    0 5px 14px rgb(0 0 0 / 18%),
-    inset 0 1px rgb(255 255 255 / 80%);
+  background: var(--color-ink);
+  box-shadow: 0 5px 14px rgb(0 0 0 / 22%);
 }
 
 /* Keep the primary action in the form flow so it never covers fields on a
@@ -257,10 +361,10 @@ button {
 .mobile-submit-bar {
   margin-inline: -1.25rem;
   border-top: 1px solid var(--color-line);
-  background: rgb(17 17 17 / 94%);
+  background: var(--glass-tint-strong);
   padding: 1rem 1.25rem calc(0.25rem + env(safe-area-inset-bottom));
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
 @media (min-width: 640px) {
@@ -299,95 +403,105 @@ button {
   }
 }
 
-@supports not ((backdrop-filter: blur(1px))) {
-  .mobile-nav-shell {
-    background: rgb(24 24 24 / 96%);
-  }
+/*
+ * The public marketing pages animate with springs from `motion`, which start
+ * at the element's live on-screen value and so survive being interrupted.
+ * The two rules below are the exceptions that never need interrupting: an
+ * ambient product drift and the reveal used on the reseller page.
+ */
+.product-float {
+  animation: product-float 7s ease-in-out infinite;
 }
 
-/* The public page is Tailwind-first. These few rules provide small process
-   illustrations plus the restrained product/reveal motion. */
-.product-float { animation: product-float 7s ease-in-out infinite; }
-.reveal.is-visible { animation: section-arrive 750ms ease both; }
-.mobile-order-bar { transition: opacity 180ms ease, transform 180ms ease; }
+.reveal.is-visible {
+  animation: section-arrive 700ms var(--ease-settle) both;
+}
+
+.mobile-order-bar {
+  transition:
+    opacity 180ms var(--ease-settle),
+    transform 180ms var(--ease-settle);
+}
+
 .mobile-order-bar.is-comparison-visible {
   pointer-events: none;
   opacity: 0;
   transform: translateY(100%);
 }
 
-.step-art {
-  position: relative;
-  display: flex;
-  height: 142px;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-.mini-stand {
-  display: flex;
-  width: 77px;
-  height: 111px;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 15px 10px;
-  transform: perspective(300px) rotateY(-14deg) rotateZ(-5deg);
-  border: 1px solid #737373;
-  border-bottom-width: 5px;
-  border-radius: 3px;
-  background: #222;
-}
-.mini-stand span:first-child { font-size: 9px; letter-spacing: -0.3px; }
-.mini-stand span:last-child { color: #aaa; font-size: 6px; }
-.counter-line {
-  position: absolute;
-  bottom: 25px;
-  width: 70%;
-  height: 1px;
-  background: var(--color-line-strong);
-}
-.mini-phone {
-  display: flex;
-  width: 61px;
-  height: 108px;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(15deg);
-  border: 2px solid #737373;
-  border-radius: 10px;
-  background: #141414;
-  box-shadow: inset 0 0 0 4px #0a0a0a;
-  font-size: 23px;
-}
-.tap-rings { display: flex; width: 63px; height: 57px; align-items: center; gap: 5px; overflow: hidden; }
-.tap-rings i { display: block; width: 13px; height: 25px; border: 1px solid #737373; border-left: 0; border-radius: 0 100% 100% 0; }
-.tap-rings i:nth-child(2) { height: 39px; }
-.tap-rings i:nth-child(3) { height: 55px; }
-.mini-review {
-  display: flex;
-  width: 170px;
-  flex-direction: column;
-  gap: 9px;
-  padding: 20px;
-  transform: rotate(-5deg);
-  border: 1px solid var(--color-line-strong);
-  border-radius: 8px;
-  background: var(--color-surface);
-}
-.mini-review > span:first-child { color: #aaa; font-size: 8px; }
-.mini-review > span:nth-child(2) { font-size: 19px; letter-spacing: 1px; }
-.review-line { width: 95%; height: 3px; border-radius: 4px; background: #333; }
-.review-line.short { width: 60%; }
-
 @keyframes product-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
-@keyframes section-arrive {
-  from { opacity: 0.35; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
-@media (min-width: 768px) {
-  .step-art { height: 165px; margin-block: 12px 22px; }
+@keyframes section-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Accessibility. Reduced motion means a gentler equivalent, not the absence
+ * of feedback: opacity still changes, travel and overshoot do not.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Frostier, not clearer: raise the opacity and drop the blur entirely. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-tint: rgb(255 255 255 / 98%);
+    --glass-tint-strong: rgb(255 255 255 / 100%);
+    --glass-border: var(--color-line-strong);
+    --glass-blur: none;
+  }
+
+  .glass-sheen::after {
+    display: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .brand-wash,
+  .brand-glow {
+    background: none;
+  }
+
+  :root {
+    --glass-tint: #ffffff;
+    --glass-tint-strong: #ffffff;
+    --glass-border: var(--color-ink);
+    --glass-blur: none;
+    --color-muted: #4b4b50;
+    --color-subtle: #5a5a60;
+    --color-line: #b9b9c0;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px))) {
+  :root {
+    --glass-tint: rgb(255 255 255 / 97%);
+    --glass-tint-strong: rgb(255 255 255 / 99%);
+  }
 }

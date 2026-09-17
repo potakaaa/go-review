@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { ForgotPasswordForm } from "@/app/forgot-password/forgot-password-form";
-import { Card } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Reset password",
@@ -25,7 +24,7 @@ export default async function ForgotPasswordPage({
         <div className="mb-8">
           <div
             aria-hidden="true"
-            className="mb-6 flex size-11 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
+            className="mb-6 flex size-11 items-center justify-center rounded-xl border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
           >
             KEY
           </div>
@@ -39,7 +38,7 @@ export default async function ForgotPasswordPage({
           </p>
         </div>
 
-        <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
+        <div className="glass glass-sheen rounded-2xl p-5 sm:p-6">
           <ForgotPasswordForm
             initialError={
               error === "invalid_link"
@@ -47,7 +46,7 @@ export default async function ForgotPasswordPage({
                 : undefined
             }
           />
-        </Card>
+        </div>
       </div>
     </main>
   );

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { MfaForm } from "@/app/mfa/mfa-form";
-import { Card } from "@/components/ui";
 import { checkStaffAccess } from "@/lib/auth";
 import { safeNextPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -42,7 +41,7 @@ export default async function MfaPage({
         <div className="mb-8">
           <div
             aria-hidden="true"
-            className="mb-6 flex size-11 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
+            className="mb-6 flex size-11 items-center justify-center rounded-xl border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
           >
             2FA
           </div>
@@ -56,9 +55,9 @@ export default async function MfaPage({
           </p>
         </div>
 
-        <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
+        <div className="glass glass-sheen rounded-2xl p-5 sm:p-6">
           <MfaForm next={safeNextPath(params.next)} />
-        </Card>
+        </div>
       </div>
     </main>
   );

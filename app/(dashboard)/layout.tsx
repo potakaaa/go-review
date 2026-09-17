@@ -24,12 +24,19 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur-xl">
+      <header
+        className="sticky top-0 z-30 border-b border-line"
+        style={{
+          background: "var(--glass-tint-strong)",
+          backdropFilter: "var(--glass-blur)",
+          WebkitBackdropFilter: "var(--glass-blur)",
+        }}
+      >
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
             <span
               aria-hidden="true"
-              className="flex size-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-[10px] font-medium tracking-tight text-ink"
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-line-strong bg-surface font-mono text-[10px] font-medium tracking-tight text-ink"
             >
               GR
             </span>

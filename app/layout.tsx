@@ -60,7 +60,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Lets the fixed bottom nav sit under the home indicator on notched phones.
   viewportFit: "cover",
-  themeColor: "#0a0a0a",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

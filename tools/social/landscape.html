@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Goreview — order online</title>
+<style>
+  @font-face {
+    font-family: "Inter Variable";
+    src: url("../../public/fonts/inter-latin.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: block;
+  }
+
+  /* Same tokens as the site. */
+  :root {
+    --canvas: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --subtle: #86868b;
+    --glass-tint: rgb(255 255 255 / 70%);
+    --glass-border: rgb(255 255 255 / 70%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: #666;
+    font-family: "Inter Variable", -apple-system, system-ui, sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* The capture target sits flush in the top-left so the screenshot region
+     maps 1:1 onto output pixels. */
+  #poster {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: var(--canvas);
+    color: var(--ink);
+    display: grid;
+    grid-template-columns: 0.86fr 1.14fr;
+    align-items: center;
+  }
+
+  /* The hero wash from the site. */
+  #poster::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(110% 80% at 84% 4%, #edf0f6 0%, transparent 60%);
+  }
+
+  .copy {
+    position: relative;
+    z-index: 2;
+    padding: 0 12px 0 64px;
+  }
+
+  .wordmark {
+    font-size: 25px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+  .wordmark .light { font-weight: 400; }
+  .wordmark .dot { color: var(--muted); }
+
+  .eyebrow {
+    margin-top: 44px;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-top: 14px;
+    font-size: 58px;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.032em;
+  }
+  h1 .accent { color: var(--muted); }
+
+  .body {
+    margin-top: 18px;
+    max-width: 420px;
+    font-size: 17px;
+    line-height: 1.55;
+    letter-spacing: -0.003em;
+    color: var(--muted);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding: 15px 26px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--canvas);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+
+  .terms {
+    margin-top: 20px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    letter-spacing: -0.002em;
+    color: var(--subtle);
+  }
+
+  /* --- product cluster --- */
+  .stage {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 46px;
+  }
+
+  /* The colour the glass refracts, exactly as on the site. */
+  .glow {
+    position: absolute;
+    width: 560px;
+    height: 430px;
+    border-radius: 50%;
+    filter: blur(55px);
+    background:
+      radial-gradient(circle at 20% 38%, rgb(66 133 244 / 70%), transparent 55%),
+      radial-gradient(circle at 80% 62%, rgb(225 48 108 / 52%), transparent 55%),
+      radial-gradient(circle at 54% 26%, rgb(250 188 5 / 40%), transparent 52%),
+      radial-gradient(circle at 40% 80%, rgb(52 168 83 / 40%), transparent 55%);
+  }
+
+  .panel {
+    --card-w: 106px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 30px 34px;
+    border-radius: 38px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-tint);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    backdrop-filter: blur(26px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 90%),
+      inset 0 -1px 0 rgb(0 0 0 / 4%),
+      0 0 0 1px rgb(29 29 31 / 7%),
+      0 2px 4px rgb(29 29 31 / 5%),
+      0 26px 64px rgb(29 29 31 / 13%);
+  }
+
+  /* Specular sheen. */
+  .panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(120% 100% at 15% -40%, rgb(255 255 255 / 85%), transparent 55%);
+    pointer-events: none;
+  }
+
+  .panel img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    filter: drop-shadow(0 16px 26px rgb(29 29 31 / 24%));
+  }
+
+  /* The flagship leads, with the tap cards stepping down beside it. */
+  /* The flagship stands beside the tap cards held as one fanned hand. Each
+     card pivots about a point below its own bottom edge, so the tops splay
+     while the bottoms stay gathered -- the thing that makes a fan read as a
+     fan rather than three sheared rectangles. Mirrors components/card-fan.tsx. */
+  .standee { height: 268px; }
+
+  .fan {
+    position: relative;
+    z-index: 1;
+    width: calc(var(--card-w) * 3.15);
+    height: calc(var(--card-w) * 1.62);
+  }
+
+  .fan .card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--card-w);
+    height: auto;
+    margin-left: calc(var(--card-w) * -0.5);
+    margin-top: calc(var(--card-w) * -0.667);
+    transform-origin: 50% 155%;
+  }
+
+  /* Painted in DOM order, so the Google card lands in front unaided. */
+  .fan .left { transform: translate(-46%, 4%) rotate(-16deg); }
+  .fan .right { transform: translate(46%, 4%) rotate(16deg); }
+  .fan .center { transform: translateY(-2%); }
+</style>
+</head>
+<body>
+  <div id="poster">
+    <div class="copy">
+      <div class="wordmark">go<span class="light">review</span><span class="dot">.</span></div>
+
+      <p class="eyebrow">New</p>
+      <h1>You can now<br /><span class="accent">order online.</span></h1>
+      <p class="body">
+        Google review standees and tap cards. Choose your quantities on the
+        website and we&rsquo;ll confirm the details with you.
+      </p>
+
+      <div class="pill">goreview.rald.site <span aria-hidden="true">↗</span></div>
+
+      <p class="terms">
+        Standee ₱699 · Tap cards ₱299 each (minimum 3)<br />
+        Free delivery within Cagayan de Oro
+      </p>
+    </div>
+
+    <div class="stage">
+      <div class="glow"></div>
+      <div class="panel">
+        <img class="standee" src="../../public/images/goreview-standee-transparent-v3.png" alt="" />
+        <div class="fan">
+          <img class="card left" src="../../public/images/facebook-tap-card-cutout.png" alt="" />
+          <img class="card right" src="../../public/images/instagram-tap-card-cutout.png" alt="" />
+          <img class="card center" src="../../public/images/google-tap-card-cutout.png" alt="" />
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

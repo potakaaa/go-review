@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { LoginForm } from "@/app/login/login-form";
-import { Card } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -26,7 +25,7 @@ export default async function LoginPage({
         <div className="mb-8">
           <div
             aria-hidden="true"
-            className="mb-6 flex size-11 items-center justify-center rounded-md border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
+            className="mb-6 flex size-11 items-center justify-center rounded-xl border border-line-strong bg-surface font-mono text-xs font-medium tracking-tight text-ink"
           >
             GR
           </div>
@@ -39,7 +38,7 @@ export default async function LoginPage({
           </p>
         </div>
 
-        <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
+        <div className="glass glass-sheen rounded-2xl p-5 sm:p-6">
           <LoginForm
             next={typeof next === "string" ? next : undefined}
             initialError={initialError}
@@ -49,7 +48,7 @@ export default async function LoginPage({
                 : undefined
             }
           />
-        </Card>
+        </div>
       </div>
     </main>
   );
