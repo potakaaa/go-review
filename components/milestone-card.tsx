@@ -91,7 +91,7 @@ export function milestoneCard(data: MilestoneCardData): ReactElement {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <Eyebrow>ALL-TIME SCANS</Eyebrow>
+        <Eyebrow>ALL-TIME QR SCANS</Eyebrow>
         <div
           style={{
             display: "flex",
@@ -105,16 +105,21 @@ export function milestoneCard(data: MilestoneCardData): ReactElement {
           {milestone.label}
         </div>
         <div style={{ display: "flex", marginTop: 30, fontSize: 40, color: MUTED }}>
-          taps and scans on Goreview cards.
+          QR code scans on Goreview cards.
         </div>
 
         <div style={{ display: "flex", marginTop: 56, gap: 64 }}>
           {stats.map((stat) => (
-            <div key={stat.label} style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
-              <span style={{ fontSize: 52, fontWeight: 600, letterSpacing: -1.6 }}>
+            // Satori's `baseline` lands the label about two pixels low at
+            // these sizes, so the pair is bottom-aligned with both line boxes
+            // pinned to 1 and the label lifted onto the figure's baseline.
+            <div key={stat.label} style={{ display: "flex", alignItems: "flex-end", gap: 14 }}>
+              <span style={{ fontSize: 52, fontWeight: 600, letterSpacing: -1.6, lineHeight: 1 }}>
                 {stat.value}
               </span>
-              <span style={{ fontSize: 30, color: MUTED }}>{stat.label}</span>
+              <span style={{ fontSize: 30, lineHeight: 1, marginBottom: 2, color: MUTED }}>
+                {stat.label}
+              </span>
             </div>
           ))}
         </div>

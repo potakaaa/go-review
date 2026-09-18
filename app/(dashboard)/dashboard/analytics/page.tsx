@@ -33,8 +33,8 @@ export default async function AnalyticsPage() {
   const usedRoutes = routes.filter((route) => route.scan_count > 0);
   const milestone = scanMilestone(stats.totalScans);
   const summary = milestone.exact
-    ? `A 9:16 card for stories and reels, leading with the exact count of ${stats.totalScans} scans, over ${stats.active} live cards. Past 50 it rounds down to the nearest 50.`
-    : `A 9:16 card for stories and reels: ${milestone.label} scans — rounded down from ${stats.totalScans} — over ${stats.active} live cards, with your three busiest named.`;
+    ? `A 9:16 card for stories and reels, leading with the exact count of ${stats.totalScans} QR scans, over ${stats.active} live cards. Past 50 it rounds down to the nearest 50.`
+    : `A 9:16 card for stories and reels: ${milestone.label} QR scans — rounded down from ${stats.totalScans} — over ${stats.active} live cards, with your three busiest named.`;
 
   return (
     <div className="space-y-8 pb-16">
