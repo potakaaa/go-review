@@ -14,9 +14,17 @@ import {
   TiltStage,
 } from "@/components/motion";
 import { PublicFooter, PublicHeader } from "@/components/public-site";
+import { ShopStoryCard } from "@/components/shop-story";
 import { container, primaryButton, secondaryButton } from "@/components/styles";
 import { organizationJsonLd, websiteJsonLd, webPageJsonLd } from "@/lib/seo";
 import { PUBLIC_ORIGIN } from "@/lib/site";
+import { getPublishedStories } from "@/lib/stories";
+import { reviewDifference } from "@/lib/story-validation";
+
+// Published shop stories are read at build time; refresh the snapshot hourly-ish
+// so the section is not frozen between deploys. Saving a story also revalidates
+// "/" from the dashboard action.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: { absolute: "Google Review Standee & Tap Card Options | Goreview" },
@@ -78,7 +86,10 @@ const faqs = [
   ],
 ] as const;
 
-export default function Home() {
+export default async function Home() {
+  const stories = await getPublishedStories();
+  const hasResults = stories.some((story) => reviewDifference(story) !== null);
+
   return (
     <>
       <JsonLd
@@ -270,6 +281,44 @@ export default function Home() {
             </Reveal>
           </div>
         </section>
+
+        {/* Out in the real world -- published shop stories from the dashboard.
+            Hidden entirely when nothing is published, so the page never shows
+            an empty shelf. */}
+        {stories.length > 0 && (
+          <section id="shops" className="scroll-mt-20 py-20 md:py-28">
+            <div className={container}>
+              <Reveal className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                <div className="max-w-2xl">
+                  <p className="eyebrow">Out in the real world</p>
+                  <h2 className="text-title mt-4 text-balance">
+                    On the counter. Part of the everyday.
+                  </h2>
+                </div>
+                <p className="max-w-sm text-[0.9375rem] leading-7 text-muted md:text-right">
+                  Real shops. Real conversations. A simpler invitation to leave
+                  a review.
+                </p>
+              </Reveal>
+
+              <RevealGroup className="mt-14 grid gap-6 md:grid-cols-3 md:gap-4 xl:gap-5">
+                {stories.map((story) => (
+                  <RevealItem key={story.id}>
+                    <ShopStoryCard story={story} />
+                  </RevealItem>
+                ))}
+              </RevealGroup>
+
+              {hasResults && (
+                <p className="mt-6 max-w-[700px] text-[0.75rem] leading-[1.8] text-subtle">
+                  Review changes reflect the observation dates shown. Individual
+                  results vary; these figures do not establish that every review
+                  came through Goreview.
+                </p>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Order flow */}
         <section className="border-y border-line bg-surface py-20 md:py-28">
