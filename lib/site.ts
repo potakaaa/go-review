@@ -56,6 +56,7 @@ export function isPublicPath(path: string): boolean {
     path === "/google-review-qr-code" ||
     path === "/google-review-card-philippines" ||
     path === "/facebook-tap-card" ||
+    path === "/google-tap-card" ||
     path === "/instagram-tap-card" ||
     path === "/order" ||
     path === "/privacy" ||

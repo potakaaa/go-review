@@ -16,7 +16,7 @@ import { FACEBOOK_URL, ORDER_EMAIL } from "@/lib/site";
 
 const NAV = [
   { href: "/google-review-card", label: "Google standee" },
-  { href: "/#options", label: "Card options" },
+  { href: "/#products", label: "All products" },
   { href: "/guides", label: "Guides" },
   { href: "/resellers", label: "Resellers" },
   { href: "/#pricing", label: "Pricing" },
@@ -238,7 +238,8 @@ export function PublicCta({
           </PressAnchor>
         </div>
         <p className="mt-6 text-[0.8125rem] text-subtle">
-          Google standee ₱699 · Tap cards ₱299 each · Minimum three cards
+          Google standee ₱699 · 2-in-1 Facebook + Google Maps standee ₱999 ·
+          Tap cards ₱299 each, minimum three
         </p>
       </div>
     </section>

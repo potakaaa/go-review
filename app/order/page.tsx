@@ -6,7 +6,7 @@ import { PublicFooter, PublicHeader } from "@/components/public-site";
 export const metadata: Metadata = {
   title: "Order a Google review standee or tap cards",
   description:
-    "Start with the Goreview Google review standee, or add Google, Facebook, and Instagram tap cards for walls, tables, and counters.",
+    "Order the Goreview Google review standee, the 2-in-1 Facebook and Google Maps standee, or Google, Facebook, and Instagram tap cards.",
 };
 
 export default function OrderPage() {
@@ -19,9 +19,10 @@ export default function OrderPage() {
           <p className="eyebrow">Order inquiry</p>
           <h1 className="text-display mt-4">Start with the standee.</h1>
           <p className="text-body-lg mt-5 max-w-2xl text-muted">
-            Choose the ₱699 Google review standee, then add ₱299 tap cards if
-            you want a card on another surface or for another platform. Card
-            orders have a minimum of three total, with free delivery within CDO.
+            Choose the ₱699 Google review standee or the ₱999 2-in-1 Facebook
+            and Google Maps standee, then add ₱299 tap cards if you want
+            another surface or platform. Card orders have a minimum of three
+            total, with free delivery within CDO.
           </p>
 
           <div className="mt-10 rounded-3xl border border-line bg-surface p-5 md:p-8">

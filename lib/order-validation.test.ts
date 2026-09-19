@@ -11,6 +11,7 @@ const valid = {
   barangay: "Carmen",
   delivery_area: "cdo",
   standee_quantity: "0",
+  duo_standee_quantity: "0",
   google_card_quantity: "1",
   facebook_card_quantity: "1",
   instagram_card_quantity: "1",
@@ -30,7 +31,19 @@ describe("order inquiry", () => {
     expect(orderInquirySchema.safeParse({ ...valid, standee_quantity: "1", google_card_quantity: "0", facebook_card_quantity: "0", instagram_card_quantity: "0" }).success).toBe(true);
   });
 
+  it("allows a standalone 2-in-1 standee", () => {
+    expect(orderInquirySchema.safeParse({ ...valid, duo_standee_quantity: "1", google_card_quantity: "0", facebook_card_quantity: "0", instagram_card_quantity: "0" }).success).toBe(true);
+  });
+
+  it("still requires at least one product", () => {
+    expect(orderInquirySchema.safeParse({ ...valid, google_card_quantity: "0", facebook_card_quantity: "0", instagram_card_quantity: "0" }).success).toBe(false);
+  });
+
   it("computes fixed product pricing", () => {
-    expect(estimateOrderTotal({ standee_quantity: 1, google_card_quantity: 1, facebook_card_quantity: 1, instagram_card_quantity: 1 })).toBe(1596);
+    expect(estimateOrderTotal({ standee_quantity: 1, duo_standee_quantity: 0, google_card_quantity: 1, facebook_card_quantity: 1, instagram_card_quantity: 1 })).toBe(1596);
+  });
+
+  it("prices the 2-in-1 standee at 999", () => {
+    expect(estimateOrderTotal({ standee_quantity: 0, duo_standee_quantity: 2, google_card_quantity: 0, facebook_card_quantity: 0, instagram_card_quantity: 0 })).toBe(1998);
   });
 });

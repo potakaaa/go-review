@@ -41,6 +41,7 @@ describe("site host boundaries", () => {
     expect(isPublicPath("/llms.txt")).toBe(true);
     expect(isPublicPath("/google-review-card")).toBe(true);
     expect(isPublicPath("/facebook-tap-card")).toBe(true);
+    expect(isPublicPath("/google-tap-card")).toBe(true);
     expect(isPublicPath("/instagram-tap-card")).toBe(true);
     expect(isPublicPath("/order")).toBe(true);
     expect(isPublicPath("/privacy")).toBe(true);

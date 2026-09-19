@@ -15,13 +15,18 @@ export function PlatformTapCardPage({
   image,
   destination,
   accent,
+  subject = platform,
 }: {
-  platform: "Facebook" | "Instagram";
+  platform: "Facebook" | "Google" | "Instagram";
   image: string;
   destination: string;
   /** The platform's own colour, used only for the ambient glow behind the
    *  cutout -- never for text, where it would fail contrast on white. */
   accent: string;
+  /** What the sentences are about, where the bare platform name would not
+   *  read as a thing you can bring closer -- "your Google review", not
+   *  "your Google". Defaults to the platform name. */
+  subject?: string;
 }) {
   const features = [
     [
@@ -57,7 +62,7 @@ export function PlatformTapCardPage({
             <div>
               <p className="eyebrow">{platform} tap card</p>
               <h1 className="text-display mt-4 text-balance">
-                Make your {platform}{" "}
+                Make your {subject}{" "}
                 <span className="display-heading text-muted">one tap away.</span>
               </h1>
               <p className="text-body-lg mt-6 max-w-xl text-muted">
@@ -116,7 +121,7 @@ export function PlatformTapCardPage({
       </main>
 
       <PublicCta
-        title={`Bring your ${platform} closer.`}
+        title={`Bring your ${subject} closer.`}
         description="Choose your quantities and mix platforms in one simple order inquiry."
       />
       <PublicFooter />

@@ -13,6 +13,7 @@ import {
   RevealItem,
   TiltStage,
 } from "@/components/motion";
+import { ProductRail } from "@/components/product-rail";
 import { PublicFooter, PublicHeader } from "@/components/public-site";
 import { ShopStoryCard } from "@/components/shop-story";
 import { container, primaryButton, secondaryButton } from "@/components/styles";
@@ -29,7 +30,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: { absolute: "Google Review Standee & Tap Card Options | Goreview" },
   description:
-    "The Goreview Google review standee is the flagship NFC and QR display, with optional 3×4-inch Facebook, Instagram, and Google tap cards from ₱299.",
+    "The Goreview Google review standee is the flagship NFC and QR display, joined by the ₱999 two-in-one Facebook and Google Maps standee and 3×4-inch tap cards from ₱299.",
   alternates: { canonical: PUBLIC_ORIGIN },
 };
 
@@ -37,7 +38,7 @@ const cardOptions = [
   {
     platform: "Google",
     copy: "A wall, table, or counter card that opens your Google review link.",
-    href: "/google-review-card",
+    href: "/google-tap-card",
   },
   {
     platform: "Facebook",
@@ -57,6 +58,12 @@ const flagshipFeatures = [
   ["Google-first", "Configured around the review destination that matters most."],
 ] as const;
 
+const duoPoints = [
+  ["One stand, two QR codes", "Facebook on the left, Google Maps on the right, each with its own NFC tap."],
+  ["Editable destinations", "The printed links stay fixed while staff can update where each side points."],
+  ["Made for the counter", "Cafés, restaurants, salons, clinics, shops — anywhere the conversation ends."],
+] as const;
+
 const steps = [
   ["01", "Choose", "Start with the Google standee, or add cards for other surfaces."],
   ["02", "Send an inquiry", "Tell us your quantities, business details, and delivery area."],
@@ -67,6 +74,10 @@ const faqs = [
   [
     "What is the main Goreview product?",
     "The Google review standee is the flagship product: a freestanding NFC and QR display for counters and reception desks.",
+  ],
+  [
+    "What is the 2-in-1 standee?",
+    "It is a ₱999 standee that carries Facebook and Google Maps on the same stand. One QR and NFC tap follows and reviews your Facebook Page; the other opens your Google Maps review screen.",
   ],
   [
     "Can I order the adhesive cards instead?",
@@ -131,8 +142,8 @@ export default async function Home() {
                 <PressLink href="/order" className={`${primaryButton} min-h-12 px-6`}>
                   Order the Google standee
                 </PressLink>
-                <PressLink href="#options" className={`${secondaryButton} min-h-12 px-6`}>
-                  See card options
+                <PressLink href="#products" className={`${secondaryButton} min-h-12 px-6`}>
+                  See all products
                 </PressLink>
               </div>
               <p className="mt-5 text-[0.8125rem] text-subtle">
@@ -210,6 +221,95 @@ export default async function Home() {
                 </PressLink>
               </div>
             </Materialize>
+          </div>
+        </section>
+
+        {/* The new 2-in-1. A photograph rather than a cutout: the point of
+            this product is two platforms on one stand, and a real counter is
+            what makes the second QR read as a second destination rather than a
+            duplicate. */}
+        <section id="duo" className="scroll-mt-20 py-20 md:py-28">
+          <div className={container}>
+            <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr] md:gap-14">
+              <Reveal>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="rounded-full bg-ink px-3 py-1 text-[0.6875rem] font-medium tracking-[0.04em] text-canvas uppercase">
+                    New
+                  </span>
+                  <p className="eyebrow">Two platforms, one stand</p>
+                </div>
+                <h2 className="text-title mt-4 text-balance">
+                  Facebook and Google Maps, on the same counter.
+                </h2>
+                <p className="text-body-lg mt-5 max-w-lg text-muted">
+                  You asked, we listened. One standee carries both: customers
+                  tap or scan the left side to follow and review your Facebook
+                  Page, and the right side to leave a Google Maps review. Two
+                  chances to turn a happy customer into a real review.
+                </p>
+
+                <ul className="mt-8 grid gap-3">
+                  {duoPoints.map(([title, copy]) => (
+                    <li key={title} className="border-t border-line pt-4">
+                      <strong className="block text-[0.9375rem] font-semibold">
+                        {title}
+                      </strong>
+                      <span className="mt-1 block text-[0.9375rem] leading-7 text-muted">
+                        {copy}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <PressLink href="/order" className={`${primaryButton} min-h-12 px-6`}>
+                    Order the 2-in-1 standee
+                  </PressLink>
+                  <span className="text-[0.9375rem] text-muted">
+                    <strong className="text-ink">₱999</strong> · one-time payment
+                  </span>
+                </div>
+              </Reveal>
+
+              <ParallaxLayer distance={20}>
+                <Reveal y={28}>
+                  <Image
+                    src="/images/duo-review-standee-v1.webp"
+                    alt="The 2-in-1 Goreview standee on a café counter, with a Facebook QR code on the left and a Google Maps QR code on the right"
+                    width={1448}
+                    height={1086}
+                    sizes="(max-width: 767px) 92vw, 48vw"
+                    className="h-auto w-full rounded-2xl object-cover shadow-[0_24px_48px_rgb(29_29_31/14%)]"
+                  />
+                </Reveal>
+              </ParallaxLayer>
+            </div>
+          </div>
+        </section>
+
+        {/* The whole catalogue on one shelf. With five products a grid would
+            either wrap into a wall or force the page to pick three winners. */}
+        <section
+          id="products"
+          className="scroll-mt-20 border-y border-line bg-surface py-20 md:py-28"
+        >
+          <div className={container}>
+            <Reveal className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl">
+                <p className="eyebrow">Everything we make</p>
+                <h2 className="text-title mt-4 text-balance">
+                  Pick the surface your customers already look at.
+                </h2>
+              </div>
+              <p className="max-w-sm text-[0.9375rem] leading-7 text-muted md:text-right">
+                Standees for the counter, adhesive cards for walls and tables.
+                Order them in any combination.
+              </p>
+            </Reveal>
+
+            <Reveal className="mt-12" y={28}>
+              <ProductRail />
+            </Reveal>
           </div>
         </section>
 

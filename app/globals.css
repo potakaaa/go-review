@@ -273,6 +273,22 @@ select {
   filter: blur(55px);
 }
 
+/*
+ * A horizontal product rail. The scrollbar is hidden because the rail carries
+ * its own affordances -- the cards are clipped mid-edge, there are arrows on a
+ * pointer device, and a touch device just swipes -- but the element is still a
+ * real scroll container, so keyboard focus, trackpad flicks and the platform's
+ * own scroll physics are untouched.
+ */
+@utility rail-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.rail-scroller::-webkit-scrollbar {
+  display: none;
+}
+
 /* The faint grid behind the auth screens. */
 @utility page-grid {
   background-image: linear-gradient(

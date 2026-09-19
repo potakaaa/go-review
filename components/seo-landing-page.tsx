@@ -122,19 +122,22 @@ export function SeoLandingPage({ page }: { page: SeoLandingPageData }) {
               </p>
             </div>
 
+            {/* The whole standee, framed exactly as the home page frames it.
+                The old crop showed the card face alone, which read as a
+                different product from the one these pages sell. */}
             <ParallaxLayer distance={22}>
               <TiltStage strength={8} className="relative mx-auto w-full max-w-[420px]">
                 <div
                   aria-hidden="true"
-                  className="absolute inset-x-[16%] bottom-[4%] -z-10 h-10 rounded-[50%] bg-ink/16 blur-2xl"
+                  className="absolute inset-x-[14%] bottom-[6%] -z-10 h-10 rounded-[50%] bg-ink/18 blur-2xl"
                 />
                 <Image
-                  src="/images/goreview-card-clean-v2.webp"
-                  alt="Customized Goreview NFC and QR Google review card"
-                  width={1239}
-                  height={1270}
-                  sizes="(max-width: 767px) 82vw, 40vw"
-                  className="h-auto w-full object-contain drop-shadow-[0_22px_34px_rgb(29_29_31/18%)]"
+                  src="/images/goreview-standee-transparent-v3.png"
+                  alt="Goreview freestanding Google review standee with NFC and QR options"
+                  width={1094}
+                  height={1438}
+                  sizes="(max-width: 767px) 78vw, 40vw"
+                  className="mx-auto h-auto max-h-[560px] w-auto max-w-full object-contain drop-shadow-[0_24px_36px_rgb(29_29_31/16%)]"
                   priority
                 />
               </TiltStage>

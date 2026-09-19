@@ -18,7 +18,8 @@ export async function submitOrderInquiry(
 ): Promise<OrderFormState> {
   const fields = [
     "customer_name", "business_name", "mobile", "email", "preferred_contact",
-    "city", "barangay", "delivery_area", "standee_quantity", "google_card_quantity",
+    "city", "barangay", "delivery_area", "standee_quantity", "duo_standee_quantity",
+    "google_card_quantity",
     "facebook_card_quantity", "instagram_card_quantity", "customer_notes",
   ] as const;
   const values = Object.fromEntries(fields.map((key) => [key, String(formData.get(key) ?? "")])) as Record<string, string>;

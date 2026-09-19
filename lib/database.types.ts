@@ -107,7 +107,7 @@ export type Database = {
       };
       order_inquiries: {
         Row: OrderInquiry;
-        Insert: Pick<OrderInquiry, "customer_name" | "business_name" | "mobile" | "email" | "preferred_contact" | "city" | "barangay" | "delivery_area" | "standee_quantity" | "google_card_quantity" | "facebook_card_quantity" | "instagram_card_quantity" | "customer_notes"> & Partial<Pick<OrderInquiry, "status" | "internal_notes" | "notification_status" | "notification_attempts" | "notification_sent_at" | "notification_error">>;
+        Insert: Pick<OrderInquiry, "customer_name" | "business_name" | "mobile" | "email" | "preferred_contact" | "city" | "barangay" | "delivery_area" | "standee_quantity" | "duo_standee_quantity" | "google_card_quantity" | "facebook_card_quantity" | "instagram_card_quantity" | "customer_notes"> & Partial<Pick<OrderInquiry, "status" | "internal_notes" | "notification_status" | "notification_attempts" | "notification_sent_at" | "notification_error">>;
         Update: Partial<Pick<OrderInquiry, "status" | "internal_notes" | "notification_status" | "notification_attempts" | "notification_sent_at" | "notification_error">>;
         Relationships: [];
       };
@@ -228,6 +228,7 @@ export type OrderInquiry = {
   barangay: string;
   delivery_area: "cdo" | "outside_cdo";
   standee_quantity: number;
+  duo_standee_quantity: number;
   google_card_quantity: number;
   facebook_card_quantity: number;
   instagram_card_quantity: number;

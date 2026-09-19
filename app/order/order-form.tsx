@@ -9,6 +9,7 @@ import { submitOrderInquiry, type OrderFormState } from "@/app/order/actions";
 import { PRESS, SETTLE } from "@/components/motion";
 import { FormError } from "@/components/ui";
 import {
+  DUO_STANDEE_PRICE,
   STANDEE_PRICE,
   TAP_CARD_MINIMUM,
   TAP_CARD_PRICE,
@@ -27,6 +28,19 @@ const PRODUCTS = [
     image: "/images/goreview-standee-transparent-v3.png",
     width: 1094,
     height: 1438,
+  },
+  {
+    key: "duo",
+    name: "duo_standee_quantity",
+    label: "Facebook + Google Maps standee",
+    note: "2-in-1 · NFC + two QR codes",
+    price: DUO_STANDEE_PRICE,
+    // A photographed standee rather than a cutout, so it is framed instead of
+    // floated -- see `framed` in the row below.
+    image: "/images/duo-review-standee-v1.webp",
+    width: 1448,
+    height: 1086,
+    framed: true,
   },
   {
     key: "google",
@@ -141,6 +155,7 @@ export function OrderForm() {
   );
   const [quantities, setQuantities] = useState<Record<ProductKey, number>>({
     standee: 0,
+    duo: 0,
     google: 0,
     facebook: 0,
     instagram: 0,
@@ -149,8 +164,11 @@ export function OrderForm() {
 
   const tapCount = quantities.google + quantities.facebook + quantities.instagram;
   const total = useMemo(
-    () => quantities.standee * STANDEE_PRICE + tapCount * TAP_CARD_PRICE,
-    [quantities.standee, tapCount],
+    () =>
+      quantities.standee * STANDEE_PRICE +
+      quantities.duo * DUO_STANDEE_PRICE +
+      tapCount * TAP_CARD_PRICE,
+    [quantities.standee, quantities.duo, tapCount],
   );
   const belowMinimum = tapCount > 0 && tapCount < TAP_CARD_MINIMUM;
 
@@ -205,7 +223,11 @@ export function OrderForm() {
                   width={product.width}
                   height={product.height}
                   sizes="52px"
-                  className="h-13 w-auto shrink-0 object-contain"
+                  className={
+                    "framed" in product && product.framed
+                      ? "size-13 shrink-0 rounded-lg border border-line object-cover"
+                      : "h-13 w-auto shrink-0 object-contain"
+                  }
                 />
                 <div className="min-w-0 flex-1">
                   <span className="block text-[0.9375rem] font-medium">

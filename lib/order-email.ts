@@ -21,6 +21,7 @@ export async function sendOrderNotification(order: OrderInquiry) {
 
   const products = [
     ["Google standee", order.standee_quantity],
+    ["Facebook + Google Maps standee", order.duo_standee_quantity],
     ["Google tap card", order.google_card_quantity],
     ["Facebook tap card", order.facebook_card_quantity],
     ["Instagram tap card", order.instagram_card_quantity],

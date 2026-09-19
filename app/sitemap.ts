@@ -26,6 +26,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [REVIEW_CARD_IMAGE],
     })),
     {
+      url: `${PUBLIC_ORIGIN}/google-tap-card`,
+      lastModified: "2026-09-19",
+      changeFrequency: "monthly",
+      priority: 0.9,
+      images: [`${PUBLIC_ORIGIN}/images/google-tap-card-cutout.png`],
+    },
+    {
       url: `${PUBLIC_ORIGIN}/facebook-tap-card`,
       lastModified: "2026-09-17",
       changeFrequency: "monthly",

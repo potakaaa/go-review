@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const STANDEE_PRICE = 699;
+export const DUO_STANDEE_PRICE = 999;
 export const TAP_CARD_PRICE = 299;
 export const TAP_CARD_MINIMUM = 3;
 
@@ -22,6 +23,7 @@ export const orderInquirySchema = z
     barangay: z.string().trim().min(1, "Barangay is required.").max(100),
     delivery_area: z.enum(["cdo", "outside_cdo"]),
     standee_quantity: quantity,
+    duo_standee_quantity: quantity,
     google_card_quantity: quantity,
     facebook_card_quantity: quantity,
     instagram_card_quantity: quantity,
@@ -32,7 +34,7 @@ export const orderInquirySchema = z
       value.google_card_quantity +
       value.facebook_card_quantity +
       value.instagram_card_quantity;
-    if (value.standee_quantity + cardQuantity === 0) {
+    if (value.standee_quantity + value.duo_standee_quantity + cardQuantity === 0) {
       ctx.addIssue({ code: "custom", path: ["products"], message: "Choose at least one product." });
     }
     if (cardQuantity > 0 && cardQuantity < TAP_CARD_MINIMUM) {
@@ -49,7 +51,8 @@ export const orderInquirySchema = z
 
 export type OrderInquiryInput = z.infer<typeof orderInquirySchema>;
 
-export function estimateOrderTotal(input: Pick<OrderInquiryInput, "standee_quantity" | "google_card_quantity" | "facebook_card_quantity" | "instagram_card_quantity">) {
+export function estimateOrderTotal(input: Pick<OrderInquiryInput, "standee_quantity" | "duo_standee_quantity" | "google_card_quantity" | "facebook_card_quantity" | "instagram_card_quantity">) {
   return input.standee_quantity * STANDEE_PRICE +
+    input.duo_standee_quantity * DUO_STANDEE_PRICE +
     (input.google_card_quantity + input.facebook_card_quantity + input.instagram_card_quantity) * TAP_CARD_PRICE;
 }
