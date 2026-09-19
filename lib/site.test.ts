@@ -1,14 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { isAdminHost, isLocalDevelopmentHost, isPublicPath } from "@/lib/site";
+import { adminOrigins, isAdminHost, isLocalDevelopmentHost, isPublicPath } from "@/lib/site";
 
 describe("site host boundaries", () => {
-  const origin = "https://admin.goreview.rald.site";
+  const origin = "https://admin.goreview.site";
 
   it("recognizes only the configured production admin host", () => {
-    expect(isAdminHost("admin.goreview.rald.site", origin, false)).toBe(true);
-    expect(isAdminHost("goreview.rald.site", origin, false)).toBe(false);
+    expect(isAdminHost("admin.goreview.site", origin, false)).toBe(true);
+    expect(isAdminHost("goreview.site", origin, false)).toBe(false);
     expect(isAdminHost("preview.vercel.app", origin, false)).toBe(false);
-    expect(isAdminHost("admin.goreview.rald.site.attacker.test", origin, false)).toBe(false);
+    expect(isAdminHost("admin.goreview.site.attacker.test", origin, false)).toBe(false);
+  });
+
+  // The domain move must not sign anyone out: a client whose bookmark still
+  // points at the old dashboard host keeps reaching it.
+  it("still honours the pre-goreview.site admin host", () => {
+    expect(isAdminHost("admin.goreview.rald.site", adminOrigins(), false)).toBe(true);
+    expect(isAdminHost("admin.goreview.site", adminOrigins(), false)).toBe(true);
+  });
+
+  it("matches a full host, never a suffix, across every honoured origin", () => {
+    expect(isAdminHost("admin.goreview.rald.site.attacker.test", adminOrigins(), false)).toBe(false);
+    expect(isAdminHost("admin.goreview.site.attacker.test", adminOrigins(), false)).toBe(false);
+    expect(isAdminHost("goreview.rald.site", adminOrigins(), false)).toBe(false);
+    expect(isAdminHost("", adminOrigins(), false)).toBe(false);
   });
 
   it("allows local hosts only during development", () => {

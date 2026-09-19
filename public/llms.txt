@@ -16,21 +16,21 @@ Goreview gives customers a direct path to a business's chosen Google review scre
 
 ## Canonical pages
 
-- [Google review cards](https://goreview.rald.site/google-review-card): what a Google review card is and how NFC and QR work together.
-- [NFC Google review cards](https://goreview.rald.site/nfc-google-review-card): how tap-to-review cards work and when QR is useful as a fallback.
-- [Google review QR code cards](https://goreview.rald.site/google-review-qr-code): how a QR code sends customers to a business review page.
-- [Google review cards in the Philippines](https://goreview.rald.site/google-review-card-philippines): local ordering, setup, shipping, and support information.
-- [Facebook tap cards](https://goreview.rald.site/facebook-tap-card): NFC and QR cards that open a Facebook Page or its reviews.
-- [Instagram tap cards](https://goreview.rald.site/instagram-tap-card): NFC and QR cards that open an Instagram profile.
-- [Order inquiry](https://goreview.rald.site/order): choose products and send an order inquiry; no online payment is collected.
+- [Google review cards](https://goreview.site/google-review-card): what a Google review card is and how NFC and QR work together.
+- [NFC Google review cards](https://goreview.site/nfc-google-review-card): how tap-to-review cards work and when QR is useful as a fallback.
+- [Google review QR code cards](https://goreview.site/google-review-qr-code): how a QR code sends customers to a business review page.
+- [Google review cards in the Philippines](https://goreview.site/google-review-card-philippines): local ordering, setup, shipping, and support information.
+- [Facebook tap cards](https://goreview.site/facebook-tap-card): NFC and QR cards that open a Facebook Page or its reviews.
+- [Instagram tap cards](https://goreview.site/instagram-tap-card): NFC and QR cards that open an Instagram profile.
+- [Order inquiry](https://goreview.site/order): choose products and send an order inquiry; no online payment is collected.
 
 ## Guides
 
-- [How to get more Google reviews](https://goreview.rald.site/guides/how-to-get-more-google-reviews)
-- [How to create a Google review link and QR code](https://goreview.rald.site/guides/google-review-link-qr-code)
-- [NFC vs QR code for Google reviews](https://goreview.rald.site/guides/nfc-vs-qr-google-reviews)
+- [How to get more Google reviews](https://goreview.site/guides/how-to-get-more-google-reviews)
+- [How to create a Google review link and QR code](https://goreview.site/guides/google-review-link-qr-code)
+- [NFC vs QR code for Google reviews](https://goreview.site/guides/nfc-vs-qr-google-reviews)
 
 ## Primary site
 
-- [Goreview](https://goreview.rald.site/)
-- [Sitemap](https://goreview.rald.site/sitemap.xml)
+- [Goreview](https://goreview.site/)
+- [Sitemap](https://goreview.site/sitemap.xml)

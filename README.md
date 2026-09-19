@@ -2,7 +2,7 @@
 
 Dynamic QR/NFC link management for physical Google Review cards.
 
-Every card is printed once with a permanent URL — `https://goreview.rald.site/r/a7K3mP`.
+Every card is printed once with a permanent URL — `https://goreview.site/r/a7K3mP`.
 That URL never changes. The Google Review page it points at is a database row you
 can edit from your phone while standing in the cafe. That indirection is the whole
 product: **a printed card is never wasted because a destination changed.**
@@ -70,7 +70,7 @@ cp .env.example .env.local
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → `anon` `public` |
-| `NEXT_PUBLIC_REDIRECT_BASE_URL` | `https://goreview.rald.site` |
+| `NEXT_PUBLIC_REDIRECT_BASE_URL` | `https://goreview.site` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` secret; server-only |
 
 The service-role key is used only by server-side superadmin actions to create
@@ -220,40 +220,51 @@ values are inlined at build time and a running deployment will not pick them up.
 > They are inlined into the browser bundle by design, and Vercel refuses to build
 > if they are stored with secret visibility.
 
-### Custom domain (`goreview.rald.site`)
+### Custom domains (`goreview.site`)
 
-The domain is already added to the `review-routes` project. What remains is the
-DNS record, at your registrar for `rald.site` (currently Namecheap):
+The project lives in the **`helbi-solutions`** team, so every CLI call needs
+`--scope helbi-solutions` (the CLI's default scope is a different team).
+
+DNS is managed at Namecheap for both `goreview.site` and `rald.site`; Vercel's
+nameservers are not in use, so each subdomain needs its own record:
 
 | Type | Host | Value |
 | --- | --- | --- |
-| `A` | `goreview` | `76.76.21.21` |
+| `A` | `@` | `216.150.1.1` |
+| `CNAME` | `www` | `8c213d8171c43821.vercel-dns-017.com` |
+| `CNAME` | `admin` | `8c213d8171c43821.vercel-dns-017.com` |
 
-Vercel verifies automatically and issues the certificate within a few minutes.
-Check progress with:
+`www.goreview.site` is a 308 redirect **to** the apex, never the reverse: a
+redirect in front of the apex would add a hop to every `/r/*` card scan.
+
+> **The old domain is permanent.** Cards already printed encode
+> `https://goreview.rald.site/r/<slug>` in ink and in NFC chips. `goreview.rald.site`
+> and `admin.goreview.rald.site` must stay attached to the project for as long as
+> any of those cards are in circulation. Do not set a domain-level redirect on
+> them either — `/r/*` must keep resolving in a single hop. `LEGACY_ADMIN_ORIGINS`
+> in `lib/site.ts` keeps the old dashboard host signed in for the same reason.
+
+Confirm `https://goreview.site/r/<slug>` redirects correctly **before printing
+any cards** — `NEXT_PUBLIC_REDIRECT_BASE_URL` is what every QR code encodes:
 
 ```bash
-vercel domains inspect goreview.rald.site --scope ralds-projects-1208
+vercel domains inspect goreview.site --scope helbi-solutions
+curl -sI https://goreview.site/r/<slug>   # 302 to the destination, no 308 hop
 ```
 
-Then confirm `https://goreview.rald.site/r/<slug>` redirects correctly **before
-printing any cards** — `NEXT_PUBLIC_REDIRECT_BASE_URL` is already set to this
-domain, so every QR code generated encodes it.
-
-Use `https://admin.goreview.rald.site` as **Supabase → Authentication → URL
-Configuration → Site URL**, and add
-`https://admin.goreview.rald.site/auth/callback` to Redirect URLs. Password
-recovery belongs to the admin host; printed card links remain on
-`https://goreview.rald.site`.
+In **Supabase → Authentication → URL Configuration**, set Site URL to
+`https://admin.goreview.site` and keep both `/auth/callback` URLs in Redirect
+URLs until the old admin host is retired. Password recovery belongs to the admin
+host; printed card links stay on the public host.
 
 ### Public and admin domains
 
-Add `admin.goreview.rald.site` to the same Vercel project as
-`goreview.rald.site`; a second deployment is not needed. Set this production
-environment variable and redeploy:
+Both public hosts and both admin hosts point at this one project; no second
+deployment is needed. Set these production environment variables and redeploy:
 
 ```bash
-ADMIN_ORIGIN=https://admin.goreview.rald.site
+NEXT_PUBLIC_REDIRECT_BASE_URL=https://goreview.site
+ADMIN_ORIGIN=https://admin.goreview.site
 ```
 
 The public host serves the Goreview landing page and `/r/*` card redirects.

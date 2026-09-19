@@ -28,7 +28,7 @@ describe("public SEO content", () => {
       },
     });
     expect(metadata.alternates?.canonical).toBe(
-      "https://goreview.rald.site/google-review-card",
+      "https://goreview.site/google-review-card",
     );
   });
 
@@ -50,14 +50,14 @@ describe("public SEO content", () => {
     expect(product.offers.priceCurrency).toBe("PHP");
     expect(product.offers.price).toBe("699");
     expect(product.image).toContain(
-      "https://goreview.rald.site/images/goreview-card-clean-v2.webp",
+      "https://goreview.site/images/goreview-card-clean-v2.webp",
     );
     expect(websiteJsonLd["@type"]).toBe("WebSite");
     expect(webPageJsonLd({
       path: "/google-review-card",
       name: "Google review cards",
       description: "A description",
-    }).isPartOf["@id"]).toBe("https://goreview.rald.site#website");
+    }).isPartOf["@id"]).toBe("https://goreview.site#website");
     expect(JSON.stringify(product)).not.toMatch(/aggregateRating|ratingValue/);
     expect(faq.mainEntity[0].acceptedAnswer.text).toBe("Answer");
   });
