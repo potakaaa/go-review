@@ -224,10 +224,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* The new 2-in-1. A photograph rather than a cutout: the point of
-            this product is two platforms on one stand, and a real counter is
-            what makes the second QR read as a second destination rather than a
-            duplicate. */}
+        {/* The new 2-in-1. */}
         <section id="duo" className="scroll-mt-20 py-20 md:py-28">
           <div className={container}>
             <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr] md:gap-14">
@@ -271,15 +268,22 @@ export default async function Home() {
                 </div>
               </Reveal>
 
+              {/* A cutout on the page, grounded by its own contact shadow --
+                  the same treatment the flagship standee gets in the hero, so
+                  the two products read as one family. */}
               <ParallaxLayer distance={20}>
-                <Reveal y={28}>
+                <Reveal y={28} className="relative mx-auto w-full max-w-[420px]">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-x-[12%] bottom-[2%] -z-10 h-9 rounded-[50%] bg-ink/18 blur-2xl"
+                  />
                   <Image
-                    src="/images/duo-review-standee-v1.webp"
-                    alt="The 2-in-1 Goreview standee on a café counter, with a Facebook QR code on the left and a Google Maps QR code on the right"
-                    width={1448}
-                    height={1086}
-                    sizes="(max-width: 767px) 92vw, 48vw"
-                    className="h-auto w-full rounded-2xl object-cover shadow-[0_24px_48px_rgb(29_29_31/14%)]"
+                    src="/images/duo-review-standee-cutout.webp"
+                    alt="The 2-in-1 Goreview standee, with a Facebook QR code on the left and a Google Maps QR code on the right"
+                    width={790}
+                    height={589}
+                    sizes="(max-width: 767px) 86vw, 420px"
+                    className="h-auto w-full object-contain drop-shadow-[0_22px_34px_rgb(29_29_31/18%)]"
                   />
                 </Reveal>
               </ParallaxLayer>

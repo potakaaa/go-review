@@ -36,8 +36,6 @@ type Product = {
   image: string;
   width: number;
   height: number;
-  /** A photograph fills its frame; a cutout floats inside it. */
-  framed?: boolean;
   isNew?: boolean;
 };
 
@@ -62,10 +60,9 @@ const PRODUCTS: Product[] = [
     copy: "One standee, two platforms. Customers tap or scan to follow and review on Facebook, or review on Google Maps.",
     href: "/order",
     linkLabel: "Order the 2-in-1",
-    image: "/images/duo-review-standee-v1.webp",
-    width: 1448,
-    height: 1086,
-    framed: true,
+    image: "/images/duo-review-standee-cutout.webp",
+    width: 790,
+    height: 589,
     isNew: true,
   },
   {
@@ -208,15 +205,11 @@ export function ProductRail() {
                   width={product.width}
                   height={product.height}
                   sizes="(max-width: 639px) 15.5rem, 17.5rem"
-                  // The cutout gets an explicit height rather than `h-full`:
-                  // a percentage height on an auto-width image inside the
-                  // fixed-height frame resolves against an indefinite basis,
-                  // so the image overflows and is silently cropped.
-                  className={
-                    product.framed
-                      ? "size-full object-cover"
-                      : "h-30 w-auto max-w-full object-contain drop-shadow-[0_10px_18px_rgb(29_29_31/16%)]"
-                  }
+                  // An explicit height rather than `h-full`: a percentage
+                  // height on an auto-width image inside the fixed-height
+                  // frame resolves against an indefinite basis, so the image
+                  // overflows and is silently cropped.
+                  className="max-h-30 w-auto max-w-full object-contain drop-shadow-[0_10px_18px_rgb(29_29_31/16%)]"
                 />
                 {product.isNew ? (
                   <span className="absolute top-2.5 left-2.5 rounded-full bg-ink px-2.5 py-1 text-[0.6875rem] font-medium tracking-[0.04em] text-canvas uppercase">

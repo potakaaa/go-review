@@ -35,12 +35,9 @@ const PRODUCTS = [
     label: "Facebook + Google Maps standee",
     note: "2-in-1 · NFC + two QR codes",
     price: DUO_STANDEE_PRICE,
-    // A photographed standee rather than a cutout, so it is framed instead of
-    // floated -- see `framed` in the row below.
-    image: "/images/duo-review-standee-v1.webp",
-    width: 1448,
-    height: 1086,
-    framed: true,
+    image: "/images/duo-review-standee-cutout.webp",
+    width: 790,
+    height: 589,
   },
   {
     key: "google",
@@ -223,11 +220,7 @@ export function OrderForm() {
                   width={product.width}
                   height={product.height}
                   sizes="52px"
-                  className={
-                    "framed" in product && product.framed
-                      ? "size-13 shrink-0 rounded-lg border border-line object-cover"
-                      : "h-13 w-auto shrink-0 object-contain"
-                  }
+                  className="max-h-13 w-auto max-w-13 shrink-0 object-contain"
                 />
                 <div className="min-w-0 flex-1">
                   <span className="block text-[0.9375rem] font-medium">
