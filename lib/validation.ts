@@ -8,6 +8,13 @@ import {
 import { ROUTE_PLATFORMS, type RoutePlatform } from "@/lib/platforms";
 
 import { BATCH_MAX_SIZE, BATCH_MIN_SIZE } from "@/lib/batch";
+import {
+  duplicateDestinationIndex,
+  maxStandeeBatchSize,
+  STANDEE_BATCH_MIN_SIZE,
+  STANDEE_MAX_SLOTS,
+  STANDEE_MIN_SLOTS,
+} from "@/lib/standee";
 import { BATCH_EDIT_MAX_SIZE } from "@/lib/batch-edit";
 import {
   SLUG_MAX_LENGTH,
@@ -189,6 +196,90 @@ export const batchEditRouteSchema = z.object({
   maps_url: mapsUrlSchema,
 }).superRefine(addPlatformDestinationIssues);
 
+/**
+ * One QR slot on a standee. The stand shares a business name and notes, so a
+ * slot only carries where its own QR points.
+ */
+export const standeeSlotSchema = z.object({
+  platform: platformSchema,
+  destination_url: httpsDestinationSchema,
+  maps_url: mapsUrlSchema,
+});
+
+/**
+ * Slot errors are keyed `slots.0.destination_url` so `fieldErrors` can hand
+ * each message back to the row of the form that produced it.
+ */
+function addStandeeSlotIssues(
+  value: { slots: Array<{ platform: RoutePlatform; destination_url: string; maps_url?: string | null }> },
+  ctx: z.RefinementCtx,
+) {
+  value.slots.forEach((slot, index) => {
+    if (!looksLikePlatformDestination(slot.platform, slot.destination_url)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [`slots.${index}.destination_url`],
+        message:
+          slot.platform === "google"
+            ? "Use an approved Google Maps or Google Review URL."
+            : slot.platform === "facebook"
+              ? "Use a valid Facebook Page, Reviews, or Recommendations URL."
+              : "Use a valid Instagram profile URL.",
+      });
+    }
+    if (slot.platform !== "google" && slot.maps_url) {
+      ctx.addIssue({
+        code: "custom",
+        path: [`slots.${index}.maps_url`],
+        message: "Google Maps source links are only used for Google routes.",
+      });
+    }
+  });
+
+  const duplicate = duplicateDestinationIndex(
+    value.slots.map((slot) => slot.destination_url),
+  );
+  if (duplicate !== -1) {
+    ctx.addIssue({
+      code: "custom",
+      path: [`slots.${duplicate}.destination_url`],
+      message: "Each QR on a standee needs its own destination.",
+    });
+  }
+}
+
+export const createStandeeSchema = z
+  .object({
+    business_name: businessNameSchema,
+    notes: notesSchema,
+    slots: z
+      .array(standeeSlotSchema)
+      .min(STANDEE_MIN_SLOTS, `A standee needs at least ${STANDEE_MIN_SLOTS} QR codes.`)
+      .max(STANDEE_MAX_SLOTS, `A standee holds at most ${STANDEE_MAX_SLOTS} QR codes.`),
+  })
+  .superRefine(addStandeeSlotIssues);
+
+export const createStandeeBatchSchema = createStandeeSchema
+  .safeExtend({
+    quantity: z.coerce
+      .number()
+      .int("Enter a whole number of standees.")
+      .min(
+        STANDEE_BATCH_MIN_SIZE,
+        `Create at least ${STANDEE_BATCH_MIN_SIZE} standees.`,
+      ),
+  })
+  .superRefine((value, ctx) => {
+    const limit = maxStandeeBatchSize(value.slots.length);
+    if (value.quantity > limit) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["quantity"],
+        message: `With ${value.slots.length} QR codes per standee, create at most ${limit} standees at a time.`,
+      });
+    }
+  });
+
 export const updateRouteSchema = z.object({
   platform: platformSchema,
   business_name: businessNameSchema,
@@ -202,6 +293,8 @@ export type CreateRouteInput = z.infer<typeof createRouteSchema>;
 export type CreateBatchRouteInput = z.infer<typeof createBatchRouteSchema>;
 export type BatchEditRouteInput = z.infer<typeof batchEditRouteSchema>;
 export type UpdateRouteInput = z.infer<typeof updateRouteSchema>;
+export type CreateStandeeInput = z.infer<typeof createStandeeSchema>;
+export type CreateStandeeBatchInput = z.infer<typeof createStandeeBatchSchema>;
 
 export { SLUG_MIN_LENGTH, SLUG_MAX_LENGTH };
 

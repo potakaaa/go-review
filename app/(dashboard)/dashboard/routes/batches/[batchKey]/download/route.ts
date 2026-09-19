@@ -2,6 +2,8 @@ import QRCode from "qrcode";
 
 import { requirePermission } from "@/lib/permissions";
 import { BATCH_KEY_PATTERN, batchZipFileName } from "@/lib/batch";
+import { platformLabel } from "@/lib/platforms";
+import { standeeRunZipFileName } from "@/lib/standee";
 import { publicUrlForSlug, QR_OPTIONS, QR_PNG_SIZE, qrFileName } from "@/lib/qr";
 import { createZip, type ZipEntry } from "@/lib/zip";
 
@@ -14,18 +16,29 @@ function csvCell(value: string | number | boolean): string {
   return '"' + String(value).replace(/"/g, '""') + '"';
 }
 
-function csvManifest(
-  routes: Array<{
-    batch_position: number | null;
-    slug: string;
-    business_name: string;
-    destination_url: string;
-    active: boolean;
-  }>,
-): Uint8Array {
+type ExportRoute = {
+  batch_position: number | null;
+  standee_key: string | null;
+  standee_position: number | null;
+  slug: string;
+  business_name: string;
+  platform: unknown;
+  destination_url: string;
+  active: boolean;
+};
+
+/**
+ * A run of standees is stored as one batch, so the manifest names the stand
+ * and the QR slot as well as the flat position -- otherwise a printer has no
+ * way to tell which four PNGs belong on the same piece of card.
+ */
+function csvManifest(routes: ExportRoute[]): Uint8Array {
   const rows = [
     [
       "position",
+      "standee",
+      "qr",
+      "platform",
       "business_name",
       "slug",
       "public_url",
@@ -34,6 +47,9 @@ function csvManifest(
     ],
     ...routes.map((route) => [
       route.batch_position ?? "",
+      route.standee_key ?? "",
+      route.standee_position ?? "",
+      platformLabel(route.platform),
       route.business_name,
       route.slug,
       publicUrlForSlug(route.slug),
@@ -62,7 +78,7 @@ export async function GET(
   const { data: routes, error } = await supabase
     .from("redirect_routes")
     .select(
-      "batch_position, slug, business_name, destination_url, active",
+      "batch_position, standee_key, standee_position, slug, business_name, platform, destination_url, active",
     )
     .eq("batch_key", batchKey)
     .order("batch_position", { ascending: true });
@@ -94,7 +110,15 @@ export async function GET(
         });
 
         entries[index] = {
-          name: qrFileName(route.business_name, route.slug) + ".png",
+          // Standee QRs carry their platform in the filename so two PNGs from
+          // the same stand are never indistinguishable on disk.
+          name:
+            qrFileName(
+              route.standee_key
+                ? `${route.business_name} ${platformLabel(route.platform)}`
+                : route.business_name,
+              route.slug,
+            ) + ".png",
           data: png,
         };
       }
@@ -117,7 +141,11 @@ export async function GET(
       headers: {
         "cache-control": "private, no-store",
         "content-disposition":
-          'attachment; filename="' + batchZipFileName(batchKey) + '"',
+          'attachment; filename="' +
+          (routeList.some((route) => route.standee_key)
+            ? standeeRunZipFileName(batchKey)
+            : batchZipFileName(batchKey)) +
+          '"',
         "content-length": String(archive.byteLength),
         "content-type": "application/zip",
         "x-content-type-options": "nosniff",

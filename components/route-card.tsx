@@ -161,6 +161,14 @@ function FullRouteCard({
         {route.scan_count} {route.scan_count === 1 ? "scan" : "scans"} · Created{" "}
         {formatDate(route.created_at)}
       </p>
+      {route.standee_key ? (
+        <Link
+          href={`/dashboard/standees/${route.standee_key}`}
+          className="mt-2 inline-flex text-xs font-medium text-brand underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          Standee {route.standee_key} · QR {route.standee_position}
+        </Link>
+      ) : null}
       {route.batch_key ? (
         <Link
           href={`/dashboard/routes/batches/${route.batch_key}`}

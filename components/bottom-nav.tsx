@@ -54,6 +54,7 @@ const DESKTOP_ITEMS = [
   { href: "/dashboard/staff", label: "Staff", exact: false, section: "staff" },
   { href: "/dashboard", label: "Dashboard", exact: true, section: undefined },
   { href: "/dashboard/routes", label: "Routes", exact: false, section: "routes" },
+  { href: "/dashboard/standees", label: "Standees", exact: false, section: "routes" },
   { href: "/dashboard/orders", label: "Orders", exact: false, section: "orders" },
   { href: "/dashboard/analytics", label: "Analytics", exact: true, section: "analytics" },
   { href: "/dashboard/convert", label: "Convert", exact: true, section: "convert" },

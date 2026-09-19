@@ -31,6 +31,8 @@ export type RedirectRoute = {
   slug_lower: string;
   batch_key: string | null;
   batch_position: number | null;
+  standee_key: string | null;
+  standee_position: number | null;
   business_name: string;
   platform: RoutePlatform;
   destination_url: string;
@@ -51,6 +53,8 @@ type RedirectRouteInsert = {
   slug: string;
   batch_key?: string | null;
   batch_position?: number | null;
+  standee_key?: string | null;
+  standee_position?: number | null;
   business_name: string;
   platform?: RoutePlatform;
   destination_url: string;

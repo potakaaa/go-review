@@ -89,12 +89,26 @@ export default async function RouteDetailPage({
             Edit route
           </Link>
         ) : null}
-        {route.batch_key ? (
+        {route.standee_key ? (
           <Link
-            href={"/dashboard/routes/batches/" + route.batch_key}
+            href={"/dashboard/standees/" + route.standee_key}
             className={buttonClass("secondary", "text-sm sm:col-span-2")}
           >
-            View batch and download ZIP
+            View the standee this QR is printed on
+          </Link>
+        ) : null}
+        {route.batch_key ? (
+          <Link
+            href={
+              (route.standee_key
+                ? "/dashboard/standees/runs/"
+                : "/dashboard/routes/batches/") + route.batch_key
+            }
+            className={buttonClass("secondary", "text-sm sm:col-span-2")}
+          >
+            {route.standee_key
+              ? "View the print run and download ZIP"
+              : "View batch and download ZIP"}
           </Link>
         ) : null}
       </div>

@@ -45,6 +45,9 @@ export default async function RoutesPage({
           </p>
         </div>
         <div className="grid gap-2 sm:flex">
+          <ButtonLink href="/dashboard/standees" variant="secondary">
+            Standees
+          </ButtonLink>
           {canManageRoutes ? (
             <>
               <ButtonLink href="/dashboard/routes/batch/edit" variant="secondary">
