@@ -36,8 +36,8 @@ const PRODUCTS = [
     note: "2-in-1 · NFC + two QR codes",
     price: DUO_STANDEE_PRICE,
     image: "/images/duo-review-standee-cutout.webp",
-    width: 790,
-    height: 589,
+    width: 778,
+    height: 585,
   },
   {
     key: "google",

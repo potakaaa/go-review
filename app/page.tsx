@@ -280,8 +280,8 @@ export default async function Home() {
                   <Image
                     src="/images/duo-review-standee-cutout.webp"
                     alt="The 2-in-1 Goreview standee, with a Facebook QR code on the left and a Google Maps QR code on the right"
-                    width={790}
-                    height={589}
+                    width={778}
+                    height={585}
                     sizes="(max-width: 767px) 86vw, 420px"
                     className="h-auto w-full object-contain drop-shadow-[0_22px_34px_rgb(29_29_31/18%)]"
                   />

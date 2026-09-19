@@ -61,8 +61,8 @@ const PRODUCTS: Product[] = [
     href: "/order",
     linkLabel: "Order the 2-in-1",
     image: "/images/duo-review-standee-cutout.webp",
-    width: 790,
-    height: 589,
+    width: 778,
+    height: 585,
     isNew: true,
   },
   {
