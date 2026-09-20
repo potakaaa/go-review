@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
     ],
   },
   poweredByHeader: false,
+  async redirects() {
+    // The three per-platform tap-card pages were 96-97% identical, so they are
+    // now one page with a section each. Permanent, so the old URLs pass their
+    // history on rather than competing with the page that replaced them.
+    return ["google", "facebook", "instagram"].map((platform) => ({
+      source: `/${platform}-tap-card`,
+      destination: `/tap-cards#${platform}`,
+      permanent: true,
+    }));
+  },
   async headers() {
     return [
       {

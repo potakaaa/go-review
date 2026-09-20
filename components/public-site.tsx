@@ -177,7 +177,27 @@ export function PublicFooter() {
         </div>
 
         <div className="md:text-right">
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 md:justify-end">
+          {/* The topic pages live in their own row. They are the pages search
+              sends people to, and they had no incoming links from anywhere. */}
+          <nav aria-label="Topics" className="flex flex-wrap gap-x-6 gap-y-2 md:justify-end">
+            {[
+              { href: "/tap-cards", label: "Tap cards" },
+              { href: "/google-review-card", label: "Google review cards" },
+              { href: "/nfc-google-review-card", label: "NFC review cards" },
+              { href: "/google-review-qr-code", label: "QR review codes" },
+              { href: "/google-review-card-philippines", label: "Philippines" },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="py-1 text-[0.8125rem] text-muted transition-colors hover:text-ink"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <nav aria-label="Footer" className="mt-2 flex flex-wrap gap-x-6 gap-y-2 md:justify-end">
             {[
               { href: FACEBOOK_URL, label: "Facebook", external: true },
               { href: ORDER_EMAIL, label: "Email", external: true },

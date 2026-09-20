@@ -19,6 +19,7 @@ import { ShopStoryCard } from "@/components/shop-story";
 import { container, primaryButton, secondaryButton } from "@/components/styles";
 import { organizationJsonLd, websiteJsonLd, webPageJsonLd } from "@/lib/seo";
 import { PUBLIC_ORIGIN } from "@/lib/site";
+import { guides } from "@/lib/guides";
 import { getPublishedStories } from "@/lib/stories";
 import { reviewDifference } from "@/lib/story-validation";
 
@@ -38,17 +39,17 @@ const cardOptions = [
   {
     platform: "Google",
     copy: "A wall, table, or counter card that opens your Google review link.",
-    href: "/google-tap-card",
+    href: "/tap-cards#google",
   },
   {
     platform: "Facebook",
     copy: "Invite customers to your Facebook Page and review flow.",
-    href: "/facebook-tap-card",
+    href: "/tap-cards#facebook",
   },
   {
     platform: "Instagram",
     copy: "Make your Instagram profile easy to find and follow.",
-    href: "/instagram-tap-card",
+    href: "/tap-cards#instagram",
   },
 ] as const;
 
@@ -461,6 +462,55 @@ export default async function Home() {
             <Reveal delay={0.05}>
               <Faq items={faqs} />
             </Reveal>
+          </div>
+        </section>
+
+        {/* Guides. Linked from here rather than only from /guides, so each
+            article has an incoming link from the page with the most authority. */}
+        <section className="border-t border-line py-20 md:py-28">
+          <div className={container}>
+            <Reveal className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl">
+                <p className="eyebrow">Guides</p>
+                <h2 className="text-title mt-4 text-balance">
+                  Worth reading before you order.
+                </h2>
+              </div>
+              <PressLink
+                href="/guides"
+                className="text-[0.9375rem] font-medium text-ink underline underline-offset-4 transition-colors hover:text-muted md:text-right"
+              >
+                All guides
+              </PressLink>
+            </Reveal>
+
+            <RevealGroup className="mt-12 grid gap-8 md:grid-cols-3 md:gap-6">
+              {guides.map((guide) => (
+                <RevealItem key={guide.slug}>
+                  <article className="group flex h-full flex-col border-t border-line pt-5">
+                    <h3 className="text-[0.9375rem] font-semibold leading-6">
+                      {guide.title}
+                    </h3>
+                    <p className="mt-3 text-[0.9375rem] leading-7 text-muted">
+                      {guide.excerpt}
+                    </p>
+                    <PressLink
+                      href={`/guides/${guide.slug}`}
+                      className="mt-auto inline-flex min-h-11 items-center gap-1.5 pt-5 text-[0.9375rem] font-medium text-ink transition-colors hover:text-muted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+                    >
+                      Read the guide
+                      <span
+                        aria-hidden="true"
+                        className="transition-transform duration-200 group-hover:translate-x-0.5"
+                      >
+                        →
+                      </span>
+                    </PressLink>
+                    <p className="mt-2 text-[0.75rem] text-subtle">{guide.readTime}</p>
+                  </article>
+                </RevealItem>
+              ))}
+            </RevealGroup>
           </div>
         </section>
 

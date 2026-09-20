@@ -55,6 +55,8 @@ export function isPublicPath(path: string): boolean {
     path === "/nfc-google-review-card" ||
     path === "/google-review-qr-code" ||
     path === "/google-review-card-philippines" ||
+    path === "/tap-cards" ||
+    // Kept public so the 301s to /tap-cards are served rather than 404'd.
     path === "/facebook-tap-card" ||
     path === "/google-tap-card" ||
     path === "/instagram-tap-card" ||
