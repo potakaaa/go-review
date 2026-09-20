@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from "react";
 
-import { convertGoogleMapsLink } from "@/app/(dashboard)/dashboard/routes/actions";
+import {
+  convertFacebookPageLink,
+  convertGoogleMapsLink,
+} from "@/app/(dashboard)/dashboard/routes/actions";
 import { Alert, FormError, buttonClass } from "@/components/ui";
 import { PLATFORM_DETAILS, ROUTE_PLATFORMS, type RoutePlatform } from "@/lib/platforms";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
@@ -14,6 +17,12 @@ export type SlotValue = {
   platform: RoutePlatform;
   destination_url: string;
   maps_url: string;
+  /**
+   * Facebook Page link typed into the converter. Unlike `maps_url` this is a
+   * client-side convenience only: the column is Google-specific, so the link
+   * is never posted.
+   */
+  facebook_url?: string;
 };
 
 /**
@@ -68,6 +77,27 @@ export function StandeeSlotFields({
     });
   }
 
+  function convertFacebookLink() {
+    const source = (value.facebook_url ?? "").trim();
+    if (!source) {
+      setConvertMessage("Paste a Facebook Page or share link first.");
+      return;
+    }
+
+    startConverting(async () => {
+      const formData = new FormData();
+      formData.set("facebook_url", source);
+      const result = await convertFacebookPageLink({}, formData);
+
+      if (result.reviewUrl) {
+        setConvertMessage(null);
+        onChange({ ...value, destination_url: result.reviewUrl });
+      } else {
+        setConvertMessage(result.message ?? "Could not convert that link.");
+      }
+    });
+  }
+
   return (
     <fieldset className="rounded-xl border border-line-strong bg-surface p-4 sm:p-5">
       <legend className="eyebrow px-2">QR {index + 1}</legend>
@@ -105,12 +135,18 @@ export function StandeeSlotFields({
                 name={`slots[${index}][platform]`}
                 value={platform}
                 checked={selected}
-                onChange={() =>
+                onChange={() => {
                   // Switching platform clears the link: a Facebook URL is never
                   // a valid Google destination, and a stale one would only be
                   // rejected on submit.
-                  onChange({ platform, destination_url: "", maps_url: "" })
-                }
+                  setConvertMessage(null);
+                  onChange({
+                    platform,
+                    destination_url: "",
+                    maps_url: "",
+                    facebook_url: "",
+                  });
+                }}
               />
               {PLATFORM_DETAILS[platform].shortLabel}
             </label>
@@ -162,13 +198,53 @@ export function StandeeSlotFields({
           ) : null}
         </div>
       ) : (
-        /* The column only accepts a Maps link on Google slots, so an empty
-           value is posted to keep the slot indexes aligned. */
-        <input
-          type="hidden"
-          name={`slots[${index}][maps_url]`}
-          value=""
-        />
+        <>
+          {/* The column only accepts a Maps link on Google slots, so an empty
+              value is posted to keep the slot indexes aligned. */}
+          <input type="hidden" name={`slots[${index}][maps_url]`} value="" />
+
+          {value.platform === "facebook" ? (
+            <div className="mt-4">
+              <label
+                htmlFor={`slot-${index}-facebook-url`}
+                className="eyebrow mb-2 block"
+              >
+                Convert a Facebook Page link{" "}
+                <span className="font-normal text-subtle">(optional)</span>
+              </label>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <input
+                  id={`slot-${index}-facebook-url`}
+                  type="url"
+                  inputMode="url"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  value={value.facebook_url ?? ""}
+                  onChange={(event) =>
+                    onChange({ ...value, facebook_url: event.target.value })
+                  }
+                  placeholder="https://www.facebook.com/share/…"
+                  className={`${FIELD} min-w-0 flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={convertFacebookLink}
+                  disabled={converting}
+                  className={buttonClass("secondary", "shrink-0")}
+                >
+                  {converting ? "Converting…" : "Convert link"}
+                </button>
+              </div>
+              {convertMessage ? (
+                <div className="mt-2">
+                  <Alert tone="danger">{convertMessage}</Alert>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </>
       )}
 
       <div className="mt-4">

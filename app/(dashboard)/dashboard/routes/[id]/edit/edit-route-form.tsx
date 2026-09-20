@@ -7,6 +7,7 @@ import {
   updateRoute,
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
+import { FacebookReviewConverter } from "@/components/facebook-review-converter";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { PlatformSelector } from "@/components/platform-selector";
@@ -89,6 +90,14 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
           initialUrl={route.maps_url ?? ""}
           onConverted={handleConvertedReviewUrl}
           sourceError={state.errors?.maps_url}
+        />
+      ) : null}
+
+      {platform === "facebook" ? (
+        <FacebookReviewConverter
+          embedded
+          autoFocus
+          onConverted={handleConvertedReviewUrl}
         />
       ) : null}
 

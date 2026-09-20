@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CopyButton } from "@/components/copy-button";
 import { QrPanel } from "@/components/qr-panel";
 import { ToggleActiveButton } from "@/components/toggle-active-button";
 import { ToggleLockButton } from "@/components/toggle-lock-button";
@@ -73,14 +74,21 @@ export default async function RouteDetailPage({
       </Card>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <a
-          href={route.destination_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={buttonClass("secondary", "text-sm")}
-        >
-          Open destination
-        </a>
+        <div className="flex gap-2">
+          <a
+            href={route.destination_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClass("secondary", "flex-1 text-sm")}
+          >
+            Open destination
+          </a>
+          <CopyButton
+            value={route.destination_url}
+            label="Copy destination URL"
+            iconOnly
+          />
+        </div>
         {canManageRoutes ? (
           <Link
             href={`/dashboard/routes/${route.id}/edit`}
@@ -121,21 +129,37 @@ export default async function RouteDetailPage({
         {route.maps_url ? (
           <div className="px-4 py-3">
             <p className="eyebrow">Original Google Maps link</p>
-            <a
-              href={route.maps_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-0.5 block break-anywhere text-sm text-brand underline underline-offset-2"
-            >
-              {route.maps_url}
-            </a>
+            <div className="mt-0.5 flex items-start gap-2">
+              <a
+                href={route.maps_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-w-0 flex-1 break-anywhere text-sm text-brand underline underline-offset-2"
+              >
+                {route.maps_url}
+              </a>
+              <CopyButton
+                value={route.maps_url}
+                label="Copy Google Maps link"
+                variant="ghost"
+                iconOnly
+              />
+            </div>
           </div>
         ) : null}
         <div className="px-4 py-3">
           <p className="eyebrow">Destination</p>
-          <p className="mt-0.5 break-anywhere text-sm">
-            {route.destination_url}
-          </p>
+          <div className="mt-0.5 flex items-start gap-2">
+            <p className="min-w-0 flex-1 break-anywhere text-sm">
+              {route.destination_url}
+            </p>
+            <CopyButton
+              value={route.destination_url}
+              label="Copy destination URL"
+              variant="ghost"
+              iconOnly
+            />
+          </div>
         </div>
         {route.notes ? (
           <div className="px-4 py-3">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CopyButton } from "@/components/copy-button";
 import { QrPanel } from "@/components/qr-panel";
 import {
   Alert,
@@ -125,14 +126,21 @@ export default async function StandeeDetailPage({
               />
 
               <div className="mt-5 grid gap-2">
-                <a
-                  href={route.destination_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonClass("secondary", "text-sm")}
-                >
-                  Open {label} destination
-                </a>
+                <div className="flex gap-2">
+                  <a
+                    href={route.destination_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={buttonClass("secondary", "flex-1 text-sm")}
+                  >
+                    Open {label} destination
+                  </a>
+                  <CopyButton
+                    value={route.destination_url}
+                    label={`Copy ${label} destination URL`}
+                    iconOnly
+                  />
+                </div>
                 <Link
                   href={`/dashboard/routes/${route.id}`}
                   className={buttonClass("secondary", "text-sm")}

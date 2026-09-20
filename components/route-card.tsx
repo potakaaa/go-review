@@ -153,7 +153,19 @@ function FullRouteCard({
         </div>
         <div className="flex gap-2">
           <dt className="eyebrow w-16 shrink-0 pt-0.5">Goes to</dt>
-          <dd className="truncate text-muted">{domainOf(route.destination_url)}</dd>
+          <dd className="flex min-w-0 flex-1 items-start gap-1">
+            <span className="min-w-0 flex-1 truncate pt-0.5 text-muted">
+              {domainOf(route.destination_url)}
+            </span>
+            {/* Only the domain is shown, so the button copies the full URL. */}
+            <CopyButton
+              value={route.destination_url}
+              label="Copy destination URL"
+              variant="ghost"
+              iconOnly
+              className="-mt-1"
+            />
+          </dd>
         </div>
       </dl>
 

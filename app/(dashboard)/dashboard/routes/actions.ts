@@ -17,6 +17,7 @@ import {
   incrementedRouteNames,
   sortRoutesByBusinessName,
 } from "@/lib/batch-edit";
+import { resolveFacebookReviewLink } from "@/lib/facebook-review";
 import { resolveGoogleReviewLink } from "@/lib/google-review";
 import { generateSlug } from "@/lib/slug";
 import { isRoutePlatform, normalizePlatformDestination } from "@/lib/platforms";
@@ -36,11 +37,14 @@ export type RouteFormState = {
   values?: Record<string, string>;
 };
 
-export type GoogleReviewConversionState = {
+/** Shared by both link converters: the same field, button and result panel. */
+export type ReviewLinkConversionState = {
   reviewUrl?: string;
   sourceUrl?: string;
   message?: string;
 };
+
+export type GoogleReviewConversionState = ReviewLinkConversionState;
 
 /** Postgres unique-violation. */
 const UNIQUE_VIOLATION = "23505";
@@ -78,6 +82,46 @@ export async function convertGoogleMapsLink(
   }
 
   const result = await resolveGoogleReviewLink(sourceUrl);
+  if (!result.ok) return { sourceUrl, message: result.message };
+
+  return {
+    sourceUrl,
+    reviewUrl: result.reviewUrl,
+  };
+}
+
+/**
+ * Turns a Facebook Page link into the URL for that Page's Reviews tab.
+ *
+ * Desktop Page URLs are converted without leaving the server; the opaque
+ * `/share/…` links the mobile apps hand out are followed first. Same public
+ * POST surface as the Maps converter, so the same auth check applies.
+ */
+export async function convertFacebookPageLink(
+  _prevState: ReviewLinkConversionState,
+  formData: FormData,
+): Promise<ReviewLinkConversionState> {
+  const access = await requireAuth();
+  if (!hasPermission(access, "convert", "view")) notFound();
+
+  const rawValue = formData.get("facebook_url");
+  const sourceUrl = typeof rawValue === "string" ? rawValue.trim() : "";
+
+  if (!sourceUrl) {
+    return {
+      sourceUrl,
+      message: "Paste a Facebook Page or share link first.",
+    };
+  }
+
+  if (sourceUrl.length > 2048) {
+    return {
+      sourceUrl,
+      message: "That link is too long. Paste the Facebook Page link again.",
+    };
+  }
+
+  const result = await resolveFacebookReviewLink(sourceUrl);
   if (!result.ok) return { sourceUrl, message: result.message };
 
   return {
