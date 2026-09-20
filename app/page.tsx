@@ -30,7 +30,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: { absolute: "Google Review Standee & Tap Card Options | Goreview" },
   description:
-    "The Goreview Google review standee is the flagship NFC and QR display, joined by the ₱999 two-in-one Facebook and Google Maps standee and 3×4-inch tap cards from ₱299.",
+    "Google review standees and NFC tap cards for Philippine businesses. Flagship Google standee, ₱999 Facebook and Google Maps 2-in-1, tap cards from ₱299.",
   alternates: { canonical: PUBLIC_ORIGIN },
 };
 

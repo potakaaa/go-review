@@ -9,6 +9,9 @@ export type GuideSection = {
 export type Guide = {
   slug: string;
   title: string;
+  /** Shorter stand-in for the SEO <title> when `title` would truncate in
+   *  search results (~60 chars). The on-page H1 still uses `title`. */
+  metaTitle?: string;
   description: string;
   excerpt: string;
   answer: string;
@@ -155,6 +158,7 @@ export const guides = [
   {
     slug: "nfc-vs-qr-google-reviews",
     title: "NFC vs QR Code for Google Reviews: Which Should You Use?",
+    metaTitle: "NFC vs QR Code for Google Reviews",
     description:
       "Compare NFC tap cards and QR code cards for Google reviews, including phone compatibility, customer friction, placement, and the value of using both.",
     excerpt:

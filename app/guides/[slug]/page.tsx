@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
   if (!guide) return {};
 
   return metadataForPage({
-    title: `${guide.title} | Goreview`,
+    title: `${guide.metaTitle ?? guide.title} | Goreview`,
     description: guide.description,
     path: `/guides/${guide.slug}`,
     imageAlt: guide.title,

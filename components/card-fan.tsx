@@ -15,18 +15,22 @@ import { SETTLE } from "@/components/motion";
  * `--card-w`, so the whole arrangement scales as a unit on a phone.
  *
  * Decorative: the three platform links live in the columns directly below, so
- * this is hidden from assistive tech rather than duplicating them.
+ * the whole stage is hidden from assistive tech rather than duplicating them.
+ * The cards still carry alt text -- `aria-hidden` on the wrapper keeps screen
+ * readers out, while crawlers (which ignore it) can still tell what they are.
  */
 const FAN = [
   {
     src: "/images/facebook-tap-card-cutout.png",
     platform: "Facebook",
+    alt: "Facebook NFC and QR tap card",
     rest: { rotate: -16, x: "-46%", y: "4%" },
     spread: { rotate: -25, x: "-74%", y: "-2%" },
   },
   {
     src: "/images/instagram-tap-card-cutout.png",
     platform: "Instagram",
+    alt: "Instagram NFC and QR tap card",
     rest: { rotate: 16, x: "46%", y: "4%" },
     spread: { rotate: 25, x: "74%", y: "-2%" },
   },
@@ -34,6 +38,7 @@ const FAN = [
   {
     src: "/images/google-tap-card-cutout.png",
     platform: "Google",
+    alt: "Google review NFC and QR tap card",
     rest: { rotate: 0, x: "0%", y: "-2%" },
     spread: { rotate: 0, x: "0%", y: "-7%" },
   },
@@ -70,7 +75,7 @@ export function CardFan() {
           >
             <Image
               src={card.src}
-              alt=""
+              alt={card.alt}
               width={900}
               height={1200}
               sizes="(max-width: 767px) 30vw, 190px"
