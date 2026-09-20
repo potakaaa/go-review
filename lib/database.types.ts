@@ -150,6 +150,7 @@ export type Database = {
           role: StaffRole;
           active: boolean;
           must_change_password: boolean;
+          all_routes_access: RouteAccessLevel | null;
           created_at: string;
           created_by: string | null;
         }>;
@@ -169,12 +170,21 @@ export type Database = {
           access_level: RouteAccessLevel;
         }>;
       };
+      admin_list_all_route_access: {
+        Args: Record<never, never>;
+        Returns: Array<{
+          user_id: string;
+          route_id: string;
+          access_level: RouteAccessLevel;
+        }>;
+      };
       admin_register_staff: {
         Args: {
           p_user_id: string;
           p_role: StaffRole;
           p_permissions?: Json;
           p_route_access?: Json;
+          p_all_routes_access?: RouteAccessLevel | null;
         };
         Returns: boolean;
       };
@@ -185,6 +195,7 @@ export type Database = {
           p_active: boolean;
           p_permissions?: Json;
           p_route_access?: Json;
+          p_all_routes_access?: RouteAccessLevel | null;
         };
         Returns: boolean;
       };

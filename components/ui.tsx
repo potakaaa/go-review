@@ -7,14 +7,20 @@ import type { ComponentProps, ReactNode } from "react";
  * and the indirection would cost more than it saves.
  */
 
+/* The border colour belongs to each variant, never here: `border-transparent`
+   and `border-line-strong` are the same property, so whichever Tailwind emits
+   last wins regardless of the order they appear in the class string -- which
+   silently erased the secondary border. */
 const BASE_BUTTON =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-transparent px-4 py-2.5 text-sm leading-none font-medium tap-target whitespace-nowrap transition-[color,background-color,border-color,transform] duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-sm leading-none font-medium tap-target whitespace-nowrap transition-[color,background-color,border-color,transform] duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 const VARIANTS = {
-  primary: "bg-brand text-canvas hover:bg-brand-strong active:translate-y-px",
+  primary:
+    "border-transparent bg-brand text-canvas hover:bg-brand-strong active:translate-y-px",
   secondary:
     "border-line-strong bg-transparent text-ink hover:bg-elevated active:translate-y-px",
-  ghost: "text-muted hover:bg-elevated hover:text-ink active:translate-y-px",
+  ghost:
+    "border-transparent text-muted hover:bg-elevated hover:text-ink active:translate-y-px",
   danger:
     "border-danger/40 bg-danger-soft text-danger hover:border-danger active:translate-y-px",
 } as const;

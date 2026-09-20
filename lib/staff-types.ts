@@ -23,6 +23,8 @@ export type StaffMember = {
   role: StaffRole;
   active: boolean;
   must_change_password: boolean;
+  /** null means access is limited to the routes listed in staff_route_access. */
+  all_routes_access: RouteAccessLevel | null;
   created_at: string;
   created_by: string | null;
 };
@@ -43,4 +45,16 @@ export type StaffRouteOption = {
   business_name: string;
   slug: string;
   publication_status: "draft" | "published";
+  /** Only shown to tell apart two routes that share a business name. */
+  destination_url: string;
+  created_at: string;
+};
+
+/** An existing account offered as a starting point in the access picker. */
+export type StaffAccessPreset = {
+  user_id: string;
+  email: string | null;
+  role: StaffRole;
+  all_routes_access: RouteAccessLevel | null;
+  access: StaffRouteAccessRow[];
 };

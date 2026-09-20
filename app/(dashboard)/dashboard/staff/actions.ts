@@ -5,9 +5,15 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireSuperadmin } from "@/lib/permissions";
+import { parseAccessPayload } from "@/lib/staff-route-picker";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { passwordSchema } from "@/lib/validation";
-import type { Json, StaffRole, StaffSection } from "@/lib/database.types";
+import type {
+  Json,
+  RouteAccessLevel,
+  StaffRole,
+  StaffSection,
+} from "@/lib/database.types";
 
 export type StaffActionState = {
   message?: string;
@@ -38,15 +44,34 @@ function selectedPermissions(formData: FormData): Json[] {
   });
 }
 
+/**
+ * The picker posts every grant in one `route_access_json` field. The older
+ * one-select-per-route encoding is still accepted so a form rendered before a
+ * deploy does not silently drop the assignments it was showing.
+ */
 function selectedRouteAccess(formData: FormData): Json[] {
-  const values = formData.getAll("route_access");
-  return values.flatMap((value) => {
+  const payload = formData.get("route_access_json");
+  if (payload !== null) {
+    return parseAccessPayload(payload).flatMap((row) =>
+      z.uuid().safeParse(row.route_id).success
+        ? [{ route_id: row.route_id, access_level: row.access_level }]
+        : [],
+    );
+  }
+
+  return formData.getAll("route_access").flatMap((value) => {
     if (typeof value !== "string" || !value) return [];
     const [routeId, accessLevel] = value.split(":");
     if (!z.uuid().safeParse(routeId).success) return [];
     if (accessLevel !== "view" && accessLevel !== "manage") return [];
     return [{ route_id: routeId, access_level: accessLevel }];
   });
+}
+
+/** null keeps the explicit per-route list; otherwise every route is covered. */
+function selectedAllRoutesAccess(formData: FormData): RouteAccessLevel | null {
+  const value = formData.get("all_routes_access");
+  return value === "view" || value === "manage" ? value : null;
 }
 
 export async function createStaff(
@@ -79,6 +104,7 @@ export async function createStaff(
     p_role: parsed.data.role as StaffRole,
     p_permissions: selectedPermissions(formData),
     p_route_access: selectedRouteAccess(formData),
+    p_all_routes_access: selectedAllRoutesAccess(formData),
   });
   if (registerError) {
     await admin.auth.admin.deleteUser(data.user.id);
@@ -107,6 +133,7 @@ export async function updateStaff(
     p_active: formData.get("active") === "on",
     p_permissions: selectedPermissions(formData),
     p_route_access: selectedRouteAccess(formData),
+    p_all_routes_access: selectedAllRoutesAccess(formData),
   });
   if (error) {
     console.error("[staff] update_failed", { code: error.code });

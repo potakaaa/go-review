@@ -13,7 +13,7 @@ export default async function StaffPage({
   searchParams: Promise<{ created?: string | string[]; saved?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const { staff, routes } = await getStaffOverview();
+  const { staff } = await getStaffOverview();
   const created = params.created === "1" || params.created?.[0] === "1";
   const saved = params.saved === "1" || params.saved?.[0] === "1";
 
@@ -33,8 +33,8 @@ export default async function StaffPage({
       <Card className="p-5 sm:p-7">
         <p className="eyebrow">New account</p>
         <h2 className="display-heading mt-2 text-2xl">Create staff account</h2>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-muted">The account is created with the temporary password you provide. It must be replaced before the new staff member can use the workspace.</p>
-        <div className="mt-6"><StaffCreateForm routes={routes} /></div>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-muted">The account is created with the temporary password you provide. It must be replaced before the new staff member can use the workspace. Route access is assigned straight afterwards.</p>
+        <div className="mt-6"><StaffCreateForm /></div>
       </Card>
 
       <section>

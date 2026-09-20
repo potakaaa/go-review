@@ -4,9 +4,8 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { createStaff, type StaffActionState } from "./actions";
-import { PermissionFields, RouteAccessFields } from "./staff-access-fields";
+import { PermissionFields } from "./staff-access-fields";
 import { Alert, buttonClass } from "@/components/ui";
-import type { StaffRouteOption } from "@/lib/staff-types";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -20,7 +19,13 @@ function SubmitButton() {
   );
 }
 
-export function StaffCreateForm({ routes }: { routes: StaffRouteOption[] }) {
+/**
+ * Deliberately short. Route access is not asked for here: the whole inventory
+ * above the submit button made creating an account a scrolling exercise, and
+ * createStaff already lands on the account's own page, where the picker has
+ * room to work.
+ */
+export function StaffCreateForm() {
   const [state, formAction] = useActionState<StaffActionState, FormData>(
     createStaff,
     {},
@@ -53,11 +58,9 @@ export function StaffCreateForm({ routes }: { routes: StaffRouteOption[] }) {
         <div className="mt-4"><PermissionFields /></div>
       </section>
 
-      <section>
-        <p className="eyebrow">Redirect-route access</p>
-        <p className="mt-2 text-sm leading-6 text-muted">A route may be shared with several admins. Choose none, view-only, or manage for each route.</p>
-        <div className="mt-4"><RouteAccessFields routes={routes} /></div>
-      </section>
+      <p className="rounded-xl border border-dashed border-line-strong px-4 py-3 text-sm leading-6 text-muted">
+        Redirect-route access is assigned on the next screen. The account starts with no routes.
+      </p>
 
       <SubmitButton />
     </form>

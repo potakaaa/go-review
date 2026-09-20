@@ -24,7 +24,7 @@ values
 
 select has_table('private', 'staff_section_permissions', 'section permission table exists');
 select has_table('private', 'staff_route_access', 'route assignment table exists');
-select has_function('public', 'admin_update_staff', array['uuid', 'text', 'boolean', 'jsonb', 'jsonb'], 'staff update RPC exists');
+select has_function('public', 'admin_update_staff', array['uuid', 'text', 'boolean', 'jsonb', 'jsonb', 'text'], 'staff update RPC exists');
 select ok(
   not has_function_privilege('anon', 'public.admin_list_staff()', 'execute'),
   'anonymous callers cannot execute staff listing'

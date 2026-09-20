@@ -4,9 +4,11 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { updateStaff, resetStaffPassword, type StaffActionState } from "./actions";
-import { PermissionFields, RouteAccessFields } from "./staff-access-fields";
+import { PermissionFields } from "./staff-access-fields";
+import { StaffRouteAccessPicker } from "./staff-route-picker";
 import { Alert, buttonClass } from "@/components/ui";
 import type {
+  StaffAccessPreset,
   StaffMember,
   StaffPermissionRow,
   StaffRouteAccessRow,
@@ -26,11 +28,13 @@ export function StaffEditForm({
   permissions,
   routeAccess,
   routes,
+  presets,
 }: {
   member: StaffMember;
   permissions: StaffPermissionRow[];
   routeAccess: StaffRouteAccessRow[];
   routes: StaffRouteOption[];
+  presets: StaffAccessPreset[];
 }) {
   const [state, formAction] = useActionState<StaffActionState, FormData>(updateStaff, {});
   const [passwordState, passwordAction] = useActionState<StaffActionState, FormData>(resetStaffPassword, {});
@@ -57,7 +61,15 @@ export function StaffEditForm({
         </section>
         <section>
           <p className="eyebrow">Redirect-route access</p>
-          <div className="mt-4"><RouteAccessFields routes={routes} access={routeAccess} /></div>
+          <p className="mt-2 text-sm leading-6 text-muted">A route may be shared with several admins. Give this account the whole inventory, or pick routes one business at a time.</p>
+          <div className="mt-4">
+            <StaffRouteAccessPicker
+              routes={routes}
+              access={routeAccess}
+              allRoutesAccess={member.all_routes_access}
+              presets={presets}
+            />
+          </div>
         </section>
         <SubmitButton label="Save staff access" />
       </form>
