@@ -48,6 +48,7 @@ export function isPublicPath(path: string): boolean {
     path === "/robots.txt" ||
     path === "/sitemap.xml" ||
     path === "/llms.txt" ||
+    path === "/manifest.webmanifest" ||
     path === "/icon" ||
     path === "/apple-icon" ||
     path === "/opengraph-image" ||
