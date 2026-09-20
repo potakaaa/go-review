@@ -16,7 +16,6 @@ export const metadata: Metadata = {
   publisher: "Goreview by Helbi Solutions",
   authors: [{ name: "Goreview", url: PUBLIC_ORIGIN }],
   category: "Business services",
-  alternates: { canonical: PUBLIC_ORIGIN },
   openGraph: {
     title: "Goreview | NFC & QR Tap Cards for Philippine Businesses",
     description: "Customized NFC and QR tap cards for Google reviews, Facebook, and Instagram.",

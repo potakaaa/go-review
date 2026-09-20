@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 
 import { OrderForm } from "@/app/order/order-form";
 import { PublicFooter, PublicHeader } from "@/components/public-site";
+import { publicUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Order a Google review standee or tap cards",
   description:
     "Order the Goreview Google review standee, the 2-in-1 Facebook and Google Maps standee, or Google, Facebook, and Instagram tap cards.",
+  alternates: { canonical: publicUrl("/order") },
 };
 
 export default function OrderPage() {

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 import { PublicFooter, PublicHeader } from "@/components/public-site";
+import { publicUrl } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Privacy notice" };
+export const metadata: Metadata = { title: "Privacy notice", alternates: { canonical: publicUrl("/privacy") } };
 
 export default function PrivacyPage() {
   return (
