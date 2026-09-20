@@ -101,7 +101,10 @@ export function SeoLandingPage({ page }: { page: SeoLandingPageData }) {
                 aria-label="Quick answer"
               >
                 <p className="eyebrow">Quick answer</p>
-                <p className="mt-2 text-[0.9375rem] leading-7 text-muted">
+                <h2 className="mt-2 text-[0.9375rem] font-semibold leading-6">
+                  {page.question}
+                </h2>
+                <p data-speakable className="mt-2 text-[0.9375rem] leading-7 text-muted">
                   {page.answer}
                 </p>
               </aside>

@@ -201,6 +201,7 @@ export function PublicFooter() {
             {[
               { href: FACEBOOK_URL, label: "Facebook", external: true },
               { href: ORDER_EMAIL, label: "Email", external: true },
+              { href: "/about", label: "About", external: false },
               { href: "/resellers", label: "Resellers", external: false },
               { href: "/guides", label: "Guides", external: false },
               { href: "/privacy", label: "Privacy", external: false },

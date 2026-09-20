@@ -4,6 +4,13 @@ export type GuideSection = {
   heading: string;
   paragraphs: readonly string[];
   bullets?: readonly string[];
+  /** A comparison the prose would only describe worse. Rendered as a real
+   *  <table>, which is also the shape AI search engines quote most readily. */
+  table?: {
+    caption: string;
+    columns: readonly string[];
+    rows: readonly (readonly string[])[];
+  };
 };
 
 export type Guide = {
@@ -14,6 +21,10 @@ export type Guide = {
   metaTitle?: string;
   description: string;
   excerpt: string;
+  /** The question `answer` answers, rendered as the article's first H2. */
+  question: string;
+  /** Lead image for the article. */
+  image: { src: string; alt: string; width: number; height: number };
   answer: string;
   updatedAt: string;
   readTime: string;
@@ -29,6 +40,13 @@ export const guides = [
       "A practical, policy-aware guide to asking real customers for more genuine Google reviews without incentives or awkward follow-ups.",
     excerpt:
       "Make the request timely, make the link easy to reach, and let customers decide what to say.",
+    image: {
+      src: "/images/shop-1.webp",
+      alt: "A blue Goreview stand beside a payment QR sign on a coffee shop counter.",
+      width: 1200,
+      height: 1600,
+    },
+    question: "How do you get more Google reviews?",
     answer:
       "To get more genuine Google reviews, ask real customers at a natural moment, send them directly to your review page, and never require a positive rating or offer an incentive.",
     updatedAt: "2026-09-08",
@@ -100,6 +118,13 @@ export const guides = [
       "Learn how a direct Google review link and QR code can remove search steps for customers and make an honest review request easier to act on.",
     excerpt:
       "Start with the correct Business Profile review destination, test it, and place the QR code where customers naturally pause.",
+    image: {
+      src: "/images/google-tap-card-cutout.png",
+      alt: "A Goreview Google tap card carrying a QR code and an NFC tag.",
+      width: 900,
+      height: 1200,
+    },
+    question: "How do you create a Google review link and QR code?",
     answer:
       "Create a Google review QR code by copying your Business Profile review link, turning that link into a high-contrast QR code, testing it on multiple phones, and placing it where customers naturally finish their interaction.",
     updatedAt: "2026-09-08",
@@ -163,6 +188,13 @@ export const guides = [
       "Compare NFC tap cards and QR code cards for Google reviews, including phone compatibility, customer friction, placement, and the value of using both.",
     excerpt:
       "NFC is quick for compatible phones; QR is familiar and broadly accessible. A card with both gives customers a choice.",
+    image: {
+      src: "/images/goreview-standee-transparent-v3.png",
+      alt: "A Goreview standee showing both an NFC tap area and a printed QR code.",
+      width: 1094,
+      height: 1438,
+    },
+    question: "Should you use NFC or QR codes for Google reviews?",
     answer:
       "NFC is usually the fastest option on compatible phones, while QR is familiar and broadly accessible; using both on one Google review card gives customers a choice.",
     updatedAt: "2026-09-08",
@@ -193,6 +225,18 @@ export const guides = [
           "Keep both destinations tested and consistent.",
           "Invite honest feedback without promising a rating or reward.",
         ],
+        table: {
+          caption: "NFC and QR compared on the things that decide which one a customer uses.",
+          columns: ["", "NFC tap", "QR scan"],
+          rows: [
+            ["How it starts", "Customer holds the phone near the card", "Customer opens the camera and points it"],
+            ["Phone support", "Most recent iPhone and Android models", "Any phone with a camera"],
+            ["Needs light", "No", "Yes, enough to read the code"],
+            ["Works behind glass", "Only at close range", "Yes, if the code stays visible"],
+            ["Visible instruction", "Nothing to see, so the card must say so", "The code itself signals what to do"],
+            ["Best placed", "Counters and desks within arm's reach", "Table tents, posters, and signage further away"],
+          ],
+        },
       },
       {
         heading: "Choose placement before technology",

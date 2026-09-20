@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -108,9 +109,19 @@ export default async function GuidePage({ params }: GuidePageProps) {
           <p className="eyebrow">Goreview guide · {guide.readTime}</p>
           <h1 className="text-display mt-4 text-balance">{guide.title}</h1>
           <p className="text-body-lg mt-6 text-muted">{guide.excerpt}</p>
+          <Image
+            src={guide.image.src}
+            alt={guide.image.alt}
+            width={guide.image.width}
+            height={guide.image.height}
+            sizes="(max-width: 767px) 90vw, 46rem"
+            priority
+            className="mt-8 h-auto w-full rounded-2xl border border-line bg-surface object-contain"
+          />
           <aside className="mt-8 rounded-2xl border border-line bg-surface p-5" aria-label="Quick answer">
             <p className="eyebrow">Quick answer</p>
-            <p className="mt-2 text-[0.9375rem] leading-7 text-muted">{guide.answer}</p>
+            <h2 className="mt-2 text-[0.9375rem] font-semibold leading-6">{guide.question}</h2>
+            <p data-speakable className="mt-2 text-[0.9375rem] leading-7 text-muted">{guide.answer}</p>
           </aside>
           <p className="mt-5 text-[0.75rem] text-subtle">
             By Goreview · Updated {formatGuideDate(guide.updatedAt)}
@@ -128,6 +139,48 @@ export default async function GuidePage({ params }: GuidePageProps) {
                     <ul className="list-disc space-y-3 pl-5 marker:text-line-strong">
                       {section.bullets.map((bullet) => <li key={bullet} className="pl-2">{bullet}</li>)}
                     </ul>
+                  ) : null}
+                  {section.table ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse text-[0.9375rem]">
+                        <caption className="pb-3 text-left text-[0.8125rem] text-subtle">
+                          {section.table.caption}
+                        </caption>
+                        <thead>
+                          <tr>
+                            {section.table.columns.map((column) => (
+                              <th
+                                key={column}
+                                scope="col"
+                                className="border-b border-line-strong py-3 pr-4 text-left font-semibold text-ink last:pr-0"
+                              >
+                                {column}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {section.table.rows.map((row) => (
+                            <tr key={row[0]}>
+                              <th
+                                scope="row"
+                                className="border-b border-line py-3 pr-4 text-left align-top font-medium text-ink"
+                              >
+                                {row[0]}
+                              </th>
+                              {row.slice(1).map((cell, index) => (
+                                <td
+                                  key={`${row[0]}-${index}`}
+                                  className="border-b border-line py-3 pr-4 align-top leading-[1.7] last:pr-0"
+                                >
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : null}
                 </div>
               </section>

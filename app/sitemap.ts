@@ -43,6 +43,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${PUBLIC_ORIGIN}/about`,
+      lastModified: "2026-09-20",
+      changeFrequency: "yearly",
+      priority: 0.6,
+    },
+    {
       url: `${PUBLIC_ORIGIN}/resellers`,
       lastModified: "2026-09-09",
       changeFrequency: "monthly",

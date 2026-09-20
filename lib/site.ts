@@ -61,6 +61,7 @@ export function isPublicPath(path: string): boolean {
     path === "/google-tap-card" ||
     path === "/instagram-tap-card" ||
     path === "/order" ||
+    path === "/about" ||
     path === "/privacy" ||
     path === "/resellers" ||
     path === "/guides" ||

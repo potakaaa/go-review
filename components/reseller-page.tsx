@@ -252,7 +252,7 @@ export function ResellerPage() {
             <div>
               <p className="eyebrow">A business you can explain in one sentence</p>
               <h2 className="text-title mt-4 max-w-3xl text-balance">
-                The product is ready.{" "}
+                What does a Goreview reseller actually do?{" "}
                 <span className="display-heading text-muted">You bring the relationships.</span>
               </h2>
             </div>

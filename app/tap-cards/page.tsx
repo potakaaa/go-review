@@ -332,6 +332,15 @@ export default function TapCardsPage() {
             <Reveal className="max-w-2xl">
               <p className="eyebrow">Placement</p>
               <h2 className="text-title mt-4">Where a card actually goes.</h2>
+              <p
+                data-speakable
+                className="mt-5 text-[0.9375rem] leading-7 text-muted"
+              >
+                Anywhere a customer is already still for a moment with a phone
+                in hand. The adhesive back holds on painted wall, tile, glass,
+                and laminate, so placement is a question of timing rather than
+                surface.
+              </p>
             </Reveal>
             <RevealGroup className="mt-12 grid gap-8 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
               {placements.map(([title, copy]) => (
@@ -351,6 +360,45 @@ export default function TapCardsPage() {
         <section className="py-20 md:py-28">
           <div className={container}>
             <Reveal className="max-w-2xl">
+              <p className="eyebrow">Ordering</p>
+              <h2 className="text-title mt-4">How do you order tap cards?</h2>
+              <p
+                data-speakable
+                className="mt-5 text-[0.9375rem] leading-7 text-muted"
+              >
+                Send an inquiry with your quantities and destinations. Nothing
+                is charged until we have confirmed artwork, delivery, and
+                payment with you.
+              </p>
+              <ol className="mt-8 space-y-5 text-[0.9375rem] leading-7 text-muted">
+                <li className="grid grid-cols-[2.25rem_1fr] gap-4">
+                  <span className="font-mono text-[0.75rem] text-subtle">01</span>
+                  <span>
+                    <strong className="block font-semibold text-ink">Pick your mix</strong>
+                    Any combination of Google, Facebook, and Instagram, three
+                    cards minimum.
+                  </span>
+                </li>
+                <li className="grid grid-cols-[2.25rem_1fr] gap-4">
+                  <span className="font-mono text-[0.75rem] text-subtle">02</span>
+                  <span>
+                    <strong className="block font-semibold text-ink">Send the details</strong>
+                    Your business name and the review page, Page, or profile
+                    each card should open.
+                  </span>
+                </li>
+                <li className="grid grid-cols-[2.25rem_1fr] gap-4">
+                  <span className="font-mono text-[0.75rem] text-subtle">03</span>
+                  <span>
+                    <strong className="block font-semibold text-ink">We print and ship</strong>
+                    Cards arrive configured and ready to tap. Free delivery
+                    within CDO, nationwide shipping available.
+                  </span>
+                </li>
+              </ol>
+            </Reveal>
+
+            <Reveal className="mt-20 max-w-2xl">
               <p className="eyebrow">Questions</p>
               <h2 className="text-title mt-4">Before you order.</h2>
             </Reveal>

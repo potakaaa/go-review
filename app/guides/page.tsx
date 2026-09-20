@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { JsonLd } from "@/components/json-ld";
@@ -80,6 +81,48 @@ export default function GuidesPage() {
             customer feedback easier to reach—without promising a rating or
             search position.
           </p>
+
+          <Image
+            src="/images/shop-3.webp"
+            alt="A Goreview stand on a cafe pastry display beside the counter."
+            width={1170}
+            height={1560}
+            sizes="(max-width: 767px) 90vw, 42rem"
+            className="mt-10 h-auto w-full max-w-2xl rounded-2xl border border-line bg-surface object-cover"
+          />
+
+          <div className="mt-12 max-w-2xl border-t border-line pt-10">
+            <h2 className="text-subtitle">What do these guides cover?</h2>
+            <p
+              data-speakable
+              className="mt-4 text-[1.0625rem] leading-[1.75] text-muted"
+            >
+              Three things: how to ask a real customer for a review without
+              breaking Google&rsquo;s rules, how to build the direct review link
+              and QR code your business needs, and whether NFC or QR is the
+              better fit for where you would put a card. Each one is written for
+              a business owner rather than a marketer.
+            </p>
+
+            <h2 className="text-subtitle mt-10">Who are they for?</h2>
+            <p className="mt-4 text-[1.0625rem] leading-[1.75] text-muted">
+              Cafés, restaurants, salons, clinics, and shops — anywhere a
+              conversation ends at a counter and the customer walks out with
+              their phone already in hand. You do not need a website, an agency,
+              or any Goreview product to use any of the advice here.
+            </p>
+
+            <h2 className="text-subtitle mt-10">
+              Does Goreview promise more reviews?
+            </h2>
+            <p className="mt-4 text-[1.0625rem] leading-[1.75] text-muted">
+              No, and be careful with anyone who does. Nothing here filters,
+              gates, or buys reviews, because incentivising or screening them is
+              against Google&rsquo;s prohibited-content policy. What a card can
+              do is remove the searching, so a customer who already wants to say
+              something is not talked out of it by the effort.
+            </p>
+          </div>
         </section>
 
         <section className="border-y border-line bg-surface py-14 md:py-20">

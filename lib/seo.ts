@@ -64,6 +64,12 @@ export function webPageJsonLd({
     isPartOf: { "@id": WEBSITE_ID },
     about: { "@id": ORGANIZATION_ID },
     inLanguage: "en-PH",
+    // The heading/answer pair at the top of each page is the part that makes
+    // sense read aloud; the rest is layout and calls to action.
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", "[data-speakable]"],
+    },
   } as const;
 }
 
@@ -90,6 +96,34 @@ export function productJsonLd(url = publicUrl("/google-review-card")) {
       url,
       seller: organizationJsonLd,
     },
+  } as const;
+}
+
+export function howToJsonLd({
+  name,
+  description,
+  path,
+  steps,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  steps: readonly { name: string; text: string }[];
+}) {
+  const url = publicUrl(path);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "@id": `${url}#howto`,
+    name,
+    description,
+    step: steps.map((step, index) => ({
+      "@type": "HowToStep",
+      position: index + 1,
+      name: step.name,
+      text: step.text,
+    })),
   } as const;
 }
 

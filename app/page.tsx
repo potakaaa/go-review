@@ -17,7 +17,13 @@ import { ProductRail } from "@/components/product-rail";
 import { PublicFooter, PublicHeader } from "@/components/public-site";
 import { ShopStoryCard } from "@/components/shop-story";
 import { container, primaryButton, secondaryButton } from "@/components/styles";
-import { organizationJsonLd, websiteJsonLd, webPageJsonLd } from "@/lib/seo";
+import {
+  faqJsonLd,
+  howToJsonLd,
+  organizationJsonLd,
+  websiteJsonLd,
+  webPageJsonLd,
+} from "@/lib/seo";
 import { PUBLIC_ORIGIN } from "@/lib/site";
 import { guides } from "@/lib/guides";
 import { getPublishedStories } from "@/lib/stories";
@@ -114,6 +120,16 @@ export default async function Home() {
             description:
               "The Goreview Google review standee, plus optional Google, Facebook, and Instagram NFC and QR tap cards.",
           }),
+          // The order flow below is a real three-step procedure, so it is
+          // described as one rather than left as decorative numbering.
+          howToJsonLd({
+            name: "How to order Goreview cards",
+            description:
+              "Choose a product, send an inquiry with your business details, and confirm artwork, delivery, and payment before production.",
+            path: "/",
+            steps: steps.map(([, title, copy]) => ({ name: title, text: copy })),
+          }),
+          faqJsonLd(faqs.map(([question, answer]) => ({ question, answer }))),
         ]}
       />
       <PublicHeader />

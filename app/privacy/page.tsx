@@ -1,19 +1,43 @@
 import type { Metadata } from "next";
 
 import { PublicFooter, PublicHeader } from "@/components/public-site";
-import { publicUrl } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import {
+  breadcrumbJsonLd,
+  organizationJsonLd,
+  publicUrl,
+  webPageJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 
 export const metadata: Metadata = { title: "Privacy notice", alternates: { canonical: publicUrl("/privacy") } };
 
 export default function PrivacyPage() {
   return (
     <>
+      <JsonLd
+        data={[
+          organizationJsonLd,
+          websiteJsonLd,
+          webPageJsonLd({
+            path: "/privacy",
+            name: "Order inquiry privacy notice",
+            description:
+              "What Goreview collects from an order inquiry, who can see it, how long it is kept, and how to ask for changes.",
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Privacy", path: "/privacy" },
+          ]),
+        ]}
+      />
       <PublicHeader />
       <main className="mx-auto w-[calc(100%-2.5rem)] max-w-[46rem] py-14 md:py-20">
         <p className="eyebrow">Privacy</p>
         <h1 className="text-title mt-4">Order inquiry privacy notice</h1>
-        <div className="mt-8 space-y-6 text-[1.0625rem] leading-[1.75] text-muted">
-          <p>
+        <h2 className="text-subtitle mt-8">What information does Goreview collect?</h2>
+        <div className="mt-4 space-y-6 text-[1.0625rem] leading-[1.75] text-muted">
+          <p data-speakable>
             Goreview collects the contact, business, location, and product
             details you submit so we can reply, prepare your order, arrange
             delivery, and provide support.
