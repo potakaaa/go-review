@@ -1,15 +1,33 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { requirePermission } from "@/lib/permissions";
-import { storySchema, STORY_BUCKET } from "@/lib/story-validation";
+import { storySchema } from "@/lib/story-validation";
+import { STORY_BUCKET } from "@/lib/story-limits";
 import { normalizeStoryImage } from "@/lib/story-images";
 import { z } from "zod";
 
 export type StoryFormState = { error?: string };
 
+/**
+ * A story that fails to save should say so on the form. Without this the
+ * failure escapes to the dashboard error boundary, which replaces the page --
+ * and everything the writer typed -- with "Something went wrong".
+ */
 export async function saveStory(_state: StoryFormState, form: FormData): Promise<StoryFormState> {
+  try {
+    return await save(form);
+  } catch (error) {
+    // redirect() and notFound() signal through thrown values; only real
+    // failures become a form message.
+    unstable_rethrow(error);
+    console.error("[stories] save_failed", error);
+    return { error: "The story could not be saved. Refresh the page and try again." };
+  }
+}
+
+async function save(form: FormData): Promise<StoryFormState> {
   const { supabase } = await requirePermission("stories", "manage");
   const rawId = form.get("id");
   const id = rawId ? z.uuid().safeParse(rawId) : null;

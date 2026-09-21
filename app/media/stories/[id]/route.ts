@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createPublicClient } from "@/lib/supabase/public";
-import { STORY_BUCKET } from "@/lib/story-validation";
+import { STORY_BUCKET } from "@/lib/story-limits";
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) return new Response("Not found", { status: 404 });

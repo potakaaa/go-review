@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { requireStaffMfa } from "@/lib/auth";
-import { STORY_BUCKET } from "@/lib/story-validation";
+import { STORY_BUCKET } from "@/lib/story-limits";
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { supabase } = await requireStaffMfa();
   const { id } = await params;

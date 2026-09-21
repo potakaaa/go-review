@@ -28,5 +28,4 @@ export function reviewDifference(story: { before_count: number | null; after_cou
   return story.before_count === null || story.after_count === null ? null : story.after_count - story.before_count;
 }
 
-export const STORY_BUCKET = "shop-stories";
-export const STORY_UPLOAD_LIMIT = 8 * 1024 * 1024;
+export { STORY_BUCKET, STORY_UPLOAD_LIMIT } from "@/lib/story-limits";
