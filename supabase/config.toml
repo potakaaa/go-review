@@ -246,6 +246,15 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# The recovery link must carry `token_hash`, not the default `.ConfirmationURL`.
+# `.ConfirmationURL` sends the browser back through the PKCE exchange, which only
+# succeeds in the same browser that asked for the reset -- a link read on a phone
+# after requesting it on a laptop would fail. Keep this in step with the template
+# pasted into the hosted dashboard.
+[auth.email.template.recovery]
+subject = "Reset your Goreview password"
+content_path = "./templates/recovery.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

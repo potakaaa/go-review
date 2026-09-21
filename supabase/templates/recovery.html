@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="supported-color-schemes" content="dark light" />
+    <title>Reset your Goreview password</title>
+  </head>
+  <body style="margin:0; padding:0; width:100%; background-color:#0a0a0a;">
+    <!-- Preheader: shown in the inbox list, hidden in the body. -->
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+      Your single-use link to choose a new Goreview password. It expires in one hour.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px; width:100%;">
+
+            <!-- Mark -->
+            <tr>
+              <td style="padding-bottom:28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" width="44" height="44" style="width:44px; height:44px; border:1px solid #2e2e2e; border-radius:6px; background-color:#141414; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; font-weight:500; letter-spacing:-0.01em; color:#f5f5f5;">
+                      KEY
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Card -->
+            <tr>
+              <td style="background-color:#141414; border:1px solid #2e2e2e; border-radius:12px; padding:32px;">
+
+                <p style="margin:0 0 12px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#8a8a8a;">
+                  Goreview / Account recovery
+                </p>
+
+                <h1 style="margin:0 0 16px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:26px; line-height:1.25; font-weight:600; letter-spacing:-0.02em; color:#f5f5f5;">
+                  Choose a new password
+                </h1>
+
+                <p style="margin:0 0 28px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.6; color:#a3a3a3;">
+                  Someone asked to reset the password for this Goreview workspace account. Use the button below to set a new one. The link is single-use and expires in one hour.
+                </p>
+
+                <!-- Bulletproof button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" bgcolor="#f5f5f5" style="border-radius:8px;">
+                      <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery"
+                         style="display:block; padding:14px 24px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; font-weight:600; line-height:1; color:#0a0a0a; text-decoration:none; border-radius:8px;">
+                        Reset your password
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:24px 0 8px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#8a8a8a;">
+                  If the button does not work, paste this into your browser:
+                </p>
+                <p style="margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; line-height:1.6; word-break:break-all; color:#a3a3a3;">
+                  <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery" style="color:#a3a3a3; text-decoration:underline;">{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery</a>
+                </p>
+
+                <!-- Divider -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td height="1" style="height:1px; line-height:1px; font-size:0; background-color:#2e2e2e; padding:0;">&nbsp;</td>
+                  </tr>
+                </table>
+
+                <p style="margin:24px 0 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#8a8a8a;">
+                  Requesting another reset email replaces this link, so always open the most recent one. If you did not ask for this, you can ignore this email &mdash; your password stays as it is.
+                </p>
+
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:24px 8px 0;">
+                <p style="margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#6b6b6b;">
+                  Goreview &middot; sent because a password reset was requested for this address.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -4,6 +4,22 @@ import { Card } from "@/components/ui";
 
 import { ForgotPasswordForm } from "@/app/forgot-password/forgot-password-form";
 
+/**
+ * Why the link failed, in the reader's terms.
+ *
+ * Every one of these used to read "invalid or expired", which told someone
+ * holding a link they had just received nothing about what to do next.
+ */
+const LINK_ERRORS: Record<string, string> = {
+  expired_link:
+    "That reset link has expired. Request a new one and open it within the hour.",
+  used_link:
+    "That reset link has already been used, or a newer one has replaced it. Only the most recent email works -- request a new link and open that one.",
+  wrong_browser:
+    "That reset link was opened in a different browser from the one that requested it. Request a new link and open it in this browser.",
+  invalid_link: "That reset link is invalid or expired. Request a new one.",
+};
+
 export const metadata: Metadata = {
   title: "Reset password",
   robots: { index: false, follow: false },
@@ -48,9 +64,7 @@ export default async function ForgotPasswordPage({
         <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
           <ForgotPasswordForm
             initialError={
-              error === "invalid_link"
-                ? "That reset link is invalid or expired. Request a new one."
-                : undefined
+              typeof error === "string" ? LINK_ERRORS[error] : undefined
             }
           />
         </Card>

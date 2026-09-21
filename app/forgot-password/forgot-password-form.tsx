@@ -41,7 +41,8 @@ export function ForgotPasswordForm({
       <div className="space-y-5">
         <Alert tone="ok" title="Check your email">
           If that address belongs to the workspace, a password-reset link is on
-          its way. Open it in this browser and check spam if it does not arrive.
+          its way. Open the newest email -- asking again replaces the previous
+          link -- and check spam if it does not arrive.
         </Alert>
         <Link href="/login" className={buttonClass("secondary", "w-full")}>
           Back to sign in
