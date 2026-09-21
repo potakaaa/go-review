@@ -422,9 +422,16 @@ export default async function Home() {
                 </p>
               </Reveal>
 
-              <RevealGroup className="mt-14 grid gap-6 md:grid-cols-3 md:gap-4 xl:gap-5">
+              {/* Wrapping flex rather than a fixed column count: the shelf
+                  holds any number of stories, and a short final row centres
+                  itself instead of hanging off the left edge. The basis values
+                  subtract the gaps the row will add back. */}
+              <RevealGroup className="mt-12 flex flex-wrap justify-center gap-5">
                 {stories.map((story) => (
-                  <RevealItem key={story.id}>
+                  <RevealItem
+                    key={story.id}
+                    className="basis-full sm:basis-[calc((100%-1.25rem)/2)] lg:basis-[calc((100%-2.5rem)/3)] xl:basis-[calc((100%-3.75rem)/4)]"
+                  >
                     <ShopStoryCard story={story} />
                   </RevealItem>
                 ))}
