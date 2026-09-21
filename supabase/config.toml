@@ -253,7 +253,7 @@ otp_expiry = 3600
 # pasted into the hosted dashboard.
 [auth.email.template.recovery]
 subject = "Reset your Goreview password"
-content_path = "./templates/recovery.html"
+content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
