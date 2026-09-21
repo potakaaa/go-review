@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 import { adminOrigin } from "@/lib/site";
-import { createClient } from "@/lib/supabase/server";
+import { createRecoveryClient } from "@/lib/supabase/recovery";
 
 export type PasswordRecoveryState = {
   error?: string;
@@ -23,7 +23,7 @@ export async function requestPasswordReset(
     return { error: parsed.error.issues[0]?.message ?? "Check your email." };
   }
 
-  const supabase = await createClient();
+  const supabase = createRecoveryClient();
   const captchaToken = formData.get("cf-turnstile-response");
   const callbackUrl = new URL("/auth/callback", `${adminOrigin()}/`);
   const { error } = await supabase.auth.resetPasswordForEmail(
