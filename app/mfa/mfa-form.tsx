@@ -71,7 +71,11 @@ export function MfaForm({ next }: { next: string }) {
       setSetup({
         status: "enroll",
         factorId: data.id,
-        qrCode: data.totp.qr_code,
+        // GoTrue returns the SVG data URI with a trailing newline, which
+        // next/image rejects outright ("cannot end with a space or control
+        // character") -- the whole enrolment screen crashed rather than
+        // showing a QR code.
+        qrCode: data.totp.qr_code.trim(),
         secret: data.totp.secret,
       });
     }
