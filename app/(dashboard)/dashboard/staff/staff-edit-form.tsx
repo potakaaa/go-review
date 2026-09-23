@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { updateStaff, resetStaffPassword, type StaffActionState } from "./actions";
 import { PermissionFields } from "./staff-access-fields";
 import { StaffRouteAccessPicker } from "./staff-route-picker";
 import { Alert, buttonClass } from "@/components/ui";
+import type { StaffRole } from "@/lib/database.types";
 import type {
   StaffAccessPreset,
   StaffMember,
@@ -38,6 +39,7 @@ export function StaffEditForm({
 }) {
   const [state, formAction] = useActionState<StaffActionState, FormData>(updateStaff, {});
   const [passwordState, passwordAction] = useActionState<StaffActionState, FormData>(resetStaffPassword, {});
+  const [role, setRole] = useState<StaffRole>(member.role);
 
   return (
     <div className="space-y-10">
@@ -50,14 +52,14 @@ export function StaffEditForm({
         </label>
         <div>
           <label htmlFor="edit-role" className="eyebrow mb-2 block">Role</label>
-          <select id="edit-role" name="role" defaultValue={member.role} className={FIELD}>
+          <select id="edit-role" name="role" value={role} onChange={(event) => setRole(event.target.value as StaffRole)} className={FIELD}>
             <option value="admin">Admin</option>
             <option value="superadmin">Superadmin</option>
           </select>
         </div>
         <section>
           <p className="eyebrow">Section permissions</p>
-          <div className="mt-4"><PermissionFields permissions={permissions} /></div>
+          <div className="mt-4"><PermissionFields permissions={permissions} role={role} /></div>
         </section>
         <section>
           <p className="eyebrow">Redirect-route access</p>

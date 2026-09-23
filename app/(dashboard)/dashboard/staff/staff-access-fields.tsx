@@ -1,14 +1,32 @@
 import { STAFF_SECTIONS } from "@/lib/staff-types";
 import type { StaffPermissionRow } from "@/lib/staff-types";
+import type { StaffRole } from "@/lib/database.types";
 
+/**
+ * The Staff section is superadmin-only in the database: registering an admin
+ * with it raises 42501 and the whole account creation is rolled back. Offering
+ * the checkbox to an admin was therefore a trap -- it could only ever produce a
+ * failed save -- so the section is shown only for the role that can hold it.
+ */
 export function PermissionFields({
   permissions,
+  role,
 }: {
   permissions?: StaffPermissionRow[];
+  role: StaffRole;
 }) {
+  const sections = STAFF_SECTIONS.filter(
+    (section) => section.id !== "staff" || role === "superadmin",
+  );
+
   return (
     <div className="space-y-3">
-      {STAFF_SECTIONS.map((section) => {
+      {role === "superadmin" ? (
+        <p className="rounded-xl border border-dashed border-line-strong px-4 py-3 text-sm leading-6 text-muted">
+          Superadmins hold every section regardless of what is ticked here.
+        </p>
+      ) : null}
+      {sections.map((section) => {
         const current = permissions?.find((item) => item.section === section.id);
         return (
           <fieldset

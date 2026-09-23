@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { AuthError } from "@supabase/supabase-js";
 
 import { requireSuperadmin } from "@/lib/permissions";
 import { parseAccessPayload } from "@/lib/staff-route-picker";
@@ -18,6 +19,8 @@ import type {
 export type StaffActionState = {
   message?: string;
   errors?: Record<string, string>;
+  /** Echoed back so a rejected create does not empty the form. */
+  email?: string;
 };
 
 const staffIdentitySchema = z.object({
@@ -74,6 +77,62 @@ function selectedAllRoutesAccess(formData: FormData): RouteAccessLevel | null {
   return value === "view" || value === "manage" ? value : null;
 }
 
+/**
+ * Auth failures arrive in two shapes, and telling the superadmin the wrong one
+ * sends them hunting for a duplicate email that does not exist. GoTrue sets a
+ * `code` only when it rejected the input; a credential or connectivity problem
+ * carries a status instead, so both the log line and the banner name it.
+ */
+function describeAuthFailure(error: AuthError | null): {
+  detail: Record<string, unknown>;
+  message: string;
+} {
+  const detail = {
+    code: error?.code,
+    status: error?.status,
+    name: error?.name,
+    reason: error?.message,
+  };
+
+  switch (error?.code) {
+    case "email_exists":
+      return { detail, message: "An account already exists for that email address." };
+    case "weak_password":
+      return {
+        detail,
+        message:
+          "The authentication service rejected that temporary password. Choose a different one.",
+      };
+    case "email_address_invalid":
+    case "validation_failed":
+      return { detail, message: "That email address was rejected as invalid." };
+  }
+
+  if (error?.status === 401 || error?.status === 403) {
+    return {
+      detail,
+      message:
+        "The authentication service rejected this server's credentials. Check SUPABASE_SERVICE_ROLE_KEY for this deployment.",
+    };
+  }
+
+  return {
+    detail,
+    message: "The authentication service could not be reached. No account was created.",
+  };
+}
+
+/**
+ * The database refuses two combinations outright. Repeating its generic
+ * "could not be authorized" for both left the superadmin with nothing to act
+ * on, so the one that a form can actually produce is named.
+ */
+function registerAuthorizationMessage(code: string | undefined): string {
+  return code === "42501"
+    ? "The Staff section can only be held by a superadmin. Choose the Superadmin role or leave Staff unticked."
+    : "The account could not be authorized. No account was kept.";
+}
+
 export async function createStaff(
   _previousState: StaffActionState,
   formData: FormData,
@@ -83,8 +142,12 @@ export async function createStaff(
     temporary_password: formData.get("temporary_password"),
     role: formData.get("role"),
   });
+  const submittedEmail = String(formData.get("email") ?? "");
   if (!parsed.success) {
-    return { message: parsed.error.issues[0]?.message ?? "Check the account details." };
+    return {
+      email: submittedEmail,
+      message: parsed.error.issues[0]?.message ?? "Check the account details.",
+    };
   }
 
   const { supabase } = await requireSuperadmin();
@@ -95,8 +158,9 @@ export async function createStaff(
     email_confirm: true,
   });
   if (error || !data.user) {
-    console.error("[staff] auth_create_failed", { code: error?.code });
-    return { message: "The account could not be created. Check whether the email is already in use." };
+    const failure = describeAuthFailure(error);
+    console.error("[staff] auth_create_failed", failure.detail);
+    return { email: submittedEmail, message: failure.message };
   }
 
   const { error: registerError } = await supabase.rpc("admin_register_staff", {
@@ -109,7 +173,10 @@ export async function createStaff(
   if (registerError) {
     await admin.auth.admin.deleteUser(data.user.id);
     console.error("[staff] profile_create_failed", { code: registerError.code });
-    return { message: "The account could not be authorized. No account was kept." };
+    return {
+      email: submittedEmail,
+      message: registerAuthorizationMessage(registerError.code),
+    };
   }
 
   revalidatePath("/dashboard/staff");
@@ -126,7 +193,16 @@ export async function updateStaff(
   const role = z.enum(["admin", "superadmin"]).safeParse(formData.get("role"));
   if (!role.success) return { message: "Invalid staff role." };
 
-  const { supabase } = await requireSuperadmin();
+  const context = await requireSuperadmin();
+  const { supabase } = context;
+  // The database refuses this too, but only after the form has been filled in;
+  // saying so here names the reason instead of "could not be updated".
+  if (userId.data === context.userId) {
+    return {
+      message:
+        "You cannot change your own access. Ask another superadmin to make the change.",
+    };
+  }
   const { error } = await supabase.rpc("admin_update_staff", {
     p_user_id: userId.data,
     p_role: role.data,
@@ -163,8 +239,14 @@ export async function resetStaffPassword(
     password: temporaryPassword.data,
   });
   if (authError) {
-    console.error("[staff] password_reset_failed", { code: authError.code });
-    return { message: "The temporary password could not be set." };
+    const failure = describeAuthFailure(authError);
+    console.error("[staff] password_reset_failed", failure.detail);
+    return {
+      message:
+        authError.code === "weak_password"
+          ? "The authentication service rejected that temporary password. Choose a different one."
+          : "The temporary password could not be set.",
+    };
   }
 
   const { error: stateError } = await supabase.rpc(
