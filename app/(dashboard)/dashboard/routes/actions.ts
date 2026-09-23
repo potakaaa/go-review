@@ -539,7 +539,12 @@ export async function updateRoute(
   // `slug` is deliberately absent from this update. A card in a customer's
   // hands is printed once; changing where it points must never change the URL
   // printed on it. The form renders the slug read-only for the same reason.
-  const { error } = await supabase
+  // `select` is what makes a refused write visible. The section permission
+  // above says this admin may edit routes in general; the per-route grant is
+  // enforced by RLS, and an UPDATE that matches no row is not an error in
+  // PostgREST -- without the returned row this action would redirect to
+  // `?saved=1` having changed nothing.
+  const { data: updated, error } = await supabase
     .from("redirect_routes")
     .update({
       business_name: parsed.data.business_name,
@@ -549,7 +554,8 @@ export async function updateRoute(
       notes: parsed.data.notes,
       active: parsed.data.active,
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     console.error("[routes] update_failed", { code: error.code });
@@ -557,6 +563,15 @@ export async function updateRoute(
       errors: {},
       values,
       message: "Could not save your changes. Please try again.",
+    };
+  }
+
+  if (!updated || updated.length === 0) {
+    return {
+      errors: {},
+      values,
+      message:
+        "You have view-only access to this route, so nothing was changed. Ask a superadmin for manage access.",
     };
   }
 
@@ -581,14 +596,21 @@ export async function toggleRouteActive(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("redirect_routes")
     .update({ active: nextActive })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     console.error("[routes] status_update_failed", { code: error.code });
     throw new Error("Could not update this route.");
+  }
+
+  // RLS refuses the row rather than the statement, so no rows back means
+  // view-only access to this route.
+  if (!updated || updated.length === 0) {
+    throw new Error("You have view-only access to this route.");
   }
 
   revalidatePath("/dashboard");
@@ -611,14 +633,19 @@ export async function toggleRouteLocked(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("redirect_routes")
     .update({ locked: nextLocked })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     console.error("[routes] lock_update_failed", { code: error.code });
     throw new Error("Could not update this route.");
+  }
+
+  if (!updated || updated.length === 0) {
+    throw new Error("You have view-only access to this route.");
   }
 
   revalidatePath("/dashboard");
@@ -636,13 +663,18 @@ export async function publishRoute(formData: FormData): Promise<void> {
   if (!id) return;
 
   const { supabase } = access;
-  const { error } = await supabase
+  const { data: published, error } = await supabase
     .from("redirect_routes")
     .update({ publication_status: "published", active: true })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     console.error("[routes] publish_failed", { code: error.code });
+    throw new Error("Could not publish this route.");
+  }
+
+  if (!published || published.length === 0) {
     throw new Error("Could not publish this route.");
   }
 
