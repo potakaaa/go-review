@@ -66,6 +66,7 @@
   --glass-tint-strong: rgb(255 255 255 / 86%);
   --glass-border: rgb(255 255 255 / 70%);
   --glass-blur: blur(24px) saturate(180%);
+  --glass-sheen: rgb(255 255 255 / 85%);
   /* A white border alone vanishes against a light page, so the material also
      carries an outer hairline. Bright edge on top, hairline around, then the
      drop shadow that says how far it is floating above the content. */
@@ -109,6 +110,21 @@
   --color-danger-soft: #2b1118;
 
   --font-display: "Bitcount Prop Single Variable", ui-monospace, monospace;
+
+  /* The same material, lit from the other side. A white tint over a #0a0a0a
+     page is a lamp, not glass: the bulk-apply bar in the route picker came out
+     as a near-white slab with the dark theme's own text on it. Tinting with
+     the elevated surface keeps a floating layer reading as glass here. */
+  --glass-tint: rgb(24 24 24 / 82%);
+  --glass-tint-strong: rgb(24 24 24 / 92%);
+  --glass-border: rgb(255 255 255 / 10%);
+  --glass-sheen: rgb(255 255 255 / 10%);
+  --glass-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    inset 0 -1px 0 rgb(0 0 0 / 30%),
+    0 0 0 1px rgb(0 0 0 / 40%),
+    0 1px 2px rgb(0 0 0 / 40%),
+    0 10px 30px rgb(0 0 0 / 45%);
 
   color-scheme: dark;
   background: var(--color-canvas);
@@ -240,7 +256,7 @@ select {
     content: "";
     background: radial-gradient(
       120% 100% at 15% -40%,
-      rgb(255 255 255 / 85%),
+      var(--glass-sheen),
       transparent 55%
     );
   }
