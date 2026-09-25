@@ -7,15 +7,13 @@ import { headers } from "next/headers";
 import { isAdminHost } from "@/lib/site";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  resolveStaffAccess,
+  type ResolvedStaffAccess,
+} from "@/lib/staff-access";
 import type { StaffRole, StaffSection } from "@/lib/database.types";
 
-export type StaffAccessState =
-  | "anonymous"
-  | "unapproved"
-  | "needs_password_change"
-  | "needs_mfa"
-  | "ready"
-  | "unavailable";
+export type { StaffAccessState } from "@/lib/staff-access";
 
 export type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -38,48 +36,14 @@ export type StaffContext = {
 };
 
 /**
- * Revalidates identity, checks the database-backed staff allowlist, then checks
+ * Verifies identity, checks the database-backed staff allowlist, then checks
  * the current Authenticator Assurance Level. No user metadata is trusted for
- * authorization.
+ * authorization. See resolveStaffAccess for how each step is answered.
  */
 export async function checkStaffAccess(
   supabase: ServerSupabaseClient,
-): Promise<{
-  state: StaffAccessState;
-  userId?: string;
-}> {
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) return { state: "anonymous" };
-
-  // These checks are independent after identity is known. Keep the same
-  // fail-closed decisions while removing one serialized round trip.
-  const [
-    { data: isStaff, error: staffError },
-    { data: mustChangePassword, error: passwordStateError },
-  ] = await Promise.all([
-    supabase.rpc("is_active_staff"),
-    supabase.rpc("is_password_change_required"),
-  ]);
-  if (staffError) return { state: "unavailable", userId: user.id };
-  if (!isStaff) return { state: "unapproved", userId: user.id };
-
-  if (passwordStateError) return { state: "unavailable", userId: user.id };
-  if (mustChangePassword) {
-    return { state: "needs_password_change", userId: user.id };
-  }
-
-  const { data: assurance, error: assuranceError } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (assuranceError) return { state: "unavailable", userId: user.id };
-
-  return {
-    state: assurance.currentLevel === "aal2" ? "ready" : "needs_mfa",
-    userId: user.id,
-  };
+): Promise<ResolvedStaffAccess> {
+  return resolveStaffAccess(supabase);
 }
 
 const STAFF_SECTIONS: StaffSection[] = [
@@ -107,20 +71,12 @@ export const requireStaffMfa = cache(async (): Promise<StaffContext> => {
   if (access.state === "needs_mfa") redirect("/mfa");
   if (access.state !== "ready" || !access.userId) redirect("/login");
 
-  const [{ data: profileRows, error: profileError }, { data: permissionRows, error: permissionError }] =
-    await Promise.all([
-      supabase.rpc("get_my_staff_profile"),
-      supabase.rpc("get_my_staff_permissions"),
-    ]);
-
-  const profile = profileRows?.[0];
-  if (profileError || permissionError || !profile) {
-    redirect("/login?error=access_unavailable");
-  }
+  const profile = access.access;
+  if (!profile) redirect("/login?error=access_unavailable");
 
   const permissions = Object.fromEntries(
     STAFF_SECTIONS.map((section) => {
-      const row = permissionRows?.find((permission) => permission.section === section);
+      const row = profile.permissions.find((permission) => permission.section === section);
       return [
         section,
         {
