@@ -142,6 +142,44 @@ export type RouteStats = {
   byPlatform: Record<RoutePlatform, number>;
 };
 
+/** PostgREST: the function is not in the schema cache. */
+const FUNCTION_NOT_FOUND = "PGRST202";
+
+/**
+ * The same counts from the rows themselves, for a deploy that runs ahead of
+ * the migration adding get_route_stats.
+ */
+async function countRouteStats(
+  supabase: Awaited<ReturnType<typeof requireRouteReportingAccess>>["supabase"],
+): Promise<RouteStats> {
+  type StatsRow = Pick<RedirectRoute, "active" | "scan_count" | "platform">;
+  const { data: rows, error } = await selectAllPages<StatsRow>((from, to) =>
+    supabase
+      .from("redirect_routes")
+      .select("active, scan_count, platform", { count: "exact" })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  if (error) {
+    console.error("[routes] stats_failed", { code: error.code });
+    throw new Error("Could not load route statistics.");
+  }
+  const count = (keep: (row: StatsRow) => boolean) => rows.filter(keep).length;
+  const active = count((row) => row.active);
+  return {
+    total: rows.length,
+    active,
+    inactive: rows.length - active,
+    scanned: count((row) => row.scan_count > 0),
+    totalScans: rows.reduce((sum, row) => sum + row.scan_count, 0),
+    byPlatform: {
+      google: count((row) => normalizeRoutePlatform(row.platform) === "google"),
+      facebook: count((row) => normalizeRoutePlatform(row.platform) === "facebook"),
+      instagram: count((row) => normalizeRoutePlatform(row.platform) === "instagram"),
+    },
+  };
+}
+
 /**
  * Counted in the database (under the caller's RLS) and returned as one row, so
  * the dashboard never ships every route to the server just to count it.
@@ -149,6 +187,7 @@ export type RouteStats = {
 export async function getRouteStats(): Promise<RouteStats> {
   const { supabase } = await requireRouteReportingAccess();
   const { data, error } = await supabase.rpc("get_route_stats");
+  if (error?.code === FUNCTION_NOT_FOUND) return countRouteStats(supabase);
   const row = data?.[0];
   if (error || !row) {
     console.error("[routes] stats_failed", { code: error?.code });
