@@ -6,8 +6,9 @@ import { useFormStatus } from "react-dom";
 import {
   updatePassword,
   type UpdatePasswordState,
-} from "@/app/reset-password/actions";
-import { Alert, buttonClass, FormError } from "@/components/ui";
+} from "@/app/(auth)/reset-password/actions";
+import { useActionFeedback } from "@/components/feedback";
+import { buttonClass, FormError, Spinner } from "@/components/ui";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -20,6 +21,7 @@ function SubmitButton() {
       disabled={pending}
       className={buttonClass("primary", "w-full")}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Updating…" : "Set new password"}
     </button>
   );
@@ -30,11 +32,10 @@ export function ResetPasswordForm() {
     updatePassword,
     {},
   );
+  useActionFeedback(state);
 
   return (
     <form action={formAction} className="space-y-5">
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
-
       <div>
         <label htmlFor="password" className="eyebrow mb-2 block">
           New password

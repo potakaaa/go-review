@@ -179,3 +179,21 @@ export function EmptyState({
     </Card>
   );
 }
+
+/**
+ * The in-button busy mark. Always paired with a verb ("Saving…"), so the
+ * button still says what is happening when reduced motion stops the spin.
+ */
+export function Spinner({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`spinner shrink-0 ${className}`}
+      fill="none"
+    >
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}

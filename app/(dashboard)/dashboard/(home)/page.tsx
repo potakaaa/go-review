@@ -54,7 +54,7 @@ export default async function DashboardPage() {
           <div className="grid w-full gap-2 sm:flex sm:w-auto">
             {canManageRoutes ? (
               <>
-                <ButtonLink href="/dashboard/routes/new" className="w-full sm:w-auto">
+                <ButtonLink href="/dashboard/routes/new" prefetch className="w-full sm:w-auto">
                   <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
                     <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z" />
                   </svg>
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
             description="Create your first route to generate a QR code for a card."
             action={
               canManageRoutes ? (
-                <ButtonLink href="/dashboard/routes/new">Create Route</ButtonLink>
+                <ButtonLink href="/dashboard/routes/new" prefetch>Create Route</ButtonLink>
               ) : undefined
             }
           />

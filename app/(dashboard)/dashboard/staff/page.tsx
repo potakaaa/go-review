@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Alert, ButtonLink, Card, EmptyState, StatusBadge, buttonClass } from "@/components/ui";
+import { Flash } from "@/components/flash";
+import { ButtonLink, Card, EmptyState, StatusBadge, buttonClass } from "@/components/ui";
 import { StaffCreateForm } from "./staff-create-form";
 import { getStaffOverview } from "@/lib/staff";
 
@@ -19,8 +20,8 @@ export default async function StaffPage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-10 pb-16">
-      {created ? <Alert tone="ok" title="Staff account created">The account is ready for its first sign-in. Give the staff member the temporary password securely.</Alert> : null}
-      {saved ? <Alert tone="ok">Staff access saved.</Alert> : null}
+      {created ? <Flash title="Staff account created" description="The account is ready for its first sign-in. Give the staff member the temporary password securely." params={["created"]} /> : null}
+      {saved ? <Flash title="Staff access saved" params={["saved"]} /> : null}
       <header className="flex flex-col gap-5 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Goreview / access control</p>

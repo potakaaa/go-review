@@ -1,6 +1,9 @@
 import { BottomNav, DesktopNav } from "@/components/bottom-nav";
 import { InstallPrompt } from "@/components/install-prompt";
-import { logout } from "@/app/login/actions";
+import { NavigationProgress } from "@/components/navigation-progress";
+import { SignOutButton } from "@/components/sign-out-button";
+import { Toaster } from "@/components/toaster";
+import { logout } from "@/app/(auth)/login/actions";
 import { requireStaffMfa } from "@/lib/auth";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
@@ -27,6 +30,7 @@ export default async function DashboardLayout({
 
   return (
     <div data-theme="admin" className="flex min-h-dvh flex-col bg-canvas text-ink">
+      <NavigationProgress />
       <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
@@ -53,24 +57,19 @@ export default async function DashboardLayout({
               access.profile.role === "superadmin" ||
               access.permissions.stories.canView
             ) ? (
-              <Link href="/dashboard/stories" className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
+              <Link href="/dashboard/stories" prefetch className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
                 Shop stories
               </Link>
             ) : null}
             {access.profile.role === "superadmin" ? (
-              <Link href="/dashboard/staff" className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
+              <Link href="/dashboard/staff" prefetch className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
                 Staff
               </Link>
             ) : null}
           </div>
 
           <form action={logout} className="shrink-0">
-            <button
-              type="submit"
-              className="whitespace-nowrap rounded-full px-3 py-2 text-xs font-medium text-subtle tap-target hover:bg-elevated hover:text-ink"
-            >
-              Sign out
-            </button>
+            <SignOutButton />
           </form>
         </div>
       </header>
@@ -82,6 +81,7 @@ export default async function DashboardLayout({
       </main>
 
       <BottomNav role={access.profile.role} permissions={access.permissions} />
+      <Toaster />
     </div>
   );
 }

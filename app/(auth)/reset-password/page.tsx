@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Card } from "@/components/ui";
 import { redirect } from "next/navigation";
 
-import { ResetPasswordForm } from "@/app/reset-password/reset-password-form";
+import { ResetPasswordForm } from "@/app/(auth)/reset-password/reset-password-form";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {

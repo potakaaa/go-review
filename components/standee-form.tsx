@@ -5,7 +5,8 @@ import { useFormStatus } from "react-dom";
 
 import type { StandeeFormState } from "@/app/(dashboard)/dashboard/standees/actions";
 import { StandeeSlotFields, type SlotValue } from "@/components/standee-slot-fields";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { useActionFeedback } from "@/components/feedback";
+import { FormError, Spinner, buttonClass } from "@/components/ui";
 import {
   maxStandeeBatchSize,
   STANDEE_MAX_SLOTS,
@@ -44,6 +45,7 @@ function SubmitButton({ label, disabled }: { label: string; disabled?: boolean }
       disabled={pending || disabled}
       className={buttonClass("primary", "w-full")}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Creating…" : label}
     </button>
   );
@@ -70,6 +72,7 @@ export function StandeeForm({
     action,
     {},
   );
+  useActionFeedback(state);
 
   const [slots, setSlots] = useState<SlotValue[]>(() => restoreSlots(state.values));
 
@@ -102,8 +105,6 @@ export function StandeeForm({
 
   return (
     <form action={formAction} className="space-y-6">
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
-
       <input type="hidden" name="slot_count" value={slots.length} />
 
       <div>

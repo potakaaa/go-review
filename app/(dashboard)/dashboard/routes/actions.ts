@@ -46,6 +46,16 @@ export type ReviewLinkConversionState = {
 
 export type GoogleReviewConversionState = ReviewLinkConversionState;
 
+/**
+ * Outcome of a one-tap route change. Returned rather than thrown, so the
+ * button can roll back its optimistic state and say what went wrong in a
+ * toast instead of replacing the page with the error screen.
+ */
+export type RouteChangeResult = { ok: true } | { ok: false; message: string };
+
+/** Postgres insufficient-privilege, raised by the publication trigger. */
+const INSUFFICIENT_PRIVILEGE = "42501";
+
 /** Postgres unique-violation. */
 const UNIQUE_VIOLATION = "23505";
 
@@ -586,13 +596,15 @@ export async function updateRoute(
  * cafe must always resolve to *something*, even if that something is the
  * branded "deactivated" page.
  */
-export async function toggleRouteActive(formData: FormData): Promise<void> {
+export async function toggleRouteActive(
+  formData: FormData,
+): Promise<RouteChangeResult> {
   const access = await requireAuth();
   if (!hasPermission(access, "routes", "manage")) notFound();
 
   const id = String(formData.get("id") ?? "");
   const nextActive = formData.get("next_active") === "true";
-  if (!id) return;
+  if (!id) return { ok: false, message: "Missing route id." };
 
   const supabase = await createClient();
 
@@ -600,22 +612,38 @@ export async function toggleRouteActive(formData: FormData): Promise<void> {
     .from("redirect_routes")
     .update({ active: nextActive })
     .eq("id", id)
-    .select("id");
+    .select("id, active");
 
   if (error) {
     console.error("[routes] status_update_failed", { code: error.code });
-    throw new Error("Could not update this route.");
+    return {
+      ok: false,
+      message:
+        error.code === INSUFFICIENT_PRIVILEGE
+          ? "A superadmin has to approve this draft before it can go live."
+          : "Could not update this route. Check your connection and try again.",
+    };
   }
 
   // RLS refuses the row rather than the statement, so no rows back means
   // view-only access to this route.
   if (!updated || updated.length === 0) {
-    throw new Error("You have view-only access to this route.");
+    return { ok: false, message: "You have view-only access to this route." };
+  }
+
+  // The publication trigger keeps a draft switched off even for a superadmin,
+  // silently. Report what was stored, not what was asked for.
+  if (updated[0].active !== nextActive) {
+    return {
+      ok: false,
+      message: "Drafts stay off until they are published. Publish this route first.",
+    };
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
   revalidatePath(`/dashboard/routes/${id}`);
+  return { ok: true };
 }
 
 /**
@@ -623,13 +651,15 @@ export async function toggleRouteActive(formData: FormData): Promise<void> {
  * the public redirect or the active/inactive switch: a business can protect
  * its destination details while still pausing the printed card if needed.
  */
-export async function toggleRouteLocked(formData: FormData): Promise<void> {
+export async function toggleRouteLocked(
+  formData: FormData,
+): Promise<RouteChangeResult> {
   const access = await requireAuth();
   if (!hasPermission(access, "routes", "manage")) notFound();
 
   const id = String(formData.get("id") ?? "");
   const nextLocked = formData.get("next_locked") === "true";
-  if (!id) return;
+  if (!id) return { ok: false, message: "Missing route id." };
 
   const supabase = await createClient();
 
@@ -641,26 +671,32 @@ export async function toggleRouteLocked(formData: FormData): Promise<void> {
 
   if (error) {
     console.error("[routes] lock_update_failed", { code: error.code });
-    throw new Error("Could not update this route.");
+    return {
+      ok: false,
+      message: "Could not update this route. Check your connection and try again.",
+    };
   }
 
   if (!updated || updated.length === 0) {
-    throw new Error("You have view-only access to this route.");
+    return { ok: false, message: "You have view-only access to this route." };
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
   revalidatePath(`/dashboard/routes/${id}`);
   revalidatePath(`/dashboard/routes/${id}/edit`);
+  return { ok: true };
 }
 
 /** Only a superadmin can make a regular admin's draft public. */
-export async function publishRoute(formData: FormData): Promise<void> {
+export async function publishRoute(
+  formData: FormData,
+): Promise<RouteChangeResult> {
   const access = await requireAuth();
   if (!isSuperadmin(access)) notFound();
 
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  if (!id) return { ok: false, message: "Missing route id." };
 
   const { supabase } = access;
   const { data: published, error } = await supabase
@@ -671,14 +707,15 @@ export async function publishRoute(formData: FormData): Promise<void> {
 
   if (error) {
     console.error("[routes] publish_failed", { code: error.code });
-    throw new Error("Could not publish this route.");
+    return { ok: false, message: "Could not publish this route. Try again." };
   }
 
   if (!published || published.length === 0) {
-    throw new Error("Could not publish this route.");
+    return { ok: false, message: "Could not publish this route. Try again." };
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/routes");
   revalidatePath(`/dashboard/routes/${id}`);
+  return { ok: true };
 }

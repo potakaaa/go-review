@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: { serverActions: { bodySizeLimit: "10mb" } },
+  experimental: {
+    serverActions: { bodySizeLimit: "10mb" },
+    // Keep a visited or prefetched dashboard page in the browser for 30s, so
+    // flicking between tabs is instant instead of a fresh server render each
+    // time. `static` also covers links that prefetch in full (the dashboard
+    // nav); 30s is its minimum, down from a 5 minute default, so a fully
+    // prefetched page is never older than a visited one. Every mutation
+    // revalidates its paths, which clears this cache, so a staff member
+    // always sees their own changes immediately; another staff member's
+    // changes appear within 30 seconds.
+    staleTimes: { dynamic: 30, static: 30 },
+  },
   images: {
     // Public story images carry their database version in `?v=...`; keep the
     // optimizer scoped to known local media paths while allowing that version.

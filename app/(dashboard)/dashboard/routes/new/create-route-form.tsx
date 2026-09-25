@@ -7,11 +7,12 @@ import {
   createRoute,
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
+import { useActionFeedback } from "@/components/feedback";
 import { FacebookReviewConverter } from "@/components/facebook-review-converter";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { PlatformSelector } from "@/components/platform-selector";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { FormError, Spinner, buttonClass } from "@/components/ui";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 import { isRoutePlatform, type RoutePlatform } from "@/lib/platforms";
 
@@ -32,6 +33,7 @@ function SubmitButton({
       disabled={pending || disabled}
       className={buttonClass("primary", "w-full")}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Creating…" : label}
     </button>
   );
@@ -42,6 +44,7 @@ export function CreateRouteForm() {
     createRoute,
     {},
   );
+  useActionFeedback(state);
 
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? "",
@@ -62,7 +65,6 @@ export function CreateRouteForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
       <PlatformSelector
         value={platform}

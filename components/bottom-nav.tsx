@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import type { StaffRole, StaffSection } from "@/lib/database.types";
 import type { StaffPermission } from "@/lib/auth";
 
@@ -12,6 +13,38 @@ type NavAccess = {
 
 function canView(access: NavAccess, section: StaffSection): boolean {
   return access.role === "superadmin" || access.permissions[section].canView;
+}
+
+/**
+ * Nav links prefetch in full (`prefetch`), not just their loading skeleton:
+ * the page's data and its client code are already in the browser before the
+ * tap, so switching tabs is immediate rather than skeleton-then-page. A
+ * handful of links, each cached for 30s (see staleTimes in next.config.ts).
+ */
+
+/**
+ * The pathname the nav should highlight. A tapped tab lights up immediately,
+ * before its page has arrived, and hands back to the real pathname the moment
+ * the URL changes.
+ */
+function useOptimisticPathname() {
+  const pathname = usePathname();
+  const [tapped, setTapped] = useState<string | null>(null);
+  // Adjusted during render, so the real highlight returns in the same paint
+  // as the new page -- and the back button never revives a stale tap.
+  const [seen, setSeen] = useState(pathname);
+  if (seen !== pathname) {
+    setSeen(pathname);
+    setTapped(null);
+  }
+  return { highlighted: tapped ?? pathname, onNavigate: setTapped };
+}
+
+function isActive(
+  item: { href: string; exact: boolean },
+  pathname: string,
+): boolean {
+  return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 
 /**
@@ -61,20 +94,20 @@ const DESKTOP_ITEMS = [
 ] as const;
 
 export function DesktopNav({ role, permissions }: NavAccess) {
-  const pathname = usePathname();
+  const { highlighted, onNavigate } = useOptimisticPathname();
   const access = { role, permissions };
 
   return (
     <nav aria-label="Workspace" className="hidden items-center gap-1 md:flex">
       {DESKTOP_ITEMS.filter((item) => !item.section || canView(access, item.section)).map((item) => {
-        const active = item.exact
-          ? pathname === item.href
-          : pathname.startsWith(item.href);
+        const active = isActive(item, highlighted);
 
         return (
           <Link
             key={item.href}
             href={item.href}
+            onNavigate={() => onNavigate(item.href)}
+            prefetch
             aria-current={active ? "page" : undefined}
             className={`rounded-full px-3 py-2 text-xs font-medium transition-colors ${
               active
@@ -91,7 +124,7 @@ export function DesktopNav({ role, permissions }: NavAccess) {
 }
 
 export function BottomNav({ role, permissions }: NavAccess) {
-  const pathname = usePathname();
+  const { highlighted, onNavigate } = useOptimisticPathname();
   const access = { role, permissions };
   const items = ITEMS.filter((item) => !item.section || canView(access, item.section));
 
@@ -102,14 +135,14 @@ export function BottomNav({ role, permissions }: NavAccess) {
     >
       <ul className="mobile-nav-list">
         {items.map((item) => {
-          const active = item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+          const active = isActive(item, highlighted);
 
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
+                onNavigate={() => onNavigate(item.href)}
+                prefetch
                 aria-current={active ? "page" : undefined}
                 className={`mobile-nav-link ${
                   active

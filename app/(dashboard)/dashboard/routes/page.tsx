@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { RouteCard } from "@/components/route-card";
-import { RouteFilters } from "@/components/route-filters";
-import { Alert, ButtonLink, Card, EmptyState } from "@/components/ui";
-import { listRoutes, parseFilters } from "@/lib/routes";
+import { Flash } from "@/components/flash";
+import { RouteBrowser } from "@/components/route-browser";
+import { ButtonLink } from "@/components/ui";
+import { listRouteSummaries } from "@/lib/routes";
 import { requirePermission } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Routes" };
@@ -15,23 +15,20 @@ export default async function RoutesPage({
   const canManageRoutes =
     access.profile.role === "superadmin" || access.permissions.routes.canManage;
   const params = await searchParams;
-  const filters = parseFilters(params);
-  const routes = await listRoutes(filters);
+  const routes = await listRouteSummaries();
   const updatedValue = Array.isArray(params.updated)
     ? params.updated[0]
     : params.updated;
   const updatedCount = Number(updatedValue);
 
-  const isFiltered =
-    filters.q !== "" || filters.status !== "all" || filters.platform !== "all";
-
   return (
     <div className="space-y-8 pb-16">
       {Number.isInteger(updatedCount) && updatedCount > 0 ? (
-        <Alert tone="ok" title="Routes updated">
-          {updatedCount} {updatedCount === 1 ? "route was" : "routes were"}{" "}
-          updated successfully.
-        </Alert>
+        <Flash
+          title="Routes updated"
+          description={`${updatedCount} ${updatedCount === 1 ? "route was" : "routes were"} updated.`}
+          params={["updated"]}
+        />
       ) : null}
 
       <header className="flex flex-col gap-5 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
@@ -53,11 +50,12 @@ export default async function RoutesPage({
               <ButtonLink href="/dashboard/routes/batch/edit" variant="secondary">
                 Batch edit
               </ButtonLink>
-              <ButtonLink href="/dashboard/routes/batch/new" variant="secondary">
+              <ButtonLink href="/dashboard/routes/batch/new" prefetch variant="secondary">
                 Batch routes
               </ButtonLink>
               <ButtonLink
                 href="/dashboard/routes/new"
+                prefetch
                 className="hidden sm:inline-flex"
               >
                 <svg
@@ -75,33 +73,7 @@ export default async function RoutesPage({
         </div>
       </header>
 
-      <Card className="p-3 sm:p-5">
-        <p className="eyebrow mb-3 sm:mb-4">Find a route</p>
-        <RouteFilters total={routes.length} />
-      </Card>
-
-      {routes.length === 0 ? (
-        isFiltered ? (
-          <EmptyState
-            title="No matching routes"
-            description="Try a different search term, or clear the status filter."
-          />
-        ) : (
-          <EmptyState
-            title="No routes yet"
-            description="Create your first route to generate a QR code for a card."
-            action={canManageRoutes ? (
-              <ButtonLink href="/dashboard/routes/new">Create Route</ButtonLink>
-            ) : undefined}
-          />
-        )
-      ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-3 lg:grid-cols-2">
-          {routes.map((route) => (
-            <RouteCard key={route.id} route={route} canManage={canManageRoutes} />
-          ))}
-        </div>
-      )}
+      <RouteBrowser routes={routes} canManage={canManageRoutes} />
     </div>
   );
 }

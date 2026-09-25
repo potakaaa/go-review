@@ -7,11 +7,12 @@ import {
   createBatch,
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
+import { useActionFeedback } from "@/components/feedback";
 import { FacebookReviewConverter } from "@/components/facebook-review-converter";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { PlatformSelector } from "@/components/platform-selector";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { FormError, Spinner, buttonClass } from "@/components/ui";
 import { BATCH_MAX_SIZE, BATCH_MIN_SIZE } from "@/lib/batch";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 import { isRoutePlatform, type RoutePlatform } from "@/lib/platforms";
@@ -28,6 +29,7 @@ function SubmitButton({ disabled }: { disabled?: boolean }) {
       disabled={pending || disabled}
       className={buttonClass("primary", "w-full")}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Creating batch…" : "Create batch"}
     </button>
   );
@@ -38,6 +40,7 @@ export function CreateBatchRouteForm() {
     createBatch,
     {},
   );
+  useActionFeedback(state);
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? "",
   );
@@ -54,7 +57,6 @@ export function CreateBatchRouteForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
       <PlatformSelector
         value={platform}

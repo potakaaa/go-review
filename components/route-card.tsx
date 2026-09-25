@@ -1,43 +1,33 @@
 import Link from "next/link";
 
 import { CopyButton } from "@/components/copy-button";
-import { ToggleActiveButton } from "@/components/toggle-active-button";
 import {
-  Card,
-  LockBadge,
-  PublicationBadge,
-  StatusBadge,
-  buttonClass,
-} from "@/components/ui";
+  RouteLiveLabel,
+  RouteMobileStatus,
+  RouteLockBadge,
+  RoutePublicationBadge,
+  RouteStateProvider,
+  RouteStatusBadge,
+} from "@/components/route-state";
+import { ToggleActiveButton } from "@/components/toggle-active-button";
+import { Card, buttonClass } from "@/components/ui";
 import { domainOf, formatDate } from "@/lib/format";
 import { publicUrlForSlug } from "@/lib/qr";
-import type { RedirectRoute } from "@/lib/database.types";
+import type { RouteListItem } from "@/lib/route-list";
 import { platformLabel } from "@/lib/platforms";
 
-function MobileStatus({ active }: { active: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded border px-1.5 py-1 text-[10px] font-medium uppercase tracking-wide ${
-        active
-          ? "border-ok/30 bg-ok-soft text-ok"
-          : "border-line bg-elevated text-subtle"
-      }`}
-    >
-      <span
-        aria-hidden="true"
-        className={`size-1.5 rounded-full ${active ? "bg-ok" : "bg-subtle"}`}
-      />
-      {active ? "Active" : "Off"}
-    </span>
-  );
-}
+/**
+ * Renders in both Server Components (the dashboard's recent routes) and the
+ * client-side routes list. Every badge reads the shared RouteState, so the
+ * phone and desktop layouts change together the moment a toggle is tapped.
+ */
 
 function CompactRouteCard({
   route,
   canManage,
   canView,
 }: {
-  route: RedirectRoute;
+  route: RouteListItem;
   canManage: boolean;
   canView: boolean;
 }) {
@@ -46,7 +36,7 @@ function CompactRouteCard({
     <>
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-wrap gap-1.5">
-          <MobileStatus active={route.active} />
+          <RouteMobileStatus active={route.active} />
           <span className="inline-flex rounded border border-line bg-elevated px-1.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
             {platformLabel(route.platform)}
           </span>
@@ -57,7 +47,7 @@ function CompactRouteCard({
           ) : null}
         </div>
         <span className="flex items-center gap-1 text-subtle">
-          {route.locked ? <LockBadge compact /> : null}
+          <RouteLockBadge locked={route.locked} compact />
           {canView ? (
             <span
               aria-hidden="true"
@@ -84,7 +74,7 @@ function CompactRouteCard({
           {route.scan_count === 1 ? "scan" : "scans"}
         </p>
         <p className="mt-1 text-[11px] text-subtle">
-          {route.active ? "Live link" : "Deactivated"}
+          <RouteLiveLabel active={route.active} />
         </p>
       </div>
     </>
@@ -119,7 +109,7 @@ function FullRouteCard({
   canManage,
   canView,
 }: {
-  route: RedirectRoute;
+  route: RouteListItem;
   canManage: boolean;
   canView: boolean;
 }) {
@@ -138,9 +128,9 @@ function FullRouteCard({
           <span className="rounded border border-line bg-elevated px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">
             {platformLabel(route.platform)}
           </span>
-          <StatusBadge active={route.active} />
-          <PublicationBadge status={route.publication_status} />
-          {route.locked ? <LockBadge /> : null}
+          <RouteStatusBadge active={route.active} />
+          <RoutePublicationBadge status={route.publication_status} />
+          <RouteLockBadge locked={route.locked} />
         </div>
       </div>
 
@@ -230,18 +220,22 @@ export function RouteCard({
   canManage = true,
   canView = true,
 }: {
-  route: RedirectRoute;
+  route: RouteListItem;
   canManage?: boolean;
   canView?: boolean;
 }) {
   return (
-    <>
+    <RouteStateProvider
+      active={route.active}
+      locked={route.locked}
+      published={route.publication_status === "published"}
+    >
       <div className="sm:hidden">
         <CompactRouteCard route={route} canManage={canManage} canView={canView} />
       </div>
       <div className="hidden h-full sm:block">
         <FullRouteCard route={route} canManage={canManage} canView={canView} />
       </div>
-    </>
+    </RouteStateProvider>
   );
 }

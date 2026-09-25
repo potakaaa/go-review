@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { buttonClass, type ButtonVariant } from "@/components/ui";
 
@@ -9,7 +10,8 @@ import { buttonClass, type ButtonVariant } from "@/components/ui";
  *
  * The confirmation is not decorative: this button is used while standing in
  * front of a customer, and a silent copy leaves you tapping it repeatedly with
- * no idea whether it worked.
+ * no idea whether it worked. The button itself changes (it is where the eye
+ * is), and a toast repeats it with what was actually copied.
  */
 async function copyText(value: string): Promise<boolean> {
   try {
@@ -78,6 +80,14 @@ export function CopyButton({
   async function handleClick() {
     const ok = await copyText(value);
     setState(ok ? "copied" : "failed");
+    if (ok) {
+      toast.success("Copied to clipboard", { id: "copy", description: value });
+    } else {
+      toast.error("Couldn't copy", {
+        id: "copy",
+        description: "The browser blocked the clipboard. Select the link and copy it by hand.",
+      });
+    }
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => setState("idle"), 2000);
   }

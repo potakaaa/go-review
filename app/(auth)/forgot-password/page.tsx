@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 
+import { Flash } from "@/components/flash";
 import { Card } from "@/components/ui";
 
-import { ForgotPasswordForm } from "@/app/forgot-password/forgot-password-form";
+import { ForgotPasswordForm } from "@/app/(auth)/forgot-password/forgot-password-form";
 
 /**
  * Why the link failed, in the reader's terms.
@@ -33,12 +34,21 @@ export default async function ForgotPasswordPage({
   searchParams: Promise<{ error?: string | string[] }>;
 }) {
   const { error } = await searchParams;
+  const linkError = typeof error === "string" ? LINK_ERRORS[error] : undefined;
 
   return (
     <main
       data-theme="admin"
       className="relative flex min-h-dvh flex-col justify-center overflow-hidden bg-canvas px-5 py-12 text-ink"
     >
+      {linkError ? (
+        <Flash
+          tone="error"
+          title="That reset link did not work"
+          description={linkError}
+          params={["error"]}
+        />
+      ) : null}
       <div
         aria-hidden="true"
         className="page-grid pointer-events-none absolute inset-0 opacity-60"
@@ -62,11 +72,7 @@ export default async function ForgotPasswordPage({
         </div>
 
         <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
-          <ForgotPasswordForm
-            initialError={
-              typeof error === "string" ? LINK_ERRORS[error] : undefined
-            }
-          />
+          <ForgotPasswordForm />
         </Card>
       </div>
     </main>
