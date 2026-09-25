@@ -5,7 +5,8 @@ import { useFormStatus } from "react-dom";
 
 import { createStaff, type StaffActionState } from "./actions";
 import { PermissionFields } from "./staff-access-fields";
-import { Alert, buttonClass } from "@/components/ui";
+import { useActionFeedback } from "@/components/feedback";
+import { Spinner, buttonClass } from "@/components/ui";
 import type { StaffRole } from "@/lib/database.types";
 
 const FIELD =
@@ -15,6 +16,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className={buttonClass("primary", "w-full")}>
+      {pending ? <Spinner /> : null}
       {pending ? "Creating account…" : "Create staff account"}
     </button>
   );
@@ -31,13 +33,13 @@ export function StaffCreateForm() {
     createStaff,
     {},
   );
+  useActionFeedback(state);
   // Which sections can be granted depends on the role, so the select drives the
   // permission list rather than only the value that is posted.
   const [role, setRole] = useState<StaffRole>("admin");
 
   return (
     <form action={formAction} className="space-y-7">
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
       <div>
         <label htmlFor="staff-email" className="eyebrow mb-2 block">Email</label>
         <input id="staff-email" name="email" type="email" required autoComplete="email" defaultValue={state.email ?? ""} key={state.email ?? ""} className={FIELD} placeholder="operator@example.com" />

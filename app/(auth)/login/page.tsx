@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 
+import { Flash } from "@/components/flash";
 import { Card } from "@/components/ui";
 
-import { LoginForm } from "@/app/login/login-form";
+import { LoginForm } from "@/app/(auth)/login/login-form";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -15,7 +16,7 @@ export default async function LoginPage({
   searchParams,
 }: PageProps<"/login">) {
   const { next, error, message } = await searchParams;
-  const initialError =
+  const redirectError =
     error === "not_authorized"
       ? "This account is not authorized for this workspace."
       : error === "access_unavailable"
@@ -27,6 +28,16 @@ export default async function LoginPage({
       data-theme="admin"
       className="relative flex min-h-dvh flex-col justify-center overflow-hidden bg-canvas px-5 py-12 text-ink"
     >
+      {redirectError ? (
+        <Flash tone="error" title={redirectError} params={["error"]} />
+      ) : null}
+      {message === "password_updated" ? (
+        <Flash
+          title="Password updated"
+          description="Sign in with your new password."
+          params={["message"]}
+        />
+      ) : null}
       <div aria-hidden="true" className="page-grid pointer-events-none absolute inset-0 opacity-60" />
       <div className="relative mx-auto w-full max-w-sm">
         <div className="mb-8">
@@ -46,15 +57,7 @@ export default async function LoginPage({
         </div>
 
         <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
-          <LoginForm
-            next={typeof next === "string" ? next : undefined}
-            initialError={initialError}
-            initialMessage={
-              message === "password_updated"
-                ? "Password updated. Sign in with your new password."
-                : undefined
-            }
-          />
+          <LoginForm next={typeof next === "string" ? next : undefined} />
         </Card>
       </div>
     </main>

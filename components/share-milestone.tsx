@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { buttonClass } from "@/components/ui";
+import { Spinner, buttonClass } from "@/components/ui";
 
 const IMAGE_PATH = "/dashboard/analytics/share-image";
 
@@ -94,13 +95,26 @@ export function ShareMilestone({
                     width={1080}
                     height={1920}
                     onLoad={() => setState("ready")}
-                    onError={() => setState("failed")}
+                    onError={() => {
+                      setState("failed");
+                      toast.error("Could not build the image", {
+                        description: "Close and reopen to try again.",
+                      });
+                    }}
                     className={`absolute inset-0 size-full transition-opacity duration-300 ease-[var(--ease-settle)] ${
                       state === "ready" ? "opacity-100" : "opacity-0"
                     }`}
                   />
                   {state === "loading" ? (
-                    <div className="absolute inset-0 animate-pulse bg-elevated" />
+                    <div
+                      role="status"
+                      className="skeleton absolute inset-0 flex items-center justify-center rounded-none"
+                    >
+                      <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-muted">
+                        <Spinner className="size-3.5" />
+                        Building image…
+                      </span>
+                    </div>
                   ) : null}
                   {state === "failed" ? (
                     <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-danger">
@@ -117,6 +131,9 @@ export function ShareMilestone({
           <a
             href={IMAGE_PATH}
             download={fileName}
+            onClick={() =>
+              toast.info("Downloading image", { description: fileName })
+            }
             className={buttonClass("primary", "w-full")}
           >
             Download image

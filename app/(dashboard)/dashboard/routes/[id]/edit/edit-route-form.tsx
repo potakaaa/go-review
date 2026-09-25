@@ -7,11 +7,12 @@ import {
   updateRoute,
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
+import { useActionFeedback } from "@/components/feedback";
 import { FacebookReviewConverter } from "@/components/facebook-review-converter";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { PlatformSelector } from "@/components/platform-selector";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { FormError, Spinner, buttonClass } from "@/components/ui";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 import type { RedirectRoute } from "@/lib/database.types";
 import {
@@ -30,6 +31,7 @@ function SubmitButton({ disabled }: { disabled?: boolean }) {
       disabled={pending || disabled}
       className={buttonClass("primary", "w-full")}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Saving…" : "Save changes"}
     </button>
   );
@@ -40,6 +42,7 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
     updateRoute,
     {},
   );
+  useActionFeedback(state);
 
   const [destination, setDestination] = useState(
     state.values?.destination_url ?? route.destination_url,
@@ -58,7 +61,6 @@ export function EditRouteForm({ route }: { route: RedirectRoute }) {
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="id" value={route.id} />
 
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
       <PlatformSelector
         value={platform}

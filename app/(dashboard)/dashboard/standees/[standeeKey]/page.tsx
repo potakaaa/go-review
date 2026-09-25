@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 
 import { CopyButton } from "@/components/copy-button";
 import { QrPanel } from "@/components/qr-panel";
+import { Flash } from "@/components/flash";
 import {
-  Alert,
   ButtonLink,
   Card,
   LockBadge,
@@ -40,10 +40,11 @@ export default async function StandeeDetailPage({
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-16">
       {created ? (
-        <Alert tone="ok" title="Standee created">
-          {standee.routes.length} QR codes are ready to print onto the stand for{" "}
-          {standee.businessName}.
-        </Alert>
+        <Flash
+          title="Standee created"
+          description={`${standee.routes.length} QR codes are ready to print onto the stand for ${standee.businessName}.`}
+          params={["created"]}
+        />
       ) : null}
 
       <header className="flex flex-col gap-5 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">

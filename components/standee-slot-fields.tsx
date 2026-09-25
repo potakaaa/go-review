@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import {
   convertFacebookPageLink,
   convertGoogleMapsLink,
 } from "@/app/(dashboard)/dashboard/routes/actions";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { Alert, FormError, Spinner, buttonClass } from "@/components/ui";
 import { PLATFORM_DETAILS, ROUTE_PLATFORMS, type RoutePlatform } from "@/lib/platforms";
 import { destinationNeedsAcknowledgement } from "@/lib/validation-client";
 
@@ -56,10 +57,26 @@ export function StandeeSlotFields({
     value.platform,
   );
 
+  // A failed conversion is about this slot's input, so it stays written under
+  // the field; the toast makes sure it is seen even when the field is
+  // scrolled off a phone screen.
+  function failConversion(message: string) {
+    setConvertMessage(message);
+    toast.error(message, { description: `QR ${index + 1}` });
+  }
+
+  function succeedConversion(reviewUrl: string) {
+    setConvertMessage(null);
+    onChange({ ...value, destination_url: reviewUrl });
+    toast.success("Link converted", {
+      description: `QR ${index + 1} destination filled in.`,
+    });
+  }
+
   function convertMapsLink() {
     const source = value.maps_url.trim();
     if (!source) {
-      setConvertMessage("Paste a Google Maps share link first.");
+      failConversion("Paste a Google Maps share link first.");
       return;
     }
 
@@ -68,19 +85,15 @@ export function StandeeSlotFields({
       formData.set("maps_url", source);
       const result = await convertGoogleMapsLink({}, formData);
 
-      if (result.reviewUrl) {
-        setConvertMessage(null);
-        onChange({ ...value, destination_url: result.reviewUrl });
-      } else {
-        setConvertMessage(result.message ?? "Could not convert that link.");
-      }
+      if (result.reviewUrl) succeedConversion(result.reviewUrl);
+      else failConversion(result.message ?? "Could not convert that link.");
     });
   }
 
   function convertFacebookLink() {
     const source = (value.facebook_url ?? "").trim();
     if (!source) {
-      setConvertMessage("Paste a Facebook Page or share link first.");
+      failConversion("Paste a Facebook Page or share link first.");
       return;
     }
 
@@ -89,12 +102,8 @@ export function StandeeSlotFields({
       formData.set("facebook_url", source);
       const result = await convertFacebookPageLink({}, formData);
 
-      if (result.reviewUrl) {
-        setConvertMessage(null);
-        onChange({ ...value, destination_url: result.reviewUrl });
-      } else {
-        setConvertMessage(result.message ?? "Could not convert that link.");
-      }
+      if (result.reviewUrl) succeedConversion(result.reviewUrl);
+      else failConversion(result.message ?? "Could not convert that link.");
     });
   }
 
@@ -187,15 +196,12 @@ export function StandeeSlotFields({
               disabled={converting}
               className={buttonClass("secondary", "shrink-0")}
             >
+              {converting ? <Spinner /> : null}
               {converting ? "Converting…" : "Convert link"}
             </button>
           </div>
           <FormError>{mapsError}</FormError>
-          {convertMessage ? (
-            <div className="mt-2">
-              <Alert tone="danger">{convertMessage}</Alert>
-            </div>
-          ) : null}
+          <FormError>{convertMessage}</FormError>
         </div>
       ) : (
         <>
@@ -234,14 +240,11 @@ export function StandeeSlotFields({
                   disabled={converting}
                   className={buttonClass("secondary", "shrink-0")}
                 >
-                  {converting ? "Converting…" : "Convert link"}
+                  {converting ? <Spinner /> : null}
+              {converting ? "Converting…" : "Convert link"}
                 </button>
               </div>
-              {convertMessage ? (
-                <div className="mt-2">
-                  <Alert tone="danger">{convertMessage}</Alert>
-                </div>
-              ) : null}
+              <FormError>{convertMessage}</FormError>
             </div>
           ) : null}
         </>

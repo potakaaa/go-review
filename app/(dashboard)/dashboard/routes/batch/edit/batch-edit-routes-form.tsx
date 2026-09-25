@@ -7,11 +7,12 @@ import {
   batchUpdateRoutes,
   type RouteFormState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
+import { useActionFeedback } from "@/components/feedback";
 import { FacebookReviewConverter } from "@/components/facebook-review-converter";
 import { GoogleReviewConverter } from "@/components/google-review-converter";
 import { RouteDestinationField } from "@/components/route-destination-field";
 import { PlatformSelector } from "@/components/platform-selector";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { FormError, Spinner, buttonClass } from "@/components/ui";
 import {
   BATCH_EDIT_MAX_SIZE,
   incrementedRouteNames,
@@ -34,6 +35,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       disabled={pending || disabled}
       className={buttonClass("primary", "w-full")}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Updating routes…" : "Update selected routes"}
     </button>
   );
@@ -44,6 +46,7 @@ export function BatchEditRoutesForm({ routes }: { routes: BatchEditRoute[] }) {
     batchUpdateRoutes,
     {},
   );
+  useActionFeedback(state);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [nameSeed, setNameSeed] = useState("");
   const [destination, setDestination] = useState("");
@@ -91,7 +94,6 @@ export function BatchEditRoutesForm({ routes }: { routes: BatchEditRoute[] }) {
 
   return (
     <form action={formAction} className="space-y-7">
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
       <PlatformSelector
         value={platform}

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Alert, ButtonLink, Card, StatusBadge, buttonClass } from "@/components/ui";
+import { Flash } from "@/components/flash";
+import { ButtonLink, Card, StatusBadge, buttonClass } from "@/components/ui";
 import { BATCH_KEY_PATTERN } from "@/lib/batch";
 import { formatDate } from "@/lib/format";
 import { platformLabel } from "@/lib/platforms";
@@ -33,10 +34,11 @@ export default async function StandeeRunPage({
   return (
     <div className="space-y-8 pb-16">
       {created ? (
-        <Alert tone="ok" title="Standee run created">
-          {standees.length} stands with {slots} QR codes each are ready for
-          download and printing.
-        </Alert>
+        <Flash
+          title="Standee run created"
+          description={`${standees.length} stands with ${slots} QR codes each are ready for download and printing.`}
+          params={["created"]}
+        />
       ) : null}
 
       <header className="flex flex-col gap-5 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">

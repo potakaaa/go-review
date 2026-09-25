@@ -1,6 +1,7 @@
 "use client";
 
 import QRCode from "qrcode";
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
 import { CopyButton } from "@/components/copy-button";
@@ -57,6 +58,9 @@ export function QrPanel({
       width: QR_PNG_SIZE,
     });
     triggerDownload(dataUrl, `${qrFileName(businessName, slug)}.png`);
+    toast.success("QR code downloaded", {
+      description: `${qrFileName(businessName, slug)}.png`,
+    });
   }
 
   async function downloadSvg() {
@@ -65,6 +69,9 @@ export function QrPanel({
       new Blob([svg], { type: "image/svg+xml" }),
     );
     triggerDownload(objectUrl, `${qrFileName(businessName, slug)}.svg`);
+    toast.success("QR code downloaded", {
+      description: `${qrFileName(businessName, slug)}.svg`,
+    });
     // Revoke on the next tick -- immediately would race the download starting.
     setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   }

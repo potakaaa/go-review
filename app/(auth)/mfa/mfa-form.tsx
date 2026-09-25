@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { Alert, buttonClass } from "@/components/ui";
+import { Alert, FormError, Spinner, buttonClass } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
 const FIELD =
@@ -83,13 +84,20 @@ export function MfaForm({ next }: { next: string }) {
     void prepare();
   }, []);
 
+  // Written under the code field, where the retry happens, and toasted so it
+  // is noticed even with the keyboard covering the form.
+  function fail(text: string) {
+    setMessage(text);
+    toast.error(text);
+  }
+
   async function verify(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (setup.status !== "challenge" && setup.status !== "enroll") return;
 
     const normalizedCode = code.replace(/\s/g, "");
     if (!/^\d{6}$/.test(normalizedCode)) {
-      setMessage("Enter the six-digit code from your authenticator app.");
+      fail("Enter the six-digit code from your authenticator app.");
       return;
     }
 
@@ -103,7 +111,7 @@ export function MfaForm({ next }: { next: string }) {
     });
 
     if (error) {
-      setMessage("That code could not be verified. Wait for a new code and try again.");
+      fail("That code could not be verified. Wait for a new code and try again.");
       setSubmitting(false);
       setCode("");
       return;
@@ -119,9 +127,12 @@ export function MfaForm({ next }: { next: string }) {
         aria-label="Preparing security verification"
         className="space-y-4"
       >
-        <div className="h-5 w-2/3 animate-pulse rounded bg-elevated" />
-        <div className="h-12 animate-pulse rounded-md bg-elevated" />
-        <p className="text-sm text-muted">Preparing secure verification…</p>
+        <div aria-hidden="true" className="skeleton h-5 w-2/3" />
+        <div aria-hidden="true" className="skeleton h-12" />
+        <p className="inline-flex items-center gap-2 text-sm text-muted">
+          <Spinner className="size-3.5" />
+          Preparing secure verification…
+        </p>
       </div>
     );
   }
@@ -169,8 +180,6 @@ export function MfaForm({ next }: { next: string }) {
         </p>
       )}
 
-      {message ? <Alert tone="danger">{message}</Alert> : null}
-
       <div>
         <label htmlFor="mfa_code" className="eyebrow mb-2 block">
           Authenticator code
@@ -190,6 +199,7 @@ export function MfaForm({ next }: { next: string }) {
           className={FIELD}
           autoFocus
         />
+        <FormError>{message}</FormError>
       </div>
 
       <button
@@ -197,6 +207,7 @@ export function MfaForm({ next }: { next: string }) {
         disabled={submitting || code.length !== 6}
         className={buttonClass("primary", "w-full")}
       >
+        {submitting ? <Spinner /> : null}
         {submitting
           ? "Verifying…"
           : enrolling

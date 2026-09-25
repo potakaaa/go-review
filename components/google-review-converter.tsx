@@ -2,13 +2,15 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 
 import {
   convertGoogleMapsLink,
   type GoogleReviewConversionState,
 } from "@/app/(dashboard)/dashboard/routes/actions";
 import { CopyButton } from "@/components/copy-button";
-import { Alert, FormError, buttonClass } from "@/components/ui";
+import { useActionFeedback } from "@/components/feedback";
+import { FormError, Spinner, buttonClass } from "@/components/ui";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-elevated px-4 py-3 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-2 focus:outline-offset-0 focus:outline-ink";
@@ -30,6 +32,7 @@ function ConvertButton({
       disabled={pending}
       formAction={embedded ? action : undefined}
     >
+      {pending ? <Spinner /> : null}
       {pending ? "Converting…" : "Convert link"}
     </button>
   );
@@ -70,6 +73,14 @@ export function GoogleReviewConverter({
       onConverted?.(state.reviewUrl);
     }
   }, [currentInput, onConverted, state.reviewUrl, state.sourceUrl]);
+
+  // Each conversion result is announced once, as it arrives: a failure
+  // toasts (and stays written under the field), a success confirms that the
+  // review link below is ready to copy.
+  useActionFeedback(state);
+  useEffect(() => {
+    if (state.reviewUrl) toast.success("Review link ready");
+  }, [state]);
 
   const controls = (
     <>
@@ -114,9 +125,7 @@ export function GoogleReviewConverter({
         <FormError>{sourceError}</FormError>
       </div>
 
-      {currentResult?.message ? (
-        <Alert tone="danger">{currentResult.message}</Alert>
-      ) : null}
+      <FormError>{currentResult?.message}</FormError>
 
       {currentResult?.reviewUrl ? (
         <div

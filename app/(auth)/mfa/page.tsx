@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Card } from "@/components/ui";
 import { redirect } from "next/navigation";
 
-import { MfaForm } from "@/app/mfa/mfa-form";
+import { MfaForm } from "@/app/(auth)/mfa/mfa-form";
 import { checkStaffAccess } from "@/lib/auth";
 import { safeNextPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/server";

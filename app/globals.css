@@ -564,6 +564,123 @@ select {
 }
 
 /*
+ * Loading. A skeleton is the page's own layout drawn in placeholder blocks,
+ * with a light sweeping across it: motion says "working", the shapes say
+ * "this is what is coming". Under reduced motion the sweep stops and the
+ * visible "Loading…" label carries the message on its own.
+ */
+@keyframes skeleton-sweep {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@utility skeleton {
+  border-radius: 0.5rem;
+  background-color: var(--color-elevated);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--color-ink) 7%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility spinner {
+  animation: spin 0.7s linear infinite;
+}
+
+/*
+ * The thin bar under the header while a page is on its way. It appears only
+ * after 120ms, so a navigation served instantly from the cache never flickers
+ * it, then eases towards (never reaching) the end until the page arrives.
+ */
+@keyframes nav-progress {
+  0% {
+    transform: scaleX(0);
+  }
+  40% {
+    transform: scaleX(0.55);
+  }
+  100% {
+    transform: scaleX(0.92);
+  }
+}
+
+@keyframes nav-progress-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+  height: 3px;
+  pointer-events: none;
+  transform-origin: left;
+  background: var(--color-ink);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-ink) 45%, transparent);
+  opacity: 0;
+  animation:
+    nav-progress-appear 150ms 120ms ease-out forwards,
+    nav-progress 8s 120ms cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+/*
+ * Sonner, in the workspace palette. `richColors` keeps each outcome's colour
+ * meaning; these tokens supply the exact shades so a toast looks like the
+ * rest of the admin rather than a stock library.
+ */
+[data-theme="admin"] [data-sonner-toaster][data-sonner-theme="dark"] {
+  --normal-bg: var(--color-elevated);
+  --normal-border: var(--color-line-strong);
+  --normal-text: var(--color-ink);
+  --success-bg: var(--color-ok-soft);
+  --success-border: color-mix(in srgb, var(--color-ok) 45%, transparent);
+  --success-text: var(--color-ok);
+  --error-bg: var(--color-danger-soft);
+  --error-border: color-mix(in srgb, var(--color-danger) 45%, transparent);
+  --error-text: var(--color-danger);
+  --warning-bg: var(--color-warn-soft);
+  --warning-border: color-mix(in srgb, var(--color-warn) 45%, transparent);
+  --warning-text: var(--color-warn);
+  --info-bg: #0c1a2b;
+  --info-border: color-mix(in srgb, #7dd3fc 40%, transparent);
+  --info-text: #7dd3fc;
+  --border-radius: 0.75rem;
+  font-family: var(--font-sans);
+}
+
+[data-theme="admin"] [data-sonner-toast] [data-title] {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-theme="admin"] [data-sonner-toast] [data-description] {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  opacity: 0.9;
+}
+
+/*
  * Accessibility. Reduced motion means a gentler equivalent, not the absence
  * of feedback: opacity still changes, travel and overshoot do not.
  */
