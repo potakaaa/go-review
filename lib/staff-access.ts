@@ -13,6 +13,36 @@ export type StaffAccessState =
 export type StaffAccessRow =
   Database["public"]["Functions"]["get_my_staff_access"]["Returns"][number];
 
+/** PostgREST: the function is not in the schema cache. */
+const FUNCTION_NOT_FOUND = "PGRST202";
+
+/**
+ * The same answer from the four RPCs that predate get_my_staff_access, asked
+ * together. Only used while a deploy runs ahead of its migration, so the
+ * code can ship first without locking anyone out.
+ */
+async function readLegacyStaffAccess(
+  supabase: SupabaseClient<Database>,
+): Promise<StaffAccessRow | undefined | "unavailable"> {
+  const [staff, password, profile, permissions] = await Promise.all([
+    supabase.rpc("is_active_staff"),
+    supabase.rpc("is_password_change_required"),
+    supabase.rpc("get_my_staff_profile"),
+    supabase.rpc("get_my_staff_permissions"),
+  ]);
+  if (staff.error || password.error || profile.error || permissions.error) {
+    return "unavailable";
+  }
+  const row = profile.data?.[0];
+  if (!staff.data || !row) return undefined;
+  return {
+    user_id: row.user_id,
+    role: row.role,
+    must_change_password: Boolean(password.data),
+    permissions: permissions.data ?? [],
+  };
+}
+
 export type ResolvedStaffAccess = {
   state: StaffAccessState;
   userId?: string;
@@ -44,9 +74,17 @@ export async function resolveStaffAccess(
   const { data: rows, error: accessError } = await supabase.rpc(
     "get_my_staff_access",
   );
-  if (accessError) return { state: "unavailable", userId };
+  let access: StaffAccessRow | undefined;
+  if (accessError?.code === FUNCTION_NOT_FOUND) {
+    const legacy = await readLegacyStaffAccess(supabase);
+    if (legacy === "unavailable") return { state: "unavailable", userId };
+    access = legacy;
+  } else if (accessError) {
+    return { state: "unavailable", userId };
+  } else {
+    access = rows?.[0];
+  }
 
-  const access = rows?.[0];
   if (!access) return { state: "unapproved", userId };
   if (access.must_change_password) {
     return { state: "needs_password_change", userId, access };
