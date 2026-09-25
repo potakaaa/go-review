@@ -138,6 +138,31 @@ export type Database = {
           can_manage: boolean;
         }>;
       };
+      get_my_staff_access: {
+        Args: Record<never, never>;
+        Returns: Array<{
+          user_id: string;
+          role: StaffRole;
+          must_change_password: boolean;
+          permissions: Array<{
+            section: StaffSection;
+            can_view: boolean;
+            can_manage: boolean;
+          }>;
+        }>;
+      };
+      get_route_stats: {
+        Args: Record<never, never>;
+        Returns: Array<{
+          total: number;
+          active: number;
+          scanned: number;
+          total_scans: number;
+          google: number;
+          facebook: number;
+          instagram: number;
+        }>;
+      };
       complete_password_change: {
         Args: { p_user_id: string };
         Returns: boolean;
