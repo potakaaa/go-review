@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 
 import { supabaseAnonKey, supabaseUrl } from "@/lib/env";
 import type { Database } from "@/lib/database.types";
+import { resolveStaffAccess } from "@/lib/staff-access";
 
 const LOGIN_PATH = "/login";
 const MFA_PATH = "/mfa";
@@ -22,9 +23,18 @@ function isPublicRecoveryPath(pathname: string): boolean {
   );
 }
 
-function securityHeaders(response: NextResponse, csp: string): NextResponse {
+function securityHeaders(
+  response: NextResponse,
+  csp: string,
+  authMs?: number,
+): NextResponse {
   response.headers.set("Content-Security-Policy", csp);
   response.headers.set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate");
+  // Visible in DevTools > Network > Timing, so a slow click can be split into
+  // "access check" and "everything after it" without guessing.
+  if (authMs !== undefined) {
+    response.headers.set("Server-Timing", `auth;desc="Access check";dur=${authMs.toFixed(1)}`);
+  }
   return response;
 }
 
@@ -96,15 +106,16 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // `getUser` revalidates the token against Supabase. `getSession` only decodes
-  // the cookie, which a client could have forged -- never gate on it here.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // One access decision shared with every server render: signature-verified
+  // claims (no Auth round trip) plus one staff-state RPC. See
+  // resolveStaffAccess for the trade-off.
+  const startedAt = performance.now();
+  const { state } = await resolveStaffAccess(supabase);
+  const authMs = performance.now() - startedAt;
 
   const { pathname, search } = request.nextUrl;
 
-  if (!user && !isPublicRecoveryPath(pathname)) {
+  if (state === "anonymous" && !isPublicRecoveryPath(pathname)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;
     loginUrl.search = "";
@@ -115,49 +126,29 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(loginUrl, response, csp);
   }
 
-  if (!user) return securityHeaders(response, csp);
+  if (state === "anonymous") return securityHeaders(response, csp, authMs);
 
-  // Identity is already verified above; these two self-scoped checks do not
-  // depend on each other, so run them together without weakening the gate.
-  const [
-    { data: isStaff, error: staffError },
-    { data: mustChangePassword, error: passwordStateError },
-  ] = await Promise.all([
-    supabase.rpc("is_active_staff"),
-    supabase.rpc("is_password_change_required"),
-  ]);
-  if (staffError || !isStaff) {
-    if (!staffError) await supabase.auth.signOut({ scope: "local" });
-    if (isPath(pathname, LOGIN_PATH)) return securityHeaders(response, csp);
+  if (state === "unapproved" || state === "unavailable") {
+    if (state === "unapproved") await supabase.auth.signOut({ scope: "local" });
+    if (isPath(pathname, LOGIN_PATH)) return securityHeaders(response, csp, authMs);
 
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;
-    loginUrl.search = staffError ? "?error=access_unavailable" : "?error=not_authorized";
+    loginUrl.search = state === "unavailable" ? "?error=access_unavailable" : "?error=not_authorized";
     return redirectWithCookies(loginUrl, response, csp);
   }
 
-  if (passwordStateError) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = LOGIN_PATH;
-    loginUrl.search = "?error=access_unavailable";
-    return redirectWithCookies(loginUrl, response, csp);
-  }
-  if (mustChangePassword && !isPath(pathname, RESET_PASSWORD_PATH)) {
+  if (state === "needs_password_change" && !isPath(pathname, RESET_PASSWORD_PATH)) {
     const resetUrl = request.nextUrl.clone();
     resetUrl.pathname = RESET_PASSWORD_PATH;
     resetUrl.search = "?required=1";
     return redirectWithCookies(resetUrl, response, csp);
   }
 
-  const { data: assurance, error: assuranceError } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (assuranceError) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = LOGIN_PATH;
-    loginUrl.search = "?error=access_unavailable";
-    return redirectWithCookies(loginUrl, response, csp);
-  }
-  const hasMfa = assurance.currentLevel === "aal2";
+  // A pending password change is resolved before MFA, exactly as before: the
+  // reset page is reachable, and nothing else is.
+  if (state === "needs_password_change") return securityHeaders(response, csp, authMs);
+  const hasMfa = state === "ready";
 
   if (
     !hasMfa &&
@@ -180,5 +171,5 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(dashboardUrl, response, csp);
   }
 
-  return securityHeaders(response, csp);
+  return securityHeaders(response, csp, authMs);
 }
