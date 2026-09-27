@@ -27,7 +27,13 @@ function SubmitButton() {
   );
 }
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({
+  email,
+  needsCode,
+}: {
+  email: string;
+  needsCode: boolean;
+}) {
   const [state, formAction] = useActionState<UpdatePasswordState, FormData>(
     updatePassword,
     {},
@@ -36,6 +42,17 @@ export function ResetPasswordForm() {
 
   return (
     <form action={formAction} className="space-y-5">
+      {/* Names the account, so a password manager replaces the saved password
+          for it instead of keeping the old one or saving a nameless entry. */}
+      <input
+        type="text"
+        name="username"
+        autoComplete="username"
+        value={email}
+        readOnly
+        hidden
+      />
+
       <div>
         <label htmlFor="password" className="eyebrow mb-2 block">
           New password
@@ -72,6 +89,33 @@ export function ResetPasswordForm() {
         />
         <FormError>{state.errors?.confirmation}</FormError>
       </div>
+
+      {/* Last, so the code is typed just before it is sent: each code only
+          lives for thirty seconds. */}
+      {needsCode ? (
+        <div>
+          <label htmlFor="code" className="eyebrow mb-2 block">
+            Authenticator code
+          </label>
+          <input
+            id="code"
+            name="code"
+            type="text"
+            required
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            placeholder="000000"
+            aria-describedby="code-help"
+            className={`${FIELD} text-center font-mono tracking-[0.28em]`}
+          />
+          <p id="code-help" className="mt-2 text-xs leading-5 text-subtle">
+            From the authenticator app you enrolled for Goreview Admin.
+          </p>
+          <FormError>{state.errors?.code}</FormError>
+        </div>
+      ) : null}
 
       <SubmitButton />
     </form>

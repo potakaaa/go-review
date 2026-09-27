@@ -4,6 +4,7 @@ import { Card } from "@/components/ui";
 import { redirect } from "next/navigation";
 
 import { ResetPasswordForm } from "@/app/(auth)/reset-password/reset-password-form";
+import { readResetSession } from "@/app/(auth)/reset-password/reset-session";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -21,11 +22,10 @@ export default async function ResetPasswordPage({
   const params = await searchParams;
   const required = params.required === "1" || params.required?.[0] === "1";
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await readResetSession(supabase);
 
-  if (!user) redirect("/forgot-password?error=invalid_link");
+  if (!session) redirect("/forgot-password?error=invalid_link");
+  const needsCode = Boolean(session.stepUpFactorId);
 
   return (
     <main
@@ -53,12 +53,17 @@ export default async function ResetPasswordPage({
           <p className="mt-3 max-w-xs text-sm leading-6 text-muted">
             {required
               ? "Your temporary password must be replaced before you can open the workspace."
-              : "Your recovery link has been verified. Set a strong password, then sign in and finish authenticator setup."}
+              : needsCode
+                ? "Your recovery link has been verified. Enter a code from your authenticator app along with your new password."
+                : "Your recovery link has been verified. Set a strong password, then finish authenticator setup."}
           </p>
         </div>
 
         <Card className="bg-surface/80 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm sm:p-6">
-          <ResetPasswordForm />
+          <ResetPasswordForm
+            email={session.user.email ?? ""}
+            needsCode={needsCode}
+          />
         </Card>
       </div>
     </main>

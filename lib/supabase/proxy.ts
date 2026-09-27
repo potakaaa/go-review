@@ -15,9 +15,15 @@ function isPath(pathname: string, path: string): boolean {
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
-function isPublicRecoveryPath(pathname: string): boolean {
+/**
+ * Recovery is reachable whatever session the browser already holds. A reset
+ * link opened where an earlier link left a half-signed-in session used to be
+ * redirected to /mfa before the callback could replace that session -- so the
+ * link was never redeemed, and the code prompt signed the reader in with the
+ * old password still in place.
+ */
+function isRecoveryPath(pathname: string): boolean {
   return (
-    isPath(pathname, LOGIN_PATH) ||
     isPath(pathname, FORGOT_PASSWORD_PATH) ||
     isPath(pathname, AUTH_CALLBACK_PATH)
   );
@@ -84,6 +90,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   let response = nextResponse();
+  const { pathname, search } = request.nextUrl;
+  if (isRecoveryPath(pathname)) return securityHeaders(response, csp);
 
   const supabase = createServerClient<Database>(
     supabaseUrl(),
@@ -113,9 +121,7 @@ export async function updateSession(request: NextRequest) {
   const { state } = await resolveStaffAccess(supabase);
   const authMs = performance.now() - startedAt;
 
-  const { pathname, search } = request.nextUrl;
-
-  if (state === "anonymous" && !isPublicRecoveryPath(pathname)) {
+  if (state === "anonymous" && !isPath(pathname, LOGIN_PATH)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;
     loginUrl.search = "";
