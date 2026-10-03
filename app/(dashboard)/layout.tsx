@@ -61,6 +61,14 @@ export default async function DashboardLayout({
                 Shop stories
               </Link>
             ) : null}
+            {(
+              access.profile.role === "superadmin" ||
+              access.permissions.routes.canView
+            ) ? (
+              <Link href="/dashboard/qr-codes" prefetch className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
+                QR codes
+              </Link>
+            ) : null}
             {access.profile.role === "superadmin" ? (
               <Link href="/dashboard/staff" prefetch className="inline-flex items-center whitespace-nowrap text-xs text-muted tap-target">
                 Staff

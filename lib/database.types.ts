@@ -90,6 +90,19 @@ export type ShopStory = {
   updated_at: string;
 };
 
+export type StaticQrCode = {
+  id: string;
+  label: string;
+  kind: "url" | "text" | "wifi" | "email" | "phone" | "sms";
+  fields: Json;
+  content: string;
+  style: Json;
+  starred: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -97,6 +110,12 @@ export type Database = {
         Row: ShopStory;
         Insert: Omit<ShopStory, "created_at" | "updated_at"> & { created_at?: string; updated_at?: string };
         Update: Partial<Omit<ShopStory, "id" | "created_at">>;
+        Relationships: [];
+      };
+      static_qr_codes: {
+        Row: StaticQrCode;
+        Insert: Pick<StaticQrCode, "label" | "kind" | "fields" | "content" | "style"> & Partial<Pick<StaticQrCode, "id" | "starred" | "created_by" | "created_at" | "updated_at">>;
+        Update: Partial<Pick<StaticQrCode, "label" | "kind" | "fields" | "content" | "style" | "starred" | "updated_at">>;
         Relationships: [];
       };
       redirect_routes: {
